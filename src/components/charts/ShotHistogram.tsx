@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
-import { buildClockState } from "../../physics/hamiltonian";
+import { buildClockState } from "../../modules/oneQubit/physics/hamiltonian";
 import { CHART_COLORS } from "./chartTheme";
-import type { Counts } from "../../physics/measurements";
+import type { Counts } from "../../modules/oneQubit/physics/measurements";
 import { Badge } from "../../ui/Badge";
 import { Card } from "../../ui/Card";
 import { ShotHistogramChart } from "./ShotHistogramChart";

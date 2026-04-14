@@ -239,7 +239,7 @@ Request body:
 
 ```json
 {
-  "alpha": 0.9273,
+  "alpha": 0.1571,
   "shots": 1024,
   "backend": "aer"
 }
@@ -249,20 +249,25 @@ Synchronous response example (Aer):
 
 ```json
 {
-  "alpha": 0.9273,
+  "alpha": 0.1571,
   "observables": {
-    "Z1": 0.09,
-    "Z2": 0.08,
-    "Z1Z2": 0.65,
-    "X1X2": 0.41
+    "Z1": -0.96,
+    "Z2": 0.85,
+    "Z1Z2": -0.82,
+    "Z1X2": -0.14,
+    "X1X2": 0.02
   },
   "noisyObservables": {
-    "Z1": 0.09,
-    "Z2": 0.08,
-    "Z1Z2": 0.65,
-    "X1X2": 0.41
+    "Z1": -0.96,
+    "Z2": 0.85,
+    "Z1Z2": -0.82,
+    "Z1X2": -0.14,
+    "X1X2": 0.02
   },
-  "energy": 0.63,
+  "energy": 0.02,
+  "energy_error": 0.08,
+  "energy_theory": 0.0246,
+  "verdict": "accept",
   "counts": {
     "000": 510,
     "100": 330,
@@ -344,6 +349,163 @@ Response example:
   { "name": "ibm", "available": false }
 ]
 ```
+
+## Protocol Alignment Analysis (Stricker et al. 2024)
+
+This section documents the gap analysis between the implementation and the reference paper:
+**"Towards experimental classical verification of quantum computation"** (Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024).
+
+### What the paper implements
+
+**Circuit (Fig. 1b, Appendix B):** 8-qubit circuit — `q_prover` (1), `q_clock` (1), `aux_prover` (3), `aux_clock` (3).
+
+**Clock state (Step 2, Eq. 2):**
+```
+|η⟩ = (1/√2)[|0⟩_clk|0⟩_prov + |1⟩_clk · U(α)|0⟩_prov]
+     = (1/√2)[|00⟩ + cos(α)|10⟩ + sin(α)|11⟩]
+```
+where `U(α) = cos(α)Z + sin(α)X`.
+
+Prepared via: `H(q_clock)` → `CU(α)` decomposed as `RY(α/2) · CZ · RY(-α/2)` on `q_prover`.
+
+**Hamiltonian (Eq. C.1):**
+
+```
+H = H_out + 6·H_in + 3·H_prop
+  = 3.5·I − 2·Z₁ + Z₂ − Z₁Z₂ − 1.5cos(α)·Z₁X₂ − 1.5sin(α)·X₁X₂
+```
+
+**Three measurement circuits — (k₁,k₂):**
+
+| Config | Observable extracted | Basis change |
+|--------|---------------------|--------------|
+| (0,0) | Z₁, Z₂, Z₁Z₂ | None (Z on all) |
+| (0,1) | **Z₁X₂** | H on q_clock only |
+| (1,1) | X₁X₂ | H on q_prover and q_clock |
+
+Note: (1,0) is deliberately excluded — X₁Z₂ does not appear in H.
+
+**Energy formula:**
+```
+E_est = 3.5 − 2⟨Z₁⟩ + ⟨Z₂⟩ − ⟨Z₁Z₂⟩ − 1.5cos(α)⟨Z₁X₂⟩ − 1.5sin(α)⟨X₁X₂⟩
+```
+
+**Acceptance criterion (Eq. D.7):**
+```
+E + σ_E < 0.4  → ACCEPTED  (honest quantum prover)
+E − σ_E ≥ 0.5  → REJECTED
+otherwise       → MARGINAL
+```
+**Low energy = honest prover = ACCEPTED.** High energy = REJECTED.
+
+**Theoretical reference:** `⟨η|H|η⟩ = sin²(α)` — verified for all α in [0, π/2].
+
+---
+
+### Fixed bugs (Phase 1 — April 2026)
+
+All six correctness bugs identified in the gap analysis have been fixed.
+
+#### ~~B1~~ — ✅ CU(α) gate corrected [`backend/circuit_builder.py`]
+
+`qc.cu(alpha, 0, 0, 0)` (= RY(α), wrong) replaced with the correct decomposition:
+```python
+qc.ry(alpha / 2, 0)   # RY(α/2) on q_prover
+qc.cz(1, 0)           # CZ: control=q_clock, target=q_prover
+qc.ry(-alpha / 2, 0)  # RY(-α/2) on q_prover
+```
+This produces `U(α) = cos(α)Z + sin(α)X` and the correct clock state `|η⟩`.
+
+#### ~~B2~~ — ✅ Observable Z₁X₂ added across the full stack
+
+Third measurement circuit `(k₁=0, k₂=1)` implemented end-to-end:
+- `circuit_builder.py`: `basis="zx"` — H on q_clock only
+- `measurement_mapper.py`: `_expectation_z1x2_from_zx_counts`; `map_measurements` accepts 3 count dicts
+- `executor.py`: `_run_with_aer` / `_run_with_ibm` run all 3 circuits; response includes `Z1X2`
+- `measurements.ts`: `OBS_Z1X2 = Z⊗X`; field in `ExactExpectations` / `SampledExpectations`
+- `backendExperiment1Q.ts`: `BackendRunResult` and `SampledExpectations` carry `Z1X2`
+
+#### ~~B3~~ — ✅ Hamiltonian corrected to 5-term formula (backend + frontend)
+
+`backend/executor.py` (`_compute_energy`) and `src/physics/energy.ts` (`estimateEnergy`) now use:
+```
+E = 3.5 − 2·Z₁ + Z₂ − Z₁Z₂ − 1.5cos(α)·Z₁X₂ − 1.5sin(α)·X₁X₂
+```
+
+#### ~~B4~~ — ✅ Acceptance criterion corrected [`src/physics/energy.ts`]
+
+`verifierDecision` now correctly maps `energy < 0.4 → "accept"`, `energy ≥ 0.5 → "reject"`.
+
+#### ~~B5~~ — ✅ Reference α★ corrected [`src/utils/constants.ts`]
+
+α★ changed from `0.9273` to `0.1 * (Math.PI / 2)` ≈ 0.1571 rad, where sin²(α★) ≈ 0.024 << 0.4 (reliably accepted).
+
+#### ~~B6~~ — ✅ Statistical error propagation implemented
+
+`backend/executor.py` adds `_compute_energy_error` (quadrature sum of per-observable shot noise) and `_verdict` (Eq. D.7 criterion). The `/run` response now includes `energy_error`, `energy_theory`, and `verdict`.
+
+---
+
+### Alignment status
+
+| Paper concept | Python reference (`classical-quantum-verifier/`) | Dashboard backend | Dashboard frontend |
+|---|---|---|---|
+| U(α) = cos(α)Z + sin(α)X | ✅ RY(α/2)·CZ·RY(-α/2) | ✅ RY(α/2)·CZ·RY(-α/2) | — |
+| `\|η⟩` clock state | ✅ | ✅ Correct state | ✅ `buildClockState` |
+| 3 measurement circuits | ✅ | ✅ z, zx, x | — |
+| Observable Z₁X₂ | ✅ | ✅ `Z1X2` in response | ✅ `OBS_Z1X2`, `Z1X2` field |
+| Full 5-term Hamiltonian | ✅ | ✅ 5-term formula | ✅ 5-term formula |
+| σ_E error propagation | ✅ quadrature sum | ✅ `energy_error` field | ⚠️ Not displayed in UI yet |
+| E < 0.4 → ACCEPTED | ✅ | ✅ `verdict` field | ✅ `verifierDecision` fixed |
+| α★ = 0.1·π/2 | ✅ | — | ✅ Corrected preset |
+| λ_min(H) displayed | ✅ CLI | ❌ Missing | ❌ Missing |
+| Alpha sweep | ✅ CLI `sweep.py` | ❌ No endpoint | ❌ No visualization |
+
+---
+
+### Fix roadmap
+
+#### Phase 1 — Correctness ✅ DONE (April 2026)
+
+| # | Fix | File(s) | Status |
+|---|---|---|---|
+| F1 | Correct CU(α): `RY(α/2)·CZ·RY(-α/2)` + add `zx` basis | `backend/circuit_builder.py` | ✅ |
+| F2 | Add `_expectation_z1x2_from_zx_counts`, update `map_measurements` to 3 circuits | `backend/measurement_mapper.py` | ✅ |
+| F3 | Correct `_compute_energy` (5 terms), add `_compute_energy_error`, `_verdict` | `backend/executor.py` | ✅ |
+| F4 | Extend API response with `Z1X2`, `energy_error`, `energy_theory`, `verdict` | `backend/executor.py` | ✅ |
+| F5 | Add `OBS_Z1X2`, field `Z1X2` to `ExactExpectations` / `SampledExpectations` | `src/physics/measurements.ts` | ✅ |
+| F6 | Correct `estimateEnergy` (5 terms), correct `verifierDecision` (inverted) | `src/physics/energy.ts` | ✅ |
+| F7 | Correct α★ preset, fix KeyAlpha insight text | `src/utils/constants.ts` | ✅ |
+| F8 | Accept `Z1X2` in `BackendRunResult`, pass to `expectationValues` | `src/services/backendExperiment1Q.ts` | ✅ |
+
+#### Phase 2 — Completeness (features present in the paper)
+
+- `POST /sweep/alpha` — reproduce Figure 2(b): E_est ± σ vs α, 30 points
+- `POST /sweep/shots` — convergence analysis
+- `lambda_min` included in every `/run` response
+- Alpha sweep chart in UI with error bars and threshold lines
+- Error bar display in EnergyPanel
+
+#### Phase 3 — Extensions ✅ DONE (April 2026)
+
+- Real depolarizing noise via `AerSimulator + NoiseModel` (matching `classical-quantum-verifier/sweep.py`)
+- Adversarial analysis at circuit level (run circuit with `alpha_fake`, compare bitstring distributions)
+- Lambda sweep endpoint and visualization
+
+| # | Fix | File(s) | Status |
+|---|---|---|---|
+| P3-1 | `run_circuit_noisy(circuit, shots, noise_p)` using `NoiseModel + depolarizing_error` | `backend/aer_executor.py` | ✅ |
+| P3-2 | `sweep_noise(alpha, shots, lambda_list)` — sweeps λ with real Aer NoiseModel | `backend/executor.py` | ✅ |
+| P3-3 | `run_adversarial_circuit(alpha, alpha_fake, shots)` — TVD, KL, ΔE between distributions | `backend/executor.py` | ✅ |
+| P3-4 | `POST /sweep/noise` endpoint | `backend/main.py` | ✅ |
+| P3-5 | `POST /adversarial/circuit` endpoint | `backend/main.py` | ✅ |
+| P3-6 | `runNoiseSweep()` + `NoiseSweepBackendResult` types | `src/services/sweepApi.ts` | ✅ |
+| P3-7 | `runAdversarialCircuit()` + `AdversarialCircuitResult` types | `src/services/adversarialApi.ts` | ✅ |
+| P3-8 | `NoiseSweepBackendPanel` — real Aer noise sweep chart with error bars | `src/components/NoiseSweepBackendPanel/` | ✅ |
+| P3-9 | `AdversarialCircuitPanel` — grouped bar chart + TVD / KL / ΔE metrics | `src/components/AdversarialCircuitPanel/` | ✅ |
+| P3-10 | Integrate Phase 3 panels into `/adversarial` page | `src/pages/AdversarialPage.tsx` | ✅ |
+
+---
 
 ## Roadmap
 

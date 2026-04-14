@@ -8,15 +8,16 @@
  *
  *     ⟨O⟩_noisy = (1 − λ) · ⟨O⟩_exact
  *
- *   Substituting into the energy estimator
- *     E = ½ − ½·cos(2α)·⟨Z₁Z₂⟩ − ½·sin(2α)·⟨X₁X₂⟩
+ *   Substituting into the full 5-term energy estimator gives:
  *
- *   gives:
- *     E_noisy(α, λ) = 0.5 + (1 − λ) · (sin²(α) − 0.5)
+ *     E_noisy(α, λ) = λ · 3.5 + (1 − λ) · sin²(α)
+ *
+ *   The constant 3.5 is the energy of the maximally-mixed state
+ *   ⟨H⟩_{I/4} = Tr(H·I/4) = 3.5 (trace of the Hamiltonian).
  *
  *   Limits:
  *     λ = 0 → E_noisy = sin²(α)  (noiseless)
- *     λ = 1 → E_noisy = 0.5      (maximally depolarised)
+ *     λ = 1 → E_noisy = 3.5       (maximally depolarised)
  *
  *   λ range in the dashboard: [0, 0.5]
  */
@@ -32,10 +33,10 @@ export type { VerifierDecision };
 
 /**
  * Energy under depolarizing noise with strength λ.
- *   E_noisy = 0.5 + (1 − λ)(sin²(α) − 0.5)
+ *   E_noisy = λ·3.5 + (1 − λ)·sin²(α)
  */
 export const noisyEnergy = (alpha: number, lambda: number): number =>
-  0.5 + (1 - lambda) * (theoreticalEnergy(alpha) - 0.5);
+  lambda * 3.5 + (1 - lambda) * theoreticalEnergy(alpha);
 
 /** Signed deviation: E_noisy − E_theoretical */
 export const noiseDeviation = (alpha: number, lambda: number): number =>
@@ -52,19 +53,21 @@ export const noisyDecision = (
 //
 // The lambda at which the noisy energy crosses a given threshold T:
 //
-//   0.5 + (1 − λ_c)(E_theo − 0.5) = T
-//   λ_c = 1 − (T − 0.5) / (E_theo − 0.5)
+//   λ·3.5 + (1 − λ)·E_theo = T
+//   λ·(3.5 − E_theo) = T − E_theo
+//   λ_c = (T − E_theo) / (3.5 − E_theo)
 //
-// Returns null when alpha = π/4 (E_theo = 0.5, denominator zero).
+// Returns null when the energy already satisfies the threshold without noise
+// (E_theo ≤ T with λ=0) or when the crossing falls outside [0, 1].
 
 export const criticalLambda = (
   alpha: number,
   threshold = THRESHOLD_HIGH,
 ): number | null => {
   const eTheo = theoreticalEnergy(alpha);
-  const denom = eTheo - 0.5;
+  const denom = 3.5 - eTheo; // always > 0 since E_theo ∈ [0,1] and 3.5 > 1
   if (Math.abs(denom) < 1e-9) return null;
-  const lc = 1 - (threshold - 0.5) / denom;
+  const lc = (threshold - eTheo) / denom;
   // Clamp to valid range [0, 1]
   if (lc < 0 || lc > 1) return null;
   return lc;

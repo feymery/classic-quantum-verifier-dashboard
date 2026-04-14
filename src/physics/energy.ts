@@ -34,17 +34,31 @@ export const theoreticalEnergy = (alpha: number): number =>
 // ── Estimated energy from sampled expectation values ─────────────────────────
 
 /**
- * Reconstruct energy from measured ⟨Z₁Z₂⟩ and ⟨X₁X₂⟩ using the
- * linear inversion formula:
- *   E = ½ − ½·cos(2α)·⟨Z₁Z₂⟩ − ½·sin(2α)·⟨X₁X₂⟩
+ * Reconstruct energy from measured expectation values using the full
+ * 5-term Hamiltonian linear inversion formula (Stricker et al. 2024, Eq. C.1).
+ *
+ * Paper convention: Z₁ = sistema/trabajo (coeff −2), Z₂ = reloj (coeff +1).
+ * Dashboard convention: Z1 = Z_clock = paper's Z₂, Z2 = Z_work = paper's Z₁.
+ * Por tanto la fórmula correcta en términos de los observables del dashboard es:
+ *
+ *   E = 3.5 − 2·Z2 + Z1 − Z1Z2 − 1.5·cos(α)·X1Z2 − 1.5·sin(α)·X1X2
+ *
+ * donde X1Z2 = X_clock ⊗ Z_work (base (k₁,k₂)=(1,0) del paper).
  */
 export const estimateEnergy = (
   ev: SampledExpectations | ExactExpectations,
   alpha: number,
 ): number => {
-  const c2a = Math.cos(2 * alpha);
-  const s2a = Math.sin(2 * alpha);
-  return 0.5 - 0.5 * c2a * ev.Z1Z2 - 0.5 * s2a * ev.X1X2;
+  const ca = Math.cos(alpha);
+  const sa = Math.sin(alpha);
+  return (
+    3.5 -
+    2.0 * ev.Z2 +
+    ev.Z1 -
+    ev.Z1Z2 -
+    1.5 * ca * ev.X1Z2 -
+    1.5 * sa * ev.X1X2
+  );
 };
 
 // ── Verifier logic ────────────────────────────────────────────────────────────
@@ -56,8 +70,8 @@ export const verifierDecision = (
   low = THRESHOLD_LOW,
   high = THRESHOLD_HIGH,
 ): VerifierDecision => {
-  if (energy > high) return "accept";
-  if (energy < low) return "reject";
+  if (energy < low) return "accept";
+  if (energy >= high) return "reject";
   return "boundary";
 };
 

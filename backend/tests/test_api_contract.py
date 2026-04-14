@@ -41,7 +41,7 @@ class TestSyncExecutionResponse:
         response = client.post("/run", json=sample_1q_params)
         data = response.json()
 
-        expected_obs_keys = {"Z1", "Z2", "Z1Z2", "X1X2"}
+        expected_obs_keys = {"Z1", "Z2", "Z1Z2", "Z1X2", "X1X2"}
         assert set(data["observables"].keys()) == expected_obs_keys
         assert set(data["noisyObservables"].keys()) == expected_obs_keys
 

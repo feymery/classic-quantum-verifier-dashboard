@@ -1,0 +1,96 @@
+/**
+ * sweepApi.ts — client for POST /sweep/alpha and POST /sweep/shots.
+ */
+
+import { fetchJson } from "./apiClient";
+
+const API_BASE =
+  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() ||
+  "http://localhost:8000";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export interface AlphaSweepPoint {
+  alpha: number;
+  energy_est: number;
+  energy_error: number;
+  energy_theory: number;
+  lambda_min: number;
+  verdict: "accept" | "reject" | "marginal";
+}
+
+export interface AlphaSweepResult {
+  points: AlphaSweepPoint[];
+  shots: number;
+  n_points: number;
+}
+
+export interface ShotsSweepPoint {
+  shots: number;
+  energy_est: number;
+  energy_error: number;
+  energy_theory: number;
+  verdict: "accept" | "reject" | "marginal";
+}
+
+export interface ShotsSweepResult {
+  points: ShotsSweepPoint[];
+  alpha: number;
+}
+
+// ── Noise sweep (Phase 3 — real Aer + NoiseModel) ─────────────────────────────
+
+export interface NoiseSweepBackendPoint {
+  noise_p: number;
+  energy_est: number;
+  energy_error: number;
+  energy_theory: number;
+  lambda_min: number;
+  verdict: "accept" | "reject" | "marginal";
+}
+
+export interface NoiseSweepBackendResult {
+  points: NoiseSweepBackendPoint[];
+  alpha: number;
+  shots: number;
+}
+
+// ── API calls ─────────────────────────────────────────────────────────────────
+
+export async function runAlphaSweep(
+  shots = 1024,
+  nPoints = 30,
+): Promise<AlphaSweepResult> {
+  return fetchJson<AlphaSweepResult>(`${API_BASE}/sweep/alpha`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ shots, n_points: nPoints, backend: "aer" }),
+  });
+}
+
+export async function runShotsSweep(
+  alpha: number,
+  shotsList?: number[],
+): Promise<ShotsSweepResult> {
+  const body: Record<string, unknown> = { alpha, backend: "aer" };
+  if (shotsList) body.shots_list = shotsList;
+  return fetchJson<ShotsSweepResult>(`${API_BASE}/sweep/shots`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function runNoiseSweep(
+  alpha: number,
+  shots = 1024,
+  lambdaList?: number[],
+): Promise<NoiseSweepBackendResult> {
+  const body: Record<string, unknown> = { alpha, shots };
+  if (lambdaList) body.lambda_list = lambdaList;
+  return fetchJson<NoiseSweepBackendResult>(`${API_BASE}/sweep/noise`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}

@@ -66,6 +66,26 @@ def _expectation_x1x2_from_x_counts(counts: dict[str, int], shots: int) -> float
     return x1x2_sum / safe_shots
 
 
+def _expectation_z1x2_from_zx_counts(counts: dict[str, int], shots: int) -> float:
+    """Extract Z1X2 expectation from the ZX-basis measurement counts.
+
+    Circuit (k1,k2)=(0,1): H applied to q_clock (q1) only before measurement.
+    After basis rotation: measuring q0 in Z gives eigenvalue of Z1;
+    measuring q1 in Z gives eigenvalue of X2.
+    Product Z1X2 = eigenvalue(q0) * eigenvalue(q1).
+    """
+    safe_shots = max(1, int(shots))
+    z1x2_sum = 0.0
+
+    for state, count in counts.items():
+        q0, q1, _ = _decode_qiskit_bitstring(state)
+        z1 = _bit_to_eigen(q0)
+        x2 = _bit_to_eigen(q1)
+        z1x2_sum += (z1 * x2) * count
+
+    return z1x2_sum / safe_shots
+
+
 def _expectation_pair_from_x_counts(
     counts: dict[str, int],
     shots: int,
@@ -116,16 +136,25 @@ def _expectations_2q_from_z_counts(counts: dict[str, int], shots: int) -> dict[s
 
 def map_measurements(
     counts_z: dict[str, int],
+    counts_zx: dict[str, int],
     counts_x: dict[str, int],
     shots: int,
 ) -> MeasurementMapping:
+    """Map the three measurement circuits to observable expectation values.
+
+    counts_z   : (k1,k2)=(0,0) — Z-basis on both qubits → Z1, Z2, Z1Z2
+    counts_zx  : (k1,k2)=(0,1) — H on q_clock only → Z1X2
+    counts_x   : (k1,k2)=(1,1) — H on both qubits → X1X2
+    """
     obs_z = _expectations_from_z_counts(counts_z, shots)
+    z1x2 = _expectation_z1x2_from_zx_counts(counts_zx, shots)
     x1x2 = _expectation_x1x2_from_x_counts(counts_x, shots)
 
     observables = {
         "Z1": obs_z["Z1"],
         "Z2": obs_z["Z2"],
         "Z1Z2": obs_z["Z1Z2"],
+        "Z1X2": z1x2,
         "X1X2": x1x2,
     }
 

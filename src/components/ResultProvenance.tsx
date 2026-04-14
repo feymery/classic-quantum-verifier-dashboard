@@ -1,4 +1,4 @@
-import type { ExecutionSource } from "../hooks/useExperimentRunner";
+import type { ExecutionSource } from "../types/runner";
 import { Badge } from "../ui/Badge";
 import { Text } from "../ui/Text";
 

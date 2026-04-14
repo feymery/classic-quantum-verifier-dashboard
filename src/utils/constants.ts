@@ -22,13 +22,13 @@ export const KEY_ALPHAS: KeyAlpha[] = [
     color: "#a78bfa",
   },
   {
-    value: 0.9273,
+    value: 0.1 * (Math.PI / 2),
     label: "α = α★",
-    desc: "protocol threshold",
+    desc: "protocol baseline",
     insight:
-      "The protocol-relevant operating point from Stricker et al. sin²(0.9273) ≈ 0.64, " +
-      "safely above the 0.5 accept threshold. A correctly prepared state here passes; " +
-      "a fake prover must match this energy to avoid detection.",
+      "The protocol baseline from Stricker et al. sin²(α★) ≈ 0.024, well below the 0.4 " +
+      "accept threshold. A correctly prepared state here is reliably accepted — the verifier " +
+      "confirms an honest quantum prover. A fake prover must produce this energy to avoid detection.",
     color: "#a78bfa",
   },
   {

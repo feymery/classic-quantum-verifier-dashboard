@@ -2,60 +2,35 @@ import { useCallback, useEffect, useState } from "react";
 import {
   runExperiment as runExperiment1Q,
   runComparison,
-  type ExperimentResult,
-} from "../services/quantumApi";
-import {
-  runExperiment2Q,
-  type ExperimentResult2Q,
-} from "../services/simulate2Q";
+} from "../modules/oneQubit/services/quantumApi";
+import { runExperiment2Q } from "../modules/twoQubit/services/simulate2Q";
 import {
   pollBackendExperiment1Q,
   startBackendExperiment1Q,
-} from "../services/backendExperiment1Q";
+} from "../modules/oneQubit/services/backendExperiment1Q";
 import {
   pollBackendExperiment2Q,
   runBackendExperiment2Q,
   startBackendExperiment2Q,
-} from "../services/backendExperiment2Q";
-import { isLocalBackend, type BackendId } from "../utils/constants";
+} from "../modules/twoQubit/services/backendExperiment2Q";
+import { isLocalBackend } from "../utils/constants";
+import type { ExperimentResult } from "../types/experiment";
+import type { ExperimentResult2Q } from "../types/experiment";
+import type {
+  RunnerStatus,
+  ExecutionSource,
+  RunMode,
+  RunHistoryEntry,
+  ActiveAsyncJob,
+} from "../types/runner";
 
-export type RunnerStatus = "idle" | "running" | "complete" | "error";
-export type ExecutionSource =
-  | "api"
-  | "fallback-local"
-  | "local-mock"
-  | "local-2q";
-
-export type RunMode = "oneQ" | "twoQ";
-
-export interface RunHistoryEntry {
-  id: string;
-  createdAt: string;
-  mode: RunMode;
-  status: "complete" | "error";
-  alpha: number;
-  shots: number;
-  requestedBackend: BackendId;
-  resolvedBackend: string | null;
-  executionSource: ExecutionSource | null;
-  jobId: string | null;
-  energyEstimate: number | null;
-  decision: string | null;
-  comparisonAlphas: number[];
-  error: string | null;
-}
-
-export interface ActiveAsyncJob {
-  jobId: string;
-  mode: RunMode;
-  status: "queued" | "running" | "done" | "failed";
-  requestedBackend: BackendId;
-  alpha: number;
-  shots: number;
-  comparisonAlphas: number[];
-  startedAt: string;
-  message: string | null;
-}
+export type {
+  RunnerStatus,
+  ExecutionSource,
+  RunMode,
+  RunHistoryEntry,
+  ActiveAsyncJob,
+};
 
 const RUN_HISTORY_STORAGE_KEY = "qvp.run-history.v1";
 const MAX_RUN_HISTORY_ENTRIES = 12;

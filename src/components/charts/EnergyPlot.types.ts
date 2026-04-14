@@ -1,4 +1,4 @@
-import type { ExperimentResult } from "../../services/simulate1Q";
+import type { ExperimentResult } from "../../types/experiment";
 
 export interface EnergyPlotPoint {
   alpha: number;

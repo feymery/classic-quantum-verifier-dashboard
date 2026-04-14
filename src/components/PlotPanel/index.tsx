@@ -1,8 +1,8 @@
 import { EnergyPlot } from "../charts/EnergyPlot";
 import { ShotHistogram } from "../charts/ShotHistogram";
 import { ComparisonPlot } from "../charts/ComparisonPlot";
-import type { ExperimentResult } from "../../services/simulate1Q";
-import type { ExecutionSource } from "../../hooks/useExperimentRunner";
+import type { ExperimentResult } from "../../types/experiment";
+import type { ExecutionSource } from "../../types/runner";
 import { ResultProvenance } from "../ResultProvenance";
 
 interface PlotPanelProps {

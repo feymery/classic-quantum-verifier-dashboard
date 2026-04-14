@@ -1,4 +1,4 @@
-import type { ActiveAsyncJob } from "../hooks/useExperimentRunner";
+import type { ActiveAsyncJob } from "../types/runner";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
