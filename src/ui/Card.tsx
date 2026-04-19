@@ -1,5 +1,5 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
-import { classNames } from "./utils/classNames";
+import { clsx as classNames } from "clsx";
 
 type CardPadding = "none" | "sm" | "md" | "lg";
 

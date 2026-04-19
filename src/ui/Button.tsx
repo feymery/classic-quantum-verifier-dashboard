@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { classNames } from "./utils/classNames";
+import { clsx as classNames } from "clsx";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";

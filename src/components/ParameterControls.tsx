@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import type { Backend } from "../utils/constants";
-import { AlphaControl } from "./AlphaControl/index";
+import { AlphaControl } from "./AlphaControl/AlphaControl";
 import { BackendSelector } from "./BackendSelector";
 import { Card } from "../ui/Card";
 import { Text } from "../ui/Text";

@@ -105,9 +105,9 @@ For production deployments, configure your reverse proxy or hosting platform to 
 | Route | Description |
 | --- | --- |
 | `/dashboard` | High-level overview and entry points |
-| `/experiment` | 1Q run workflow — parameters, execution, measurement output |
+| `/1Qexperiment` | Experiment 1Q — parameters, execution, measurement output |
 | `/visualization` | Chart surface — energy curves, histograms, sweep plots |
-| `/circuit` | Circuit/physics view and 2Q observables |
+| `/2Qcircuit` | 2Q Circuit — circuit/physics view and 2Q observables |
 | `/adversarial` | Fake prover controls, attack curves, detection analysis |
 | `/traps` | Trap-based verification module |
 

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { NoisePanel } from "../../../components/NoisePanel";
+import { NoisePanel } from "../../../components/NoisePanel/NoisePanel";
 import { AdversarialControlPanel } from "../components/AdversarialControlPanel/AdversarialControlPanel";
 import { AdversarialPlot } from "../components/AdversarialPlot/AdversarialPlot";
 import { DetectionPanel } from "../components/DetectionPanel/DetectionPanel";
-import { NoiseSweepBackendPanel } from "../../../components/NoiseSweepBackendPanel";
+import { NoiseSweepBackendPanel } from "../../../components/NoiseSweepBackendPanel/NoiseSweepBackendPanel";
 import { AdversarialCircuitPanel } from "../components/AdversarialCircuitPanel/AdversarialCircuitPanel";
 import type { AdversarialStrategyType } from "../physics/adversarial";
 import { simulateAdversarial } from "../services/simulateAdversarial";

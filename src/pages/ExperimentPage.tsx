@@ -1,7 +1,7 @@
-import { AlphaControl } from "../components/AlphaControl/index";
+import { AlphaControl } from "../components/AlphaControl/AlphaControl";
 import { EnergyPanel } from "../components/EnergyPanel";
 import { ExperimentControlBar } from "../components/ExperimentControlBar";
-import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/index";
+import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
 import { RunHistoryPanel } from "../components/RunHistoryPanel";
 import { ProtocolSteps1Q, ConceptBox } from "../components/ProtocolExplainer";
 import { useAppState } from "../state/useAppState";
@@ -73,7 +73,7 @@ export function ExperimentPage() {
                     dashboard.setShots(parsed);
                   }
                 }}
-                className="mt-1 w-full rounded-lg border px-3 py-2"
+                className="w-full px-3 py-2 mt-1 border rounded-lg"
                 style={{
                   borderColor: "#2d2b3a",
                   background: "#181620",
@@ -134,7 +134,7 @@ export function ExperimentPage() {
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr] items-start">
           {/* Left: step-by-step + circuit */}
           <div className="space-y-2">
-            <p className="text-xs mb-3" style={{ color: "#9490a8" }}>
+            <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
               Interactive step-by-step breakdown. Click any step to expand it.
               Values update live as you change α.
             </p>
@@ -143,7 +143,7 @@ export function ExperimentPage() {
 
           {/* Right: conceptual explanations */}
           <div className="space-y-2">
-            <p className="text-xs mb-3" style={{ color: "#9490a8" }}>
+            <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
               Conceptual background. Expand any section for a concise
               explanation.
             </p>

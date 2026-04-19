@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { type AdversarialStrategyType } from "../../physics/adversarial";
 import { simulateAdversarial } from "../../services/simulateAdversarial";
 import { CHART_COLORS } from "../../../../components/charts/chartTheme";
-import { AdversarialPlotChart } from "./AdversarialPlotChart";
+import { AdversarialPlotChart } from "./components/AdversarialPlotChart";
 
 interface AdversarialPlotProps {
   alpha: number;

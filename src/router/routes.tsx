@@ -35,10 +35,10 @@ export const appRouter = createBrowserRouter([
     path: "/",
     element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/experiment" replace /> },
-      { path: "experiment", element: withPageLoader(<ExperimentPage />) },
+      { index: true, element: <Navigate to="/1Qexperiment" replace /> },
+      { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
       { path: "visualization", element: withPageLoader(<VisualizationPage />) },
-      { path: "circuit", element: withPageLoader(<CircuitPage />) },
+      { path: "2Qcircuit", element: withPageLoader(<CircuitPage />) },
       { path: "adversarial", element: withPageLoader(<AdversarialPage />) },
       { path: "traps", element: withPageLoader(<TrapsPage />) },
     ],

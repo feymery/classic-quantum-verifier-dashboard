@@ -49,7 +49,7 @@ export function BackendSelector({
       <select
         value={selectedBackend}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full px-4 py-3 mt-2 text-sm border border-border bg-elevated text-foreground outline-none rounded-lg"
+        className="w-full px-4 py-3 mt-2 text-sm border rounded-lg outline-none border-border bg-elevated text-foreground"
       >
         {backends.map((backend) => (
           <option key={backend.id} value={backend.id}>

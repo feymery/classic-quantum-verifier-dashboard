@@ -19,4 +19,4 @@ export type {
 } from "./services/simulate2Q";
 
 // Components
-export { TwoQubitPanel } from "./components/TwoQubitPanel/index";
+export { TwoQubitPanel } from "./components/TwoQubitPanel/TwoQubitPanel";

@@ -1,4 +1,4 @@
-import { TwoQubitPanel } from "../components/TwoQubitPanel";
+import { TwoQubitPanel } from "../components/TwoQubitPanel/TwoQubitPanel";
 import {
   QubitComparison,
   ConceptBox,
@@ -120,7 +120,7 @@ export function CircuitPage() {
                   >
                     {label}
                   </span>
-                  <code className=" text-xs" style={{ color: "#ddd9ee" }}>
+                  <code className="text-xs " style={{ color: "#ddd9ee" }}>
                     {circuit}
                   </code>
                 </div>

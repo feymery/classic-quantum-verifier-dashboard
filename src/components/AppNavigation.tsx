@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/experiment", label: "Experiment" },
+  { to: "/1Qexperiment", label: "Experiment 1Q" },
   { to: "/visualization", label: "Visualization" },
-  { to: "/circuit", label: "Circuit" },
+  { to: "/2Qcircuit", label: "2Q Circuit" },
   { to: "/adversarial", label: "Adversarial" },
-  { to: "/traps", label: "Trampas" },
+  { to: "/traps", label: "Traps" },
 ];
 
 export function AppNavigation() {
