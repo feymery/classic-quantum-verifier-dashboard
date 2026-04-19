@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState, type ChangeEvent } from "react";
 import { BACKENDS, type BackendId } from "../utils/constants";
 import { energyFromAlpha } from "../utils/physics";
 import { formatEnergy } from "../utils/physics";
+import { fetchJson } from "../services/apiClient";
 
 export function useDashboardState() {
   const [alpha, setAlpha] = useState<number>(Math.PI / 4);
@@ -9,6 +10,8 @@ export function useDashboardState() {
   const [selectedBackend, setSelectedBackend] = useState<BackendId>("mock");
   const [ibmToken, setIbmToken] = useState<string>("");
   const [ibmTokenSet, setIbmTokenSet] = useState<boolean>(false);
+  const [ibmInstance, setIbmInstance] = useState<string>("");
+  const [ibmBackendName, setIbmBackendName] = useState<string>("");
   const [noiseLambda, setNoiseLambda] = useState<number>(0.05);
   const [alphaFake, setAlphaFake] = useState<number>(1.1);
   const [comparisonAlphas, setComparisonAlphas] = useState<number[]>([]);
@@ -24,10 +27,24 @@ export function useDashboardState() {
 
   const confirmToken = useCallback(() => {
     if (ibmToken) {
+      fetchJson<{ configured: boolean; connected: boolean; reason?: string }>(
+        "http://localhost:8000/configure/ibm",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: ibmToken,
+            instance: ibmInstance,
+            backend_name: ibmBackendName,
+          }),
+        },
+      ).catch(() => {
+        // Backend may not be running — still mark as set locally.
+      });
       setIbmTokenSet(true);
       setShowToken(false);
     }
-  }, [ibmToken]);
+  }, [ibmToken, ibmInstance, ibmBackendName]);
 
   const toggleShowToken = useCallback(() => setShowToken((v) => !v), []);
 
@@ -37,6 +54,8 @@ export function useDashboardState() {
     selectedBackend,
     ibmToken,
     ibmTokenSet,
+    ibmInstance,
+    ibmBackendName,
     noiseLambda,
     alphaFake,
     comparisonAlphas,
@@ -49,6 +68,8 @@ export function useDashboardState() {
     setSelectedBackend,
     setIbmToken,
     setIbmTokenSet,
+    setIbmInstance,
+    setIbmBackendName,
     setNoiseLambda,
     setAlphaFake,
     setComparisonAlphas,

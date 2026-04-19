@@ -22,9 +22,11 @@ export interface DashboardHeaderProps {
   energy: string;
   comparisonCount: number;
   latestJobId: string | null;
-  // IBM token
+  // IBM credentials
   ibmToken: string;
   ibmTokenSet: boolean;
+  ibmInstance: string;
+  ibmBackendName: string;
   showToken: boolean;
   // callbacks
   onBackendChange: (id: BackendId) => void;
@@ -32,6 +34,8 @@ export interface DashboardHeaderProps {
   onShotsChange: (value: number) => void;
   onNoiseLambdaChange: (value: number) => void;
   onTokenChange: (token: string) => void;
+  onInstanceChange: (instance: string) => void;
+  onBackendNameChange: (name: string) => void;
   onToggleShowToken: () => void;
   onConfirmToken: () => void;
 }
@@ -49,12 +53,16 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     latestJobId,
     ibmToken,
     ibmTokenSet,
+    ibmInstance,
+    ibmBackendName,
     showToken,
     onBackendChange,
     onAlphaChange,
     onShotsChange,
     onNoiseLambdaChange,
     onTokenChange,
+    onInstanceChange,
+    onBackendNameChange,
     onToggleShowToken,
     onConfirmToken,
   } = props;
@@ -90,9 +98,13 @@ export function DashboardHeader(props: DashboardHeaderProps) {
         <IbmTokenSection
           ibmToken={ibmToken}
           ibmTokenSet={ibmTokenSet}
+          ibmInstance={ibmInstance}
+          ibmBackendName={ibmBackendName}
           showToken={showToken}
           onToggleShowToken={onToggleShowToken}
           onTokenChange={onTokenChange}
+          onInstanceChange={onInstanceChange}
+          onBackendNameChange={onBackendNameChange}
           onConfirmToken={onConfirmToken}
         />
       )}

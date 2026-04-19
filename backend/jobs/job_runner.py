@@ -6,20 +6,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 from backend import aer_executor, ibm_executor
 from backend.circuit_builder import build_measurement_circuit
-from backend.ibm_client import IBMClient
+from backend.energy import compute_energy as _compute_energy
+from backend.ibm_client import IBMClient, get_shared_client
 from backend.measurement_mapper import map_measurements, map_measurements_2q
 from backend.jobs.job_store import job_store
 
 
 logger = logging.getLogger(__name__)
 
-_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="quantum-job")
-
-
-def _compute_energy(alpha: float, observables: dict[str, float]) -> float:
-    c2a = math.cos(2.0 * alpha)
-    s2a = math.sin(2.0 * alpha)
-    return 0.5 - 0.5 * c2a * observables["Z1Z2"] - 0.5 * s2a * observables["X1X2"]
+# Separate pools so slow IBM jobs (minutes) cannot starve fast Aer jobs (seconds).
+_IBM_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="quantum-ibm")
+_AER_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="quantum-aer")
 
 
 def _compute_energy_2q(alpha: float, observables: dict[str, float]) -> float:
@@ -30,43 +27,50 @@ def _compute_energy_2q(alpha: float, observables: dict[str, float]) -> float:
     return (primary + cross) / 2.0
 
 
-def _run_aer(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], str, float, dict]:
-    z_circuit = build_measurement_circuit(alpha, basis="z")
-    x_circuit = build_measurement_circuit(alpha, basis="x")
+def _run_aer(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
+    z_circuit  = build_measurement_circuit(alpha, basis="z")
+    zx_circuit = build_measurement_circuit(alpha, basis="zx")
+    x_circuit  = build_measurement_circuit(alpha, basis="x")
 
-    z_result = aer_executor.run_circuit(z_circuit, shots)
-    x_result = aer_executor.run_circuit(x_circuit, shots)
+    z_result  = aer_executor.run_circuit(z_circuit, shots)
+    zx_result = aer_executor.run_circuit(zx_circuit, shots)
+    x_result  = aer_executor.run_circuit(x_circuit, shots)
 
-    execution_time = z_result.metadata.execution_time_ms + x_result.metadata.execution_time_ms
+    execution_time = (
+        z_result.metadata.execution_time_ms
+        + zx_result.metadata.execution_time_ms
+        + x_result.metadata.execution_time_ms
+    )
     meta = {
         "execution_backend": "aer",
         "backend_name": "aer",
     }
-    return z_result.counts, x_result.counts, "aer", execution_time, meta
+    return z_result.counts, zx_result.counts, x_result.counts, "aer", execution_time, meta
 
 
-def _run_ibm(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], str, float, dict]:
-    z_circuit = build_measurement_circuit(alpha, basis="z")
-    x_circuit = build_measurement_circuit(alpha, basis="x")
-    client = IBMClient()
+def _run_ibm(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
+    z_circuit  = build_measurement_circuit(alpha, basis="z")
+    zx_circuit = build_measurement_circuit(alpha, basis="zx")
+    x_circuit  = build_measurement_circuit(alpha, basis="x")
+    client = get_shared_client()
 
-    z_submitted = ibm_executor.submit_circuit_job(z_circuit, shots, client)
-    x_submitted = ibm_executor.submit_circuit_job(x_circuit, shots, client)
-
-    z_result = ibm_executor.get_submitted_result(z_submitted, shots, z_circuit.num_qubits)
-    x_result = ibm_executor.get_submitted_result(x_submitted, shots, x_circuit.num_qubits)
+    z_result  = ibm_executor.run_circuit(z_circuit,  shots, client)
+    zx_result = ibm_executor.run_circuit(zx_circuit, shots, client)
+    x_result  = ibm_executor.run_circuit(x_circuit,  shots, client)
 
     execution_time = (
         float(z_result.metadata.get("execution_time_ms", 0.0))
+        + float(zx_result.metadata.get("execution_time_ms", 0.0))
         + float(x_result.metadata.get("execution_time_ms", 0.0))
     )
     meta = {
         "execution_backend": "ibm",
         "backend_name": str(z_result.metadata.get("backend_name", "ibm")),
-        "ibm_job_id_z": str(z_result.metadata.get("job_id", "")),
-        "ibm_job_id_x": str(x_result.metadata.get("job_id", "")),
+        "ibm_job_id_z":  str(z_result.metadata.get("job_id", "")),
+        "ibm_job_id_zx": str(zx_result.metadata.get("job_id", "")),
+        "ibm_job_id_x":  str(x_result.metadata.get("job_id", "")),
     }
-    return z_result.counts, x_result.counts, "ibm", execution_time, meta
+    return z_result.counts, zx_result.counts, x_result.counts, "ibm", execution_time, meta
 
 
 def _run_aer_2q(
@@ -108,21 +112,16 @@ def _run_ibm_2q(
     alpha: float,
     shots: int,
 ) -> tuple[dict[str, int], dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
-    z_circuit = build_measurement_circuit(alpha, basis="z")
+    z_circuit   = build_measurement_circuit(alpha, basis="z")
     x12_circuit = build_measurement_circuit(alpha, basis="x12")
     x13_circuit = build_measurement_circuit(alpha, basis="x13")
     x23_circuit = build_measurement_circuit(alpha, basis="x23")
-    client = IBMClient()
+    client = get_shared_client()
 
-    z_submitted = ibm_executor.submit_circuit_job(z_circuit, shots, client)
-    x12_submitted = ibm_executor.submit_circuit_job(x12_circuit, shots, client)
-    x13_submitted = ibm_executor.submit_circuit_job(x13_circuit, shots, client)
-    x23_submitted = ibm_executor.submit_circuit_job(x23_circuit, shots, client)
-
-    z_result = ibm_executor.get_submitted_result(z_submitted, shots, z_circuit.num_qubits)
-    x12_result = ibm_executor.get_submitted_result(x12_submitted, shots, x12_circuit.num_qubits)
-    x13_result = ibm_executor.get_submitted_result(x13_submitted, shots, x13_circuit.num_qubits)
-    x23_result = ibm_executor.get_submitted_result(x23_submitted, shots, x23_circuit.num_qubits)
+    z_result   = ibm_executor.run_circuit(z_circuit,   shots, client)
+    x12_result = ibm_executor.run_circuit(x12_circuit, shots, client)
+    x13_result = ibm_executor.run_circuit(x13_circuit, shots, client)
+    x23_result = ibm_executor.run_circuit(x23_circuit, shots, client)
 
     execution_time = (
         float(z_result.metadata.get("execution_time_ms", 0.0))
@@ -133,7 +132,7 @@ def _run_ibm_2q(
     meta = {
         "execution_backend": "ibm",
         "backend_name": str(z_result.metadata.get("backend_name", "ibm")),
-        "ibm_job_id_z": str(z_result.metadata.get("job_id", "")),
+        "ibm_job_id_z":   str(z_result.metadata.get("job_id", "")),
         "ibm_job_id_x12": str(x12_result.metadata.get("job_id", "")),
         "ibm_job_id_x13": str(x13_result.metadata.get("job_id", "")),
         "ibm_job_id_x23": str(x23_result.metadata.get("job_id", "")),
@@ -181,11 +180,12 @@ def _compose_result(
     alpha: float,
     shots: int,
     counts_z: dict[str, int],
+    counts_zx: dict[str, int],
     counts_x: dict[str, int],
     backend_used: str,
     execution_time: float,
 ) -> dict:
-    mapped = map_measurements(counts_z, counts_x, shots)
+    mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
     energy = _compute_energy(alpha, mapped.observables)
 
     return {
@@ -218,13 +218,7 @@ def run_job_async(job_id: str) -> None:
     try:
         if run_mode == "2q":
             if requested_backend == "ibm":
-                try:
                     counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time, metadata = _run_ibm_2q(alpha, shots)
-                except Exception as exc:
-                    logger.warning("IBM async 2Q execution failed for job %s, falling back to Aer: %s", job_id, exc)
-                    counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time, metadata = _run_aer_2q(alpha, shots)
-                    metadata["fallback_reason"] = str(exc)
-                    metadata["requested_backend"] = "ibm"
             else:
                 counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time, metadata = _run_aer_2q(alpha, shots)
                 metadata["requested_backend"] = requested_backend
@@ -241,18 +235,12 @@ def run_job_async(job_id: str) -> None:
             )
         else:
             if requested_backend == "ibm":
-                try:
-                    counts_z, counts_x, backend_used, execution_time, metadata = _run_ibm(alpha, shots)
-                except Exception as exc:
-                    logger.warning("IBM async execution failed for job %s, falling back to Aer: %s", job_id, exc)
-                    counts_z, counts_x, backend_used, execution_time, metadata = _run_aer(alpha, shots)
-                    metadata["fallback_reason"] = str(exc)
-                    metadata["requested_backend"] = "ibm"
+                    counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_ibm(alpha, shots)
             else:
-                counts_z, counts_x, backend_used, execution_time, metadata = _run_aer(alpha, shots)
+                counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_aer(alpha, shots)
                 metadata["requested_backend"] = requested_backend
 
-            result = _compose_result(alpha, shots, counts_z, counts_x, backend_used, execution_time)
+            result = _compose_result(alpha, shots, counts_z, counts_zx, counts_x, backend_used, execution_time)
 
         metadata["mode"] = run_mode
         job_store.update_job(
@@ -281,5 +269,6 @@ def submit_job(alpha: float, shots: int, backend: str = "ibm", mode: str = "1q")
         backend=backend_name,
         metadata={"mode": run_mode},
     )
-    _EXECUTOR.submit(run_job_async, job_id)
+    executor = _IBM_EXECUTOR if backend_name == "ibm" else _AER_EXECUTOR
+    executor.submit(run_job_async, job_id)
     return job_id

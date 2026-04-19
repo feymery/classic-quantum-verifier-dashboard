@@ -12,19 +12,23 @@ export function MainLayout() {
       className="min-h-screen"
       style={{ background: "#131217", color: "#ddd9ee" }}
     >
-      <div className="mx-auto max-w-330 px-6 py-6">
+      <div className="px-6 py-6 mx-auto max-w-330">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
           backend={dashboard.backend}
           backendStatus={backendStatus}
           ibmToken={dashboard.ibmToken}
           ibmTokenSet={dashboard.ibmTokenSet}
+          ibmInstance={dashboard.ibmInstance}
+          ibmBackendName={dashboard.ibmBackendName}
           showToken={dashboard.showToken}
           alpha={dashboard.alpha}
           shots={dashboard.shots}
           noiseLambda={dashboard.noiseLambda}
           onBackendChange={dashboard.setSelectedBackend}
           onTokenChange={dashboard.setIbmToken}
+          onInstanceChange={dashboard.setIbmInstance}
+          onBackendNameChange={dashboard.setIbmBackendName}
           onToggleShowToken={dashboard.toggleShowToken}
           onConfirmToken={dashboard.confirmToken}
           onAlphaChange={dashboard.setAlpha}

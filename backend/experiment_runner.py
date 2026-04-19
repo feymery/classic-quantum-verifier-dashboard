@@ -4,64 +4,13 @@ import logging
 
 from backend import aer_executor, ibm_executor
 from backend.circuit_builder import build_measurement_circuit, build_measurement_circuit_2q
-from backend.ibm_client import IBMClient
-from backend.jobs.job_executor import submit_job
+from backend.energy import compute_energy as _compute_energy
+from backend.ibm_client import IBMClient, get_shared_client
+from backend.jobs.job_runner import submit_job
 from backend.measurement_mapper import map_measurements, map_measurements_2q
 
 
 logger = logging.getLogger(__name__)
-
-
-def _safe_empty_response(alpha: float, shots: int) -> dict:
-    import math
-
-    return {
-        "alpha": float(alpha),
-        "observables": {"Z1": 0.0, "Z2": 0.0, "Z1Z2": 0.0, "Z1X2": 0.0, "X1X2": 0.0},
-        "noisyObservables": {"Z1": 0.0, "Z2": 0.0, "Z1Z2": 0.0, "Z1X2": 0.0, "X1X2": 0.0},
-        "energy": 0.0,
-        "energy_error": 0.0,
-        "energy_theory": math.sin(float(alpha)) ** 2,
-        "lambda_min": math.sin(float(alpha)) ** 2,
-        "verdict": "marginal",
-        "counts": {"000": 0, "001": 0, "010": 0, "011": 0, "100": 0, "101": 0, "110": 0, "111": 0},
-        "probabilities": {
-            "000": 0.0,
-            "001": 0.0,
-            "010": 0.0,
-            "011": 0.0,
-            "100": 0.0,
-            "101": 0.0,
-            "110": 0.0,
-            "111": 0.0,
-        },
-        "backendInfo": {
-            "type": "aer",
-            "shots": int(shots),
-            "executionTime": 0.0,
-        },
-    }
-
-
-def _compute_energy(alpha: float, observables: dict[str, float]) -> float:
-    """Full 5-term Hamiltonian energy estimator (Stricker et al. 2024, Eq. C.1).
-
-    E = 3.5 - 2·Z1 + Z2 - Z1Z2 - 1.5·cos(α)·Z1X2 - 1.5·sin(α)·X1X2
-
-    Theoretical minimum is sin²(α) (achieved by the honest clock state).
-    """
-    import math
-
-    ca = math.cos(alpha)
-    sa = math.sin(alpha)
-    return (
-        3.5
-        - 2.0 * observables["Z1"]
-        + observables["Z2"]
-        - observables["Z1Z2"]
-        - 1.5 * ca * observables["Z1X2"]
-        - 1.5 * sa * observables["X1X2"]
-    )
 
 
 def _compute_energy_error(alpha: float, observables: dict[str, float], shots: int) -> float:
@@ -408,7 +357,7 @@ def _run_with_ibm(
     z_circuit  = build_measurement_circuit(alpha, basis="z")
     zx_circuit = build_measurement_circuit(alpha, basis="zx")
     x_circuit  = build_measurement_circuit(alpha, basis="x")
-    client = IBMClient()
+    client = get_shared_client()
 
     z_result  = ibm_executor.run_circuit(z_circuit, shots, client)
     zx_result = ibm_executor.run_circuit(zx_circuit, shots, client)
@@ -429,7 +378,7 @@ def _run_with_ibm_2q(
     x12_circuit = build_measurement_circuit_2q(alpha, basis="x12")
     x13_circuit = build_measurement_circuit_2q(alpha, basis="x13")
     x23_circuit = build_measurement_circuit_2q(alpha, basis="x23")
-    client = IBMClient()
+    client = get_shared_client()
 
     z_result = ibm_executor.run_circuit(z_circuit, shots, client)
     x12_result = ibm_executor.run_circuit(x12_circuit, shots, client)
@@ -451,82 +400,59 @@ def _run_with_ibm_2q(
     )
 
 
-def runExperiment(alpha: float, shots: int, backend: str = "aer", mode: str = "1q") -> dict:
-    """Main orchestration entry point used by the API layer."""
-    return runExperimentSync(alpha=alpha, shots=shots, backend=backend, mode=mode)
-
-
 def runExperimentSync(alpha: float, shots: int, backend: str = "aer", mode: str = "1q") -> dict:
-    """Synchronous execution path.
-
-    Keeps current contract for immediate results, with IBM->Aer fallback.
-    """
+    """Synchronous execution path."""
     backend_requested = (backend or "aer").strip().lower()
     run_mode = (mode or "1q").strip().lower()
 
-    try:
-        energy_error: float | None = None
-        energy_theory: float | None = None
-        lambda_min: float | None = None
-        verdict: str | None = None
+    energy_error: float | None = None
+    energy_theory: float | None = None
+    lambda_min: float | None = None
+    verdict: str | None = None
 
-        if run_mode == "2q":
-            if backend_requested == "ibm":
-                try:
-                    counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_ibm_2q(alpha, shots)
-                except Exception as exc:
-                    logger.warning("IBM 2Q execution failed, falling back to Aer: %s", exc)
-                    counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_aer_2q(alpha, shots)
-            else:
-                counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_aer_2q(alpha, shots)
-
-            mapped = map_measurements_2q(counts_z, counts_x12, counts_x13, counts_x23, shots)
-            energy = _compute_energy_2q(alpha, mapped.observables)
+    if run_mode == "2q":
+        if backend_requested == "ibm":
+                counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_ibm_2q(alpha, shots)
         else:
-            import math
+            counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_aer_2q(alpha, shots)
 
-            if backend_requested == "ibm":
-                try:
-                    counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_ibm(
-                        alpha,
-                        shots,
-                    )
-                except Exception as exc:
-                    logger.warning("IBM execution failed, falling back to Aer: %s", exc)
-                    counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_aer(
-                        alpha,
-                        shots,
-                    )
-            else:
-                counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_aer(alpha, shots)
+        mapped = map_measurements_2q(counts_z, counts_x12, counts_x13, counts_x23, shots)
+        energy = _compute_energy_2q(alpha, mapped.observables)
+    else:
+        import math
 
-            mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
-            energy = _compute_energy(alpha, mapped.observables)
-            energy_error = _compute_energy_error(alpha, mapped.observables, shots)
-            verdict = _verdict(energy, energy_error)
-            energy_theory = math.sin(float(alpha)) ** 2
-            lambda_min = _compute_lambda_min(float(alpha))
+        if backend_requested == "ibm":
+                counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_ibm(
+                    alpha,
+                    shots,
+                )
+        else:
+            counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_aer(alpha, shots)
 
-        return {
-            "alpha": float(alpha),
-            "observables": mapped.observables,
-            "noisyObservables": mapped.observables,
-            "energy": energy,
-            "energy_error": energy_error if run_mode != "2q" else None,
-            "energy_theory": energy_theory if run_mode != "2q" else None,
-            "lambda_min": lambda_min if run_mode != "2q" else None,
-            "verdict": verdict if run_mode != "2q" else None,
-            "counts": counts_z,
-            "probabilities": mapped.probabilities,
-            "backendInfo": {
-                "type": backend_used,
-                "shots": int(shots),
-                "executionTime": execution_time,
-            },
-        }
-    except Exception as exc:
-        logger.exception("runExperiment failed, returning safe empty response: %s", exc)
-        return _safe_empty_response(alpha, shots)
+        mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
+        energy = _compute_energy(alpha, mapped.observables)
+        energy_error = _compute_energy_error(alpha, mapped.observables, shots)
+        verdict = _verdict(energy, energy_error)
+        energy_theory = math.sin(float(alpha)) ** 2
+        lambda_min = _compute_lambda_min(float(alpha))
+
+    return {
+        "alpha": float(alpha),
+        "observables": mapped.observables,
+        "noisyObservables": mapped.observables,
+        "energy": energy,
+        "energy_error": energy_error if run_mode != "2q" else None,
+        "energy_theory": energy_theory if run_mode != "2q" else None,
+        "lambda_min": lambda_min if run_mode != "2q" else None,
+        "verdict": verdict if run_mode != "2q" else None,
+        "counts": counts_z,
+        "probabilities": mapped.probabilities,
+        "backendInfo": {
+            "type": backend_used,
+            "shots": int(shots),
+            "executionTime": execution_time,
+        },
+    }
 
 
 def submitExperimentJob(

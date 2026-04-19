@@ -1,8 +1,8 @@
 # Backend
 
 FastAPI backend for the Quantum Verification Playground.
-Provides quantum circuit execution via Qiskit Aer and IBM Quantum Runtime, an async job system.
-REST API consumed by the React frontend.
+Executes quantum circuits via Qiskit Aer (local) and IBM Quantum Runtime (hardware/cloud).
+Exposes a REST API consumed by the React frontend.
 
 ---
 
@@ -18,7 +18,7 @@ Dependencies (from `requirements.txt`):
 | `fastapi` | REST API framework |
 | `uvicorn` | ASGI server |
 | `pydantic v2` | Request/response validation |
-| `qiskit` | Circuit definition |
+| `qiskit` | Circuit definition and transpilation |
 | `qiskit-aer` | Local quantum simulator |
 | `qiskit-ibm-runtime` | IBM Quantum execution (optional) |
 
@@ -48,66 +48,75 @@ The `--reload` flag restarts the server on file changes (development only).
 
 ---
 
-## Environment variables
+## IBM credentials
 
-All variables are optional. The backend runs fully without them using Aer.
+IBM credentials are optional. Without them all execution uses Aer.
 
-| Variable | Description |
+Credentials are configured at runtime via `POST /configure/ibm` — they are never read from environment variables and are never persisted to disk.
+
+| Field | Description |
 | --- | --- |
-| `IBM_QUANTUM_TOKEN` | IBM Quantum API token — required for `backend=ibm` execution |
-| `IBM_QUANTUM_INSTANCE` | IBM Quantum instance (e.g. `ibm-q/open/main`) — optional |
+| `token` | IBM Cloud API token |
+| `instance` | IBM Cloud CRN: `crn:v1:bluemix:public:quantum-computing:<region>:a/<account>:<service>::` |
+| `backend_name` | QPU name, e.g. `ibm_strasbourg` |
+| `verify` | If `true`, attempts a connection check immediately and returns the result |
 
-Without IBM credentials, all `/run` requests with `backend=ibm` are queued and will fail at execution time.
-Aer execution is unaffected.
+The singleton `IBMClient` holds the connection for the lifetime of the server process and is invalidated only when new credentials are submitted.
 
 ---
 
 ## Module overview
 
-``` text
+```text
 backend/
-├── main.py               # FastAPI app, all route definitions
-├── executor.py           # Orchestration: runExperiment, sweep_*, run_adversarial_circuit
-├── aer_executor.py       # Qiskit Aer execution paths (sync + noisy)
-├── ibm_executor.py       # IBM Runtime submission and result polling
-├── ibm_client.py         # IBMClient connection wrapper
-├── circuit_builder.py    # Builds Qiskit circuits for 1Q/2Q and all measurement bases
-├── measurement_mapper.py # Maps raw bitstring counts to observable expectation values
+├── main.py                  # FastAPI app — all route definitions
+├── experiment_runner.py     # Orchestrates sync experiments: runExperimentSync, sweep_*, run_adversarial_circuit
+├── energy.py                # Canonical Hamiltonian energy formula (Eq. C.1)
+├── aer_executor.py          # Qiskit Aer execution (generic noise model + QPU-noise variant)
+├── ibm_executor.py          # IBM Runtime SamplerV2 submission and result extraction
+├── ibm_client.py            # IBMClient singleton — manages QiskitRuntimeService connection
+├── circuit_builder.py       # Builds Qiskit circuits for 1Q/2Q and all three measurement bases
+├── measurement_mapper.py    # Maps raw bitstring counts to observable expectation values
 └── jobs/
-    ├── job_store.py      # SQLite-backed persistent job store
-    └── job_executor.py   # ThreadPool-based async job execution
+    ├── job_store.py         # In-memory job store (pending → running → done/failed)
+    └── job_runner.py        # ThreadPool-based async job execution (separate pools for IBM and Aer)
 ```
 
 ### Execution flow
 
-**Synchronous (Aer):**
+**Synchronous (`backend=aer`):**
 
-``` text
+```text
 POST /run {backend="aer"}
-  → executor.runExperiment()
-  → aer_executor.run_circuit()          # 3 circuits (zz, zx, xx bases)
+  → experiment_runner.runExperimentSync()
+  → aer_executor.run_circuit()           # 3 circuits: Z, ZX, X bases
   → measurement_mapper.map_measurements()
-  → _compute_energy() + _compute_energy_error() + _verdict()
+  → energy.compute_energy()
   → response
 ```
 
-**Asynchronous (IBM):**
+**Asynchronous (`backend=ibm`):**
 
-``` text
+```text
 POST /run {backend="ibm"}
-  → executor.submitExperimentJob()
-  → job_store.create_job()             # status: "pending"
-  → ThreadPool: ibm_executor.run()     # status: "running" → "done"/"failed"
-  → GET /job/{id}                      # poll until done
+  → experiment_runner.submitExperimentJob()
+  → job_store.create_job()              # status: "pending"
+  → IBM ThreadPool: job_runner.run_job_async()
+      → ibm_executor.run_circuit() × 3  # Z, ZX, X — transpiled to QPU ISA
+      → energy.compute_energy()
+      → job_store.update_job()          # status: "done" or "failed"
+  → GET /job/{id}                       # client polls until done
 ```
+
+IBM and Aer jobs run in separate thread pools so long-running QPU jobs cannot starve fast Aer jobs.
 
 ### Quantum circuit
 
 The 1Q circuit implements the verification protocol from Stricker et al. 2024:
 
 - **State prep:** `H(q_clock)` → `CU(α)` via `RY(α/2) · CZ · RY(-α/2)` on `q_prover`
-- **3 measurement bases:** ZZ (basis `zz`), Z₁X₂ (basis `zx`), X₁X₂ (basis `xx`)
-- **Energy formula:** `E = 3.5 − 2⟨Z₁⟩ + ⟨Z₂⟩ − ⟨Z₁Z₂⟩ − 1.5cos(α)⟨Z₁X₂⟩ − 1.5sin(α)⟨X₁X₂⟩`
+- **3 measurement bases:** Z⊗Z (`z`), Z⊗X (`zx`), X⊗X (`x`)
+- **Energy formula (Eq. C.1):** $E = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1Z_2\rangle - 1.5\cos(\alpha)\langle Z_1X_2\rangle - 1.5\sin(\alpha)\langle X_1X_2\rangle$
 
 See [docs/protocol.md](../docs/protocol.md) for the full protocol analysis.
 
@@ -121,9 +130,10 @@ Quick list:
 
 | Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/status` | Service health and backend availability |
+| `GET` | `/status` | Service health and IBM connection state |
 | `GET` | `/backends` | List available execution backends |
-| `POST` | `/run` | Run experiment (sync Aer or async IBM) |
+| `POST` | `/configure/ibm` | Store IBM credentials (optionally verify connection) |
+| `POST` | `/run` | Run experiment — returns result (Aer) or job ID (IBM) |
 | `GET` | `/job/{id}` | Get job status and result |
 | `GET` | `/jobs` | List jobs with optional filters |
 | `POST` | `/sweep/alpha` | Sweep α ∈ [0, π/2] at fixed shots |
@@ -170,7 +180,6 @@ python3 -m pytest backend/tests -v
 # By marker
 python3 -m pytest backend/tests -m contract
 python3 -m pytest backend/tests -m integration
-python3 -m pytest backend/tests -m unit
 
 # Warnings as errors (CI)
 python3 -m pytest backend/tests -q -W error
@@ -191,5 +200,5 @@ npm run test:backend:strict
 | `test_api_integration.py` | `integration` | Endpoint behavior, status codes, edge cases |
 | `conftest.py` | — | Shared fixtures: `client`, `sample_1q_params`, etc. |
 
-Contract tests verify the API shape that the frontend depends on.
-Break a contract test = the frontend will likely break too.
+Contract tests verify the API shape the frontend depends on.
+Breaking a contract test means the frontend will likely break too.

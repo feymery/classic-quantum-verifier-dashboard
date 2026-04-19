@@ -130,3 +130,48 @@ def run_circuit_noisy(
             execution_time_ms=elapsed_ms,
         ),
     )
+
+
+def run_circuit_from_qpu(
+    circuit: QuantumCircuit, shots: int, qpu_backend: Any
+) -> ExecutionResult:
+    """Execute a circuit on AerSimulator seeded with the real QPU noise model.
+
+    Uses ``AerSimulator.from_backend(qpu_backend)`` to import calibrated gate
+    errors, T1/T2 and crosstalk directly from the IBM QPU.  This is the
+    recommended dry-run path before spending QPU credits.
+
+    ``qpu_backend`` must be an IBM backend object obtained from
+    ``IBMClient.get_backend()``.
+    """
+    shot_count = max(1, int(shots))
+    backend_name = getattr(qpu_backend, "name", "aer-qpu")
+
+    qpu_simulator = AerSimulator.from_backend(qpu_backend)
+
+    start = time.perf_counter()
+    compiled = transpile(
+        circuit,
+        qpu_simulator,
+        optimization_level=1,
+        seed_transpiler=DEFAULT_SEED,
+    )
+    result = qpu_simulator.run(
+        compiled,
+        shots=shot_count,
+        seed_simulator=DEFAULT_SEED,
+    ).result()
+    elapsed_ms = (time.perf_counter() - start) * 1000.0
+
+    raw_counts: Any = result.get_counts(compiled)
+    counts: dict[str, int] = {str(k): int(v) for k, v in dict(raw_counts).items()}
+
+    return ExecutionResult(
+        counts=counts,
+        probabilities=_normalize_counts(counts, shot_count),
+        metadata=ExecutionMetadata(
+            backend_name=f"aer-from-{backend_name}",
+            shots=shot_count,
+            execution_time_ms=elapsed_ms,
+        ),
+    )

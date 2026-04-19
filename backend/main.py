@@ -7,8 +7,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.executor import runExperiment, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise, run_adversarial_circuit
-from backend.ibm_client import IBMClient
+from backend.experiment_runner import runExperimentSync, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise, run_adversarial_circuit
+from backend.ibm_client import IBMClient, configure_runtime, get_shared_client
 from backend.jobs.job_store import job_store
 
 
@@ -205,9 +205,46 @@ class RunRequest(BaseModel):
     mode: Literal["1q", "2q"] = "1q"
 
 
+class ConfigureIbmRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    token: str = Field(..., min_length=1)
+    instance: str = Field(default="")
+    backend_name: str = Field(default="")
+    verify: bool = Field(default=False)
+
+
+@app.post("/configure/ibm")
+def configure_ibm(payload: ConfigureIbmRequest) -> dict:
+    """Store IBM Quantum credentials for the lifetime of this server process.
+
+    The ``instance`` is an IBM Cloud CRN in the format:
+    ``crn:v1:bluemix:public:quantum-computing:<region>:a/<account_id>:<service_id>::``.
+    The ``backend_name`` is the QPU name (e.g. ``ibm_strasbourg``).
+    All values are held only in memory — they are never logged or persisted.
+    """
+    configure_runtime(token=payload.token, instance=payload.instance, backend_name=payload.backend_name)
+    # Only connect when the user explicitly requests verification (verify=True).
+    # Callers that restore saved credentials on startup should pass verify=False
+    # to avoid an IBM network call without explicit user action.
+    if payload.verify:
+        availability = get_shared_client().connect()
+        connected = availability.available
+        reason = availability.reason
+    else:
+        connected = False
+        reason = "Credentials stored. Send verify=true to test the connection."
+    return {
+        "configured": True,
+        "connected": connected,
+        "reason": reason,
+    }
+
+
 @app.get("/status")
 def get_status() -> dict:
-    ibm_state = "connected" if IBMClient().connect().available else "disconnected"
+    # Read cached availability — no new IBM network call on every poll.
+    ibm_state = "connected" if get_shared_client().availability.available else "disconnected"
     return {
         "status": "ok",
         "execution_mode": "sync + async",
@@ -221,7 +258,8 @@ def get_status() -> dict:
 
 @app.get("/backends")
 def get_backends() -> list[dict]:
-    ibm_available = IBMClient().connect().available
+    # Read cached availability — no new IBM network call on every poll.
+    ibm_available = get_shared_client().availability.available
     return [
         {"name": "aer", "available": True},
         {"name": "ibm", "available": ibm_available},
@@ -239,7 +277,7 @@ def run_endpoint(payload: RunRequest) -> dict:
             mode=payload.mode,
         )
 
-    return runExperiment(
+    return runExperimentSync(
         alpha=payload.alpha,
         shots=payload.shots,
         backend="aer",
