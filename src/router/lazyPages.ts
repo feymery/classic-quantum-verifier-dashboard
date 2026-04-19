@@ -24,3 +24,8 @@ export const AdversarialPage = lazy(async () => {
   const module = await import("../modules/adversarial/pages/AdversarialPage");
   return { default: module.AdversarialPage };
 });
+
+export const TrapsPage = lazy(async () => {
+  const module = await import("../modules/traps/pages/TrapsPage");
+  return { default: module.TrapsPage };
+});

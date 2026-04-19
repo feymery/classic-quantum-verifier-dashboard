@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { to: "/visualization", label: "Visualization" },
   { to: "/circuit", label: "Circuit" },
   { to: "/adversarial", label: "Adversarial" },
+  { to: "/traps", label: "Trampas" },
 ];
 
 export function AppNavigation() {

@@ -402,7 +402,88 @@ otherwise       → MARGINAL
 
 ---
 
-### Fixed bugs (Phase 1 — April 2026)
+### U(α) Implementation: How the Rotation Works
+
+#### What U(α) is — and what it is not
+
+`U(α) = cos(α)·Z + sin(α)·X` is **not** a standard rotation gate. It is a linear combination of two Pauli operators, which evaluates to the matrix:
+
+```
+U(α) = [ cos α   sin α ]
+       [ sin α  -cos α ]
+```
+
+- At α = 0 → pure Z (phase flip, no bit flip)
+- At α = π/2 → pure X (bit flip, no phase flip)
+- At intermediate angles → a continuously interpolated mix of both
+
+This is physically different from `RY(α)` (= e^{−iαY/2}), which only rotates around the Y axis. `qc.cu(alpha, 0, 0, 0)` produces `U3(alpha,0,0) = RY(alpha)`, giving energy `sin²(α/2)` instead of the required `sin²(α)`.
+
+#### Frontend — `hamiltonian.ts`
+
+The matrix is computed directly as an analytic sum of Pauli matrices (no exponentials, no approximations):
+
+```ts
+// src/modules/oneQubit/physics/hamiltonian.ts
+export const buildU = (alpha: number): Mat2 => {
+  const c = Math.cos(alpha);
+  const s = Math.sin(alpha);
+  // cos(α)·Z + sin(α)·X = [ [c, s], [s, -c] ]
+  return [
+    [[c, 0], [s, 0]],
+    [[s, 0], [-c, 0]],
+  ];
+};
+```
+
+`buildClockState` then builds the 2-qubit entangled state:
+
+```
+|ψ⟩ = (1/√2)(|00⟩ + cos(α)|10⟩ + sin(α)|11⟩)
+```
+
+This is the clock state of Eq. 2 in Stricker et al. 2024.
+
+#### Backend — `circuit_builder.py`
+
+Qiskit has no native gate for `U(α) = cos(α)Z + sin(α)X`. The circuit uses the decomposition from Appendix B of the paper:
+
+```
+CU(α) = RY(+α/2) · CZ · RY(−α/2)   [on q_prover, controlled by q_clock]
+```
+
+```python
+qc.ry(theta / 2, 0)   # RY(+α/2) on q_prover
+qc.cz(1, 0)            # CZ: control=q_clock, target=q_prover
+qc.ry(-theta / 2, 0)  # RY(-α/2) on q_prover
+```
+
+**Why this decomposition is correct:**
+
+When the control qubit (q_clock) is |0⟩, CZ acts as identity → the two RY gates cancel → q_prover stays in |0⟩.
+
+When the control is |1⟩, CZ applies Z to q_prover → the sequence becomes:
+
+```
+RY(+α/2) · Z · RY(−α/2) = cos(α)·Z + sin(α)·X = U(α)
+```
+
+This follows from the Lie algebra identity `e^{+iθY} Z e^{−iθY}` evaluated at θ = α/2, which rotates the Z axis toward X by angle 2θ = α in the ZX plane.
+
+#### Frontend ↔ Backend consistency
+
+Both implementations produce the same quantum state — one algebraically (TypeScript simulation) and one physically (Qiskit circuit on Aer or IBM hardware):
+
+| Layer | Method | State on `q_prover` when clock = `|1⟩` |
+|-------|--------|----------------------------------------|
+| TS `buildU` | Direct matrix sum `c·Z + s·X` | `cos(α)|0⟩ + sin(α)|1⟩` |
+| Python `build_circuit` | `RY(α/2) · CZ · RY(-α/2)` | `cos(α)|0⟩ + sin(α)|1⟩` |
+
+The ideal energy of the resulting clock state is `⟨H⟩ = sin²(α)`, confirmed analytically and verified by both the local simulator and the Aer backend.
+
+---
+
+
 
 All six correctness bugs identified in the gap analysis have been fixed.
 

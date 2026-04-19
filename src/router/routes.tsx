@@ -7,6 +7,7 @@ import {
   VisualizationPage,
   CircuitPage,
   AdversarialPage,
+  TrapsPage,
 } from "./lazyPages";
 
 function withPageLoader(node: ReactNode) {
@@ -41,6 +42,7 @@ export const appRouter = createBrowserRouter([
       { path: "visualization", element: withPageLoader(<VisualizationPage />) },
       { path: "circuit", element: withPageLoader(<CircuitPage />) },
       { path: "adversarial", element: withPageLoader(<AdversarialPage />) },
+      { path: "traps", element: withPageLoader(<TrapsPage />) },
     ],
   },
 ]);
