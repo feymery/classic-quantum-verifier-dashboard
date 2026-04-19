@@ -48,7 +48,7 @@ export function MeasurementPanel({
             <Text
               as="span"
               variant="caption"
-              className="text-xs font-medium text-[#ddd9ee]"
+              className="text-xs font-medium text-foreground"
             >
               Measurement Results
             </Text>
@@ -70,7 +70,7 @@ export function MeasurementPanel({
         {/* Error state */}
         {error && (
           <div
-            className="rounded border px-3 py-2"
+            className="px-3 py-2 border rounded"
             style={{
               borderColor: "rgba(248,113,113,0.3)",
               background: "rgba(248,113,113,0.05)",

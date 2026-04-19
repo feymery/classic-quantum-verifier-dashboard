@@ -103,7 +103,7 @@ export function DetectionPanel({
             step={0.01}
             value={confidenceLevel}
             onChange={(e) => onConfidenceChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-[#2d2b3a] accent-[#c7a472] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-border accent-caution shadow-inner shadow-black/30"
             aria-label="Confidence level"
           />
           <p className="mt-2  text-[10px]" style={{ color: "#6b6780" }}>

@@ -31,10 +31,10 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
   return (
     <div className="relative w-full select-none" ref={trackRef}>
       {/* ── Track background ── */}
-      <div className="relative h-1.5 w-full rounded-lg bg-[#2d2b3a] mt-2 mb-1">
+      <div className="relative h-1.5 w-full rounded-lg bg-border mt-2 mb-1">
         {/* Filled portion */}
         <div
-          className="absolute left-0 top-0 h-full rounded-lg transition-all duration-75"
+          className="absolute top-0 left-0 h-full transition-all duration-75 rounded-lg"
           style={{
             width: `${fillPct}%`,
             background:
@@ -49,12 +49,12 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
           return (
             <div
               key={ka.label}
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-150"
+              className="absolute transition-all duration-150 -translate-x-1/2 -translate-y-1/2 top-1/2"
               style={{ left: `${pct}%` }}
             >
               {/* Tick dot */}
               <div
-                className="w-2 h-2 rounded-lg border transition-all duration-150"
+                className="w-2 h-2 transition-all duration-150 border rounded-lg"
                 style={{
                   background: isSnapped ? ka.color : "#181620",
                   borderColor: ka.color,
@@ -76,7 +76,7 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
         onChange={handleChange}
         aria-label="Alpha parameter"
         aria-valuetext={`alpha = ${alpha.toFixed(4)}`}
-        className="absolute inset-0 w-full h-6 -top-2 opacity-0 cursor-pointer appearance-none bg-transparent"
+        className="absolute inset-0 w-full h-6 bg-transparent opacity-0 appearance-none cursor-pointer -top-2"
       />
 
       {/* ── Tick labels below ── */}

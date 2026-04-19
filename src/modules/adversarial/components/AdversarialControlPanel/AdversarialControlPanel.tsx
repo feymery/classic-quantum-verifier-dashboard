@@ -38,7 +38,7 @@ export function AdversarialControlPanel({
     >
       <div className="space-y-4">
         <label
-          className="flex items-center justify-between rounded-lg border px-3 py-2"
+          className="flex items-center justify-between px-3 py-2 border rounded-lg"
           style={{ borderColor: "#2d2b3a", background: "#1d1b25" }}
         >
           <span className=" text-[11px]" style={{ color: "#ddd9ee" }}>
@@ -75,7 +75,7 @@ export function AdversarialControlPanel({
             step={0.0025}
             value={epsilon}
             onChange={(e) => onEpsilonChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-[#2d2b3a] accent-[#c7a472] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-border accent-caution shadow-inner shadow-black/30"
             aria-label="Epsilon bias"
           />
         </label>
@@ -89,7 +89,7 @@ export function AdversarialControlPanel({
             onChange={(e) =>
               onStrategyChange(e.target.value as AdversarialStrategyType)
             }
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            className="w-full px-3 py-2 text-sm border rounded-lg"
             style={{
               borderColor: "#2d2b3a",
               background: "#1d1b25",
@@ -105,7 +105,7 @@ export function AdversarialControlPanel({
         </label>
 
         <div
-          className="space-y-1 rounded-lg border p-3"
+          className="p-3 space-y-1 border rounded-lg"
           style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
           <p className=" text-[10px]" style={{ color: "#6b6780" }}>

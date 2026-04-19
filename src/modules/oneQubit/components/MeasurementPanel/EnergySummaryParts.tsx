@@ -26,7 +26,7 @@ export function EnergyCell({ label, value, loading, color }: EnergyCellProps) {
       <span className=" text-[10px]" style={{ color: "#6b6780" }}>
         {label}
       </span>
-      <span className=" text-base tabular-nums" style={{ color }}>
+      <span className="text-base  tabular-nums" style={{ color }}>
         {loading ? "···" : value !== undefined ? value.toFixed(4) : "—"}
       </span>
     </div>
@@ -60,7 +60,7 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
   if (loading) {
     return (
       <div
-        className="rounded border p-2"
+        className="p-2 border rounded"
         style={{ background: "#181620", borderColor: "#2d2b3a" }}
       >
         <span className=" text-[10px]" style={{ color: "#6b6780" }}>
@@ -73,7 +73,7 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
   if (value === undefined) {
     return (
       <div
-        className="rounded border p-2"
+        className="p-2 border rounded"
         style={{ background: "#181620", borderColor: "#2d2b3a" }}
       >
         <span className=" text-[10px]" style={{ color: "#6b6780" }}>
@@ -87,20 +87,20 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
 
   return (
     <div className="space-y-1">
-      <div className="relative h-1.5 w-full rounded-lg bg-[#2d2b3a]">
+      <div className="relative h-1.5 w-full rounded-lg bg-border">
         <div
-          className="absolute left-0 top-0 h-full rounded-l-full bg-[#f87171]/20"
+          className="absolute top-0 left-0 h-full rounded-l-full bg-danger/20"
           style={{ width: `${THRESHOLD_LOW * 100}%` }}
         />
         <div
-          className="absolute top-0 h-full bg-[#f59e0b]/20"
+          className="absolute top-0 h-full bg-warning/20"
           style={{
             left: `${THRESHOLD_LOW * 100}%`,
             width: `${(THRESHOLD_HIGH - THRESHOLD_LOW) * 100}%`,
           }}
         />
         <div
-          className="absolute top-0 right-0 h-full rounded-r-full bg-[#34d399]/20"
+          className="absolute top-0 right-0 h-full rounded-r-full bg-success/20"
           style={{ width: `${(1 - THRESHOLD_HIGH) * 100}%` }}
         />
         {value !== undefined && (

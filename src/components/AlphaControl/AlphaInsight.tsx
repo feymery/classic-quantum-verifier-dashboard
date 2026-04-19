@@ -42,7 +42,7 @@ export function AlphaInsight({ alpha }: AlphaInsightProps) {
           current α
         </span>
         <span
-          className=" text-sm font-semibold"
+          className="text-sm font-semibold "
           style={{ color: preset?.color ?? "#ddd9ee" }}
         >
           {formatAlpha(alpha)} = {alpha.toFixed(4)}
@@ -54,7 +54,7 @@ export function AlphaInsight({ alpha }: AlphaInsightProps) {
         <span className=" text-[11px]" style={{ color: "#9490a8" }}>
           E = sin²(α)
         </span>
-        <span className=" text-sm" style={{ color: "#e8a020" }}>
+        <span className="text-sm " style={{ color: "#e8a020" }}>
           {e.toFixed(4)}
         </span>
       </div>
@@ -115,20 +115,20 @@ function ThresholdBar({
 
   return (
     <div className="space-y-1">
-      <div className="relative h-1.5 w-full rounded-lg bg-[#2d2b3a]">
+      <div className="relative h-1.5 w-full rounded-lg bg-border">
         {/* Reject zone */}
         <div
-          className="absolute left-0 top-0 h-full rounded-l-full bg-[#f87171]/20"
+          className="absolute top-0 left-0 h-full rounded-l-full bg-danger/20"
           style={{ width: `${low * 100}%` }}
         />
         {/* Boundary zone */}
         <div
-          className="absolute top-0 h-full bg-[#f59e0b]/20"
+          className="absolute top-0 h-full bg-warning/20"
           style={{ left: `${low * 100}%`, width: `${(high - low) * 100}%` }}
         />
         {/* Accept zone */}
         <div
-          className="absolute top-0 right-0 h-full rounded-r-full bg-[#34d399]/20"
+          className="absolute top-0 right-0 h-full rounded-r-full bg-success/20"
           style={{ width: `${(1 - high) * 100}%` }}
         />
         {/* Current energy marker */}
@@ -143,11 +143,11 @@ function ThresholdBar({
         />
         {/* Threshold lines */}
         <div
-          className="absolute top-0 h-full w-px bg-[#f87171]/60"
+          className="absolute top-0 w-px h-full bg-danger/60"
           style={{ left: `${low * 100}%` }}
         />
         <div
-          className="absolute top-0 h-full w-px bg-[#f59e0b]/60"
+          className="absolute top-0 w-px h-full bg-warning/60"
           style={{ left: `${high * 100}%` }}
         />
       </div>

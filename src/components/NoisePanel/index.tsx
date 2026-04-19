@@ -64,7 +64,7 @@ export function NoisePanel({
             step={0.005}
             value={noiseLambda}
             onChange={(e) => onNoiseLambdaChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-[#2d2b3a] accent-[#a78bfa] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-border accent-accent shadow-inner shadow-black/30"
             aria-label="Depolarising noise lambda"
           />
           <div className="flex items-center gap-1.5 mt-2">
@@ -132,7 +132,7 @@ export function NoisePanel({
             verifier decision at current noise
           </span>
           <span
-            className=" text-xs font-semibold tracking-widest"
+            className="text-xs font-semibold tracking-widest "
             style={{ color: decisionColor }}
           >
             {analysis.decision.toUpperCase()}

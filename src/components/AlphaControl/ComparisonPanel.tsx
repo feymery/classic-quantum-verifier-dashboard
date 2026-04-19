@@ -31,7 +31,7 @@ export function ComparisonPanel({
               onClick={onClear}
               variant="ghost"
               size="sm"
-              className="px-0 py-0  text-[10px] font-normal hover:text-[#f87171]"
+              className="px-0 py-0  text-[10px] font-normal hover:text-danger"
               style={{ color: "#6b6780" }}
             >
               clear all
@@ -121,7 +121,7 @@ export function ComparisonPanel({
                   onClick={() => onRemove(a)}
                   variant="ghost"
                   size="sm"
-                  className="ml-1 px-0 py-0  text-[10px] font-normal hover:text-[#f87171]"
+                  className="ml-1 px-0 py-0  text-[10px] font-normal hover:text-danger"
                   style={{ color: "#6b6780" }}
                   aria-label={`Remove α = ${a.toFixed(4)} from comparison`}
                 >

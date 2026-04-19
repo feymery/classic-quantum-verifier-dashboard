@@ -60,7 +60,7 @@ export function AlphaControl({
             <Text
               as="span"
               variant="caption"
-              className="text-xs font-medium text-[#ddd9ee]"
+              className="text-xs font-medium text-foreground"
             >
               Alpha Control
             </Text>
