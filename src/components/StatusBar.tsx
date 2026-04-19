@@ -5,6 +5,7 @@ interface StatusBarProps {
   noiseLambda: number;
   selectedBackend: string;
   comparisonCount: number;
+  latestJobId: string | null;
 }
 
 export function StatusBar({
@@ -14,6 +15,7 @@ export function StatusBar({
   noiseLambda,
   selectedBackend,
   comparisonCount,
+  latestJobId,
 }: StatusBarProps) {
   return (
     <div className="sticky bottom-0 z-10 border-t border-border px-6 py-3 backdrop-blur-sm bg-canvas/95">
@@ -27,6 +29,9 @@ export function StatusBar({
         <span>backend = {selectedBackend}</span>
         <span className={comparisonCount ? "text-accent" : "text-subtle"}>
           compare [{comparisonCount}]
+        </span>
+        <span className={latestJobId ? "text-emerald-300" : "text-subtle"}>
+          last job = {latestJobId ?? "--"}
         </span>
       </div>
     </div>

@@ -1,10 +1,5 @@
 import { lazy } from "react";
 
-export const DashboardPage = lazy(async () => {
-  const module = await import("../pages/DashboardPage");
-  return { default: module.DashboardPage };
-});
-
 export const ExperimentPage = lazy(async () => {
   const module = await import("../pages/ExperimentPage");
   return { default: module.ExperimentPage };

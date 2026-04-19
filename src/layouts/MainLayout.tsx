@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { AsyncJobBanner } from "../components/AsyncJobBanner";
-import { DashboardHeader } from "../components/DashboardHeader";
-import { StatusBar } from "../components/StatusBar";
+import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
 import { AppNavigation } from "../components/AppNavigation";
 import { useAppState } from "../state/useAppState";
 
@@ -21,10 +20,19 @@ export function MainLayout() {
           ibmToken={dashboard.ibmToken}
           ibmTokenSet={dashboard.ibmTokenSet}
           showToken={dashboard.showToken}
+          alpha={dashboard.alpha}
+          shots={dashboard.shots}
+          noiseLambda={dashboard.noiseLambda}
           onBackendChange={dashboard.setSelectedBackend}
           onTokenChange={dashboard.setIbmToken}
           onToggleShowToken={dashboard.toggleShowToken}
           onConfirmToken={dashboard.confirmToken}
+          onAlphaChange={dashboard.setAlpha}
+          onShotsChange={dashboard.setShots}
+          onNoiseLambdaChange={dashboard.setNoiseLambda}
+          energy={dashboard.formattedEnergy}
+          comparisonCount={dashboard.comparisonAlphas.length}
+          latestJobId={runner.latestJobId ?? null}
         />
 
         <AppNavigation />
@@ -39,15 +47,6 @@ export function MainLayout() {
           <Outlet />
         </main>
       </div>
-
-      <StatusBar
-        alpha={dashboard.alpha}
-        energy={dashboard.formattedEnergy}
-        shots={dashboard.shots}
-        noiseLambda={dashboard.noiseLambda}
-        selectedBackend={dashboard.selectedBackend}
-        comparisonCount={dashboard.comparisonAlphas.length}
-      />
     </div>
   );
 }

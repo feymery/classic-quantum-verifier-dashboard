@@ -2,7 +2,6 @@ import { Suspense, type ReactNode } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import {
-  DashboardPage,
   ExperimentPage,
   VisualizationPage,
   CircuitPage,
@@ -36,8 +35,7 @@ export const appRouter = createBrowserRouter([
     path: "/",
     element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: "dashboard", element: withPageLoader(<DashboardPage />) },
+      { index: true, element: <Navigate to="/experiment" replace /> },
       { path: "experiment", element: withPageLoader(<ExperimentPage />) },
       { path: "visualization", element: withPageLoader(<VisualizationPage />) },
       { path: "circuit", element: withPageLoader(<CircuitPage />) },

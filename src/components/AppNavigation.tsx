@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard" },
   { to: "/experiment", label: "Experiment" },
   { to: "/visualization", label: "Visualization" },
   { to: "/circuit", label: "Circuit" },
@@ -11,22 +10,20 @@ const NAV_ITEMS = [
 
 export function AppNavigation() {
   return (
-    <nav className="mb-6 overflow-x-auto rounded-lg p-1">
+    <nav className="mb-6 overflow-x-auto border-b-[0.3px] border-border">
       <div className="flex gap-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className="min-w-32 rounded-lg px-4 py-3 text-sm font-semibold transition"
+            className="px-4 py-3 text-sm font-semibold text-center transition min-w-32"
             style={({ isActive }) =>
               isActive
                 ? {
-                    background: "var(--color-accent)",
-                    color: "var(--color-canvas)",
-                    boxShadow: "var(--shadow-glow)",
+                    color: "var(--color-accent)",
+                    borderBottom: "2px solid var(--color-accent)",
                   }
                 : {
-                    background: "var(--color-surface)",
                     color: "var(--color-muted)",
                   }
             }
