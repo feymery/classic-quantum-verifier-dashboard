@@ -47,10 +47,10 @@ export function AttackCurvePlot({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-mono text-[10px]" style={{ color: "#ddd9ee" }}>
+          <p className=" text-[10px]" style={{ color: "#ddd9ee" }}>
             {title}
           </p>
-          <p className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+          <p className=" text-[9px]" style={{ color: "#6b6780" }}>
             {desc}
           </p>
         </div>
@@ -155,7 +155,7 @@ export function AttackCurvePlot({
       </ResponsiveContainer>
 
       <div
-        className="flex items-center gap-4 font-mono text-[9px]"
+        className="flex items-center gap-4  text-[9px]"
         style={{ color: "#6b6780" }}
       >
         <span style={{ color: CHART_COLORS.adversarialClaim }}>

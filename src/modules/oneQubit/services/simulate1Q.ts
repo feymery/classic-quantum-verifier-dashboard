@@ -15,7 +15,11 @@ import {
   sampleCounts,
 } from "../physics/measurements";
 import { analyseEnergy } from "../../../physics/energy";
-import type { ExperimentConfig, ExperimentResult } from "../../../types/experiment";
+import type {
+  ExperimentConfig,
+  ExperimentResult,
+} from "../../../types/experiment";
+import type { BackendId } from "../../../utils/constants";
 
 export type { ExperimentConfig, ExperimentResult };
 

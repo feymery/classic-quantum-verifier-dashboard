@@ -1,5 +1,5 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
-import { classNames } from "./utils/classNames";
+import { clsx as classNames } from "clsx";
 
 type CardPadding = "none" | "sm" | "md" | "lg";
 
@@ -29,7 +29,7 @@ export function Card({
   return (
     <Component
       className={classNames(
-        "rounded-3xl border border-[#2d2b3a] bg-[#1e1c26] shadow-sm",
+        "rounded-lg border border-border bg-elevated shadow-card",
         className,
       )}
       {...props}

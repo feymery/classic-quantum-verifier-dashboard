@@ -1,7 +1,7 @@
-import { AlphaControl } from "../components/AlphaControl/index";
+import { AlphaControl } from "../components/AlphaControl/AlphaControl";
 import { EnergyPanel } from "../components/EnergyPanel";
 import { ExperimentControlBar } from "../components/ExperimentControlBar";
-import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/index";
+import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
 import { RunHistoryPanel } from "../components/RunHistoryPanel";
 import { ProtocolSteps1Q, ConceptBox } from "../components/ProtocolExplainer";
 import { useAppState } from "../state/useAppState";
@@ -50,7 +50,7 @@ export function ExperimentPage() {
           setComparisonAlphas={dashboard.setComparisonAlphas}
         />
 
-        <Card className="rounded-3xl" padded="md">
+        <Card className="rounded-lg" padded="md">
           <Text
             variant="caption"
             className="uppercase tracking-[0.24em]"
@@ -73,7 +73,7 @@ export function ExperimentPage() {
                     dashboard.setShots(parsed);
                   }
                 }}
-                className="mt-1 w-full rounded-2xl border px-3 py-2"
+                className="w-full px-3 py-2 mt-1 border rounded-lg"
                 style={{
                   borderColor: "#2d2b3a",
                   background: "#181620",
@@ -118,10 +118,10 @@ export function ExperimentPage() {
       />
 
       {/* ── How the protocol works ── */}
-      <Card className="rounded-3xl" padded="md">
+      <Card className="rounded-lg" padded="md">
         <div className="flex items-center gap-2 mb-4">
           <span
-            className="rounded font-mono text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
+            className="rounded  text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
             style={{ background: "#2d2b3a", color: "#9490a8" }}
           >
             guide
@@ -134,7 +134,7 @@ export function ExperimentPage() {
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr] items-start">
           {/* Left: step-by-step + circuit */}
           <div className="space-y-2">
-            <p className="text-xs mb-3" style={{ color: "#9490a8" }}>
+            <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
               Interactive step-by-step breakdown. Click any step to expand it.
               Values update live as you change α.
             </p>
@@ -143,7 +143,7 @@ export function ExperimentPage() {
 
           {/* Right: conceptual explanations */}
           <div className="space-y-2">
-            <p className="text-xs mb-3" style={{ color: "#9490a8" }}>
+            <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
               Conceptual background. Expand any section for a concise
               explanation.
             </p>
@@ -158,7 +158,7 @@ export function ExperimentPage() {
                 after the Hadamard + controlled-U(α):
               </p>
               <code
-                className="block rounded px-2 py-1 font-mono text-[11px] mt-1"
+                className="block rounded px-2 py-1  text-[11px] mt-1"
                 style={{ background: "#181620", color: "#b7a8cf" }}
               >
                 |η(α)⟩ = (|0⟩|0⟩ + |1⟩U(α)|0⟩) / √2
@@ -191,7 +191,7 @@ export function ExperimentPage() {
             >
               <p>Linear inversion (Eq. C.1 in Stricker et al. 2024):</p>
               <code
-                className="block rounded px-2 py-1 font-mono text-[11px] mt-1 leading-relaxed"
+                className="block rounded px-2 py-1  text-[11px] mt-1 leading-relaxed"
                 style={{ background: "#181620", color: "#34d399" }}
               >
                 E = 3.5 − 2⟨Z₂⟩ + ⟨Z₁⟩ − ⟨Z₁Z₂⟩
@@ -213,7 +213,7 @@ export function ExperimentPage() {
                 expectation values evaluate to:
               </p>
               <code
-                className="block rounded px-2 py-1 font-mono text-[11px] mt-1"
+                className="block rounded px-2 py-1  text-[11px] mt-1"
                 style={{ background: "#181620", color: "#a78bfa" }}
               >
                 ⟨Z₁Z₂⟩ = cos(α) · ⟨X₁X₂⟩ = sin(α) · ...

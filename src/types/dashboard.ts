@@ -16,6 +16,8 @@ export interface DashboardState {
   selectedBackend: BackendId;
   ibmToken: string;
   ibmTokenSet: boolean;
+  ibmInstance: string;
+  ibmBackendName: string;
   noiseLambda: number;
   alphaFake: number;
   comparisonAlphas: number[];

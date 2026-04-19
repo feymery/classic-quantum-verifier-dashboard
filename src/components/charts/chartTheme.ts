@@ -1,33 +1,40 @@
 /**
  * chartTheme.ts
  * Centralised Recharts style tokens — import once, use everywhere.
+ * Values reference CSS custom properties from @theme in index.css so the
+ * chart palette updates automatically when design tokens change.
  * All values are typed so mis-spellings fail at compile time.
  */
 
 export const CHART_COLORS = {
-  curve: "#a78bfa",
-  curveGlow: "rgba(167,139,250,0.15)",
-  theoretical: "#a78bfa",
-  estimated: "#e8a020",
-  secondaryMuted: "#9a91ad",
-  secondaryLine: "rgba(154,145,173,0.3)",
-  adversarialClaim: "#b7a8cf",
-  adversarialActual: "#c7a472",
-  thresholdLow: "#f87171",
-  thresholdHigh: "#f59e0b",
-  accept: "#34d399",
-  reject: "#f87171",
-  grid: "rgba(46,43,58,0.7)",
-  axis: "#6b6780",
-  tooltip: "#181620",
-  tooltipBorder: "#2d2b3a",
-  comparison: ["#a78bfa", "#d8b4fe", "#f59e0b", "#34d399"] as const,
+  curve: "var(--color-accent)",
+  curveGlow: "rgba(167,139,250,0.15)" /* accent/15 — SVG compat */,
+  theoretical: "var(--color-accent)",
+  estimated: "var(--color-gold)",
+  secondaryMuted: "var(--color-muted)",
+  secondaryLine: "rgba(154,145,173,0.3)" /* muted/30  — SVG compat */,
+  adversarialClaim: "#b7a8cf" /* unique shade, no token */,
+  adversarialActual: "var(--color-caution)",
+  thresholdLow: "var(--color-danger)",
+  thresholdHigh: "var(--color-warning)",
+  accept: "var(--color-success)",
+  reject: "var(--color-danger)",
+  grid: "rgba(46,43,58,0.7)" /* border/70 — SVG compat */,
+  axis: "var(--color-subtle)",
+  tooltip: "var(--color-surface)",
+  tooltipBorder: "var(--color-border)",
+  comparison: [
+    "var(--color-accent)",
+    "var(--color-accent-dim)",
+    "var(--color-warning)",
+    "var(--color-success)",
+  ] as const,
 } as const;
 
 export const CHART_FONT = {
   family: "'Courier New', monospace",
   size: 10,
-  fill: "#6b6780",
+  fill: "var(--color-subtle)",
 } as const;
 
 /** Standard axis props — spread into <XAxis> / <YAxis> */

@@ -37,8 +37,7 @@ export type BackendExperimentStart2Q =
   | { kind: "queued"; jobId: string };
 
 const API_BASE =
-  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() ||
-  "http://localhost:8000";
+  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() || "/api";
 
 const TWO_Q_KEYS = [
   "Z1",

@@ -15,7 +15,10 @@ import {
   runExperiment as runLocal,
   runComparison as runComparisonLocal,
 } from "./simulate1Q";
-import type { ExperimentConfig, ExperimentResult } from "../../../types/experiment";
+import type {
+  ExperimentConfig,
+  ExperimentResult,
+} from "../../../types/experiment";
 import { runBackendExperiment1Q } from "./backendExperiment1Q";
 import { isLocalBackend, type BackendId } from "../../../utils/constants";
 

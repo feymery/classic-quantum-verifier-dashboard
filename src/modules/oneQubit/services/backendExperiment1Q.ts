@@ -41,8 +41,7 @@ export type BackendExperimentStart1Q =
   | { kind: "queued"; jobId: string };
 
 const API_BASE =
-  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() ||
-  "http://localhost:8000";
+  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() || "/api";
 
 function collapseCountsTo2Bit(rawCounts: Record<string, number>): Counts {
   const result: Counts = { "00": 0, "01": 0, "10": 0, "11": 0 };

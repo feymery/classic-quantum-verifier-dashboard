@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { type AdversarialStrategyType } from "../../physics/adversarial";
 import { simulateAdversarial } from "../../services/simulateAdversarial";
 import { CHART_COLORS } from "../../../../components/charts/chartTheme";
-import { AdversarialPlotChart } from "./AdversarialPlotChart";
+import { AdversarialPlotChart } from "./components/AdversarialPlotChart";
 
 interface AdversarialPlotProps {
   alpha: number;
@@ -81,10 +81,10 @@ export function AdversarialPlot({
       style={{ borderColor: "#2d2b3a", background: "#181620" }}
     >
       <div>
-        <p className="font-mono text-[10px]" style={{ color: "#ddd9ee" }}>
+        <p className=" text-[10px]" style={{ color: "#ddd9ee" }}>
           Adversarial Energy Curves
         </p>
-        <p className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+        <p className=" text-[9px]" style={{ color: "#6b6780" }}>
           Honest E(alpha) versus manipulated E(alpha_fake).
         </p>
       </div>
@@ -97,7 +97,7 @@ export function AdversarialPlot({
       />
 
       <div
-        className="flex items-center gap-4 font-mono text-[9px]"
+        className="flex items-center gap-4  text-[9px]"
         style={{ color: "#6b6780" }}
       >
         <span style={{ color: CHART_COLORS.theoretical }}>honest curve</span>

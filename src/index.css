@@ -1,14 +1,67 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS  —  single source of truth for the entire app
+   Edit here to change the global design; Tailwind generates utilities
+   automatically from every --color-*, --shadow-*, --font-* variable.
+
+   Generated utility examples:
+     bg-canvas       text-foreground   border-border
+     bg-surface      text-muted        shadow-card
+     bg-elevated     text-accent       shadow-glow
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Surfaces ───────────────────────────────────────────────────────
+     Three-level depth scale: canvas → surface → elevated              */
+  --color-canvas:   #131217; /* body / deepest background               */
+  --color-surface:  #181620; /* raised cards, form inputs               */
+  --color-elevated: #1e1c26; /* panel faces, card bodies                */
+
+  /* ── Borders ──────────────────────────────────────────────────────── */
+  --color-border: #2d2b3a;
+
+  /* ── Text / Foreground ────────────────────────────────────────────── */
+  --color-foreground: #ddd9ee; /* primary readable text                 */
+  --color-muted:      #9490a8; /* secondary / helper text               */
+  --color-subtle:     #6b6780; /* placeholder, meta, step labels        */
+
+  /* ── Accent — brand purple ────────────────────────────────────────── */
+  --color-accent:       #a78bfa; /* primary accent                      */
+  --color-accent-light: #c4b5fd; /* hover / lighter tint                */
+  --color-accent-dim:   #d8b4fe; /* dimmer purple on dark backgrounds   */
+
+  /* ── Semantic feedback ────────────────────────────────────────────── */
+  --color-success:  #34d399;
+  --color-warning:  #f59e0b;
+  --color-caution:  #c7a472; /* warm amber — estimated values           */
+  --color-danger:   #f87171;
+  --color-gold:     #e8a020; /* estimated-value chart marker            */
+
+  /* ── Shadows ─────────────────────────────────────────────────────── */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 4px 16px rgba(167, 139, 250, 0.25);
+
+  /* ── Typography ──────────────────────────────────────────────────── */
+  --font-sans: "Inter Variable", Inter, system-ui, sans-serif;
+
+  /* ── Breakpoints (mirrors Tailwind defaults — listed for reference) ─ */
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg:  1024px;
+  --breakpoint-xl:  1280px;
+  --breakpoint-2xl: 1536px;
+}
+
 html, body, #root {
   min-height: 100%;
 }
 
 body {
   margin: 0;
-  background: #131217;
-  color: #e2e8f0;
-  font-family: Inter, system-ui, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
 
 * {

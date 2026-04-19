@@ -64,7 +64,7 @@ export function DetectionPanel({
         ].map(([label, value]) => (
           <Card
             key={label}
-            className="rounded-xl"
+            className="rounded-lg"
             padded="sm"
             style={{ borderColor: "#2d2b3a", background: "#1d1b25" }}
           >
@@ -84,21 +84,15 @@ export function DetectionPanel({
 
       <div className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr]">
         <Card
-          className="rounded-xl"
+          className="rounded-lg"
           padded="sm"
           style={{ borderColor: "#2d2b3a", background: "#1d1b25" }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               confidence level
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#c7a472" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#c7a472" }}>
               {(confidenceLevel * 100).toFixed(0)}%
             </span>
           </div>
@@ -109,19 +103,16 @@ export function DetectionPanel({
             step={0.01}
             value={confidenceLevel}
             onChange={(e) => onConfidenceChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-full cursor-pointer appearance-none bg-[#2d2b3a] accent-[#c7a472] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-border accent-caution shadow-inner shadow-black/30"
             aria-label="Confidence level"
           />
-          <p
-            className="mt-2 font-mono text-[10px]"
-            style={{ color: "#6b6780" }}
-          >
+          <p className="mt-2  text-[10px]" style={{ color: "#6b6780" }}>
             current shots: {shots.toLocaleString()}
           </p>
         </Card>
 
         <Card
-          className="rounded-xl"
+          className="rounded-lg"
           padded="sm"
           style={{
             borderColor: accent,
@@ -151,7 +142,7 @@ export function DetectionPanel({
                   ? "warning"
                   : "error"
             }
-            className="mt-2 rounded px-0 py-0 font-mono text-[10px] font-normal"
+            className="mt-2 rounded px-0 py-0  text-[10px] font-normal"
             style={{
               background: "transparent",
               borderColor: "transparent",
@@ -160,10 +151,7 @@ export function DetectionPanel({
           >
             risk level: {riskLabel(riskLevel)}
           </Badge>
-          <p
-            className="mt-1 font-mono text-[10px]"
-            style={{ color: "#9490a8" }}
-          >
+          <p className="mt-1  text-[10px]" style={{ color: "#9490a8" }}>
             detectability reference at {(confidenceLevel * 100).toFixed(0)}%
             confidence
           </p>

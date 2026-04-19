@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { classNames } from "./utils/classNames";
+import { clsx as classNames } from "clsx";
 
 export interface PanelProps {
   step?: string;
@@ -21,24 +21,22 @@ export function Panel({
   return (
     <section
       className={classNames(
-        "rounded-3xl border border-[#2d2b3a] bg-[#1e1c26] p-5 shadow-sm",
+        "rounded-lg border border-border bg-elevated p-5 shadow-card",
         wide ? "col-span-full" : "",
         className,
       )}
     >
       <div className="mb-4">
         {step && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#6b6780]">
+          <span className=" text-[10px] uppercase tracking-[0.22em] text-subtle">
             {step}
           </span>
         )}
-        <h2 className="text-base font-semibold text-[#ddd9ee] mt-0.5">
+        <h2 className="text-base font-semibold text-foreground mt-0.5">
           {title}
         </h2>
         {description && (
-          <p className="mt-1 font-mono text-[11px] text-[#9490a8]">
-            {description}
-          </p>
+          <p className="mt-1  text-[11px] text-muted">{description}</p>
         )}
       </div>
       {children}

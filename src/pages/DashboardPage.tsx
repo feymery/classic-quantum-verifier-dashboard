@@ -31,7 +31,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="rounded-3xl" padded="lg">
+      <Card className="rounded-lg" padded="lg">
         <Text variant="label" color="accent" className="tracking-[0.28em]">
           platform overview
         </Text>
@@ -55,7 +55,7 @@ export function DashboardPage() {
           <Link key={section.to} to={section.to}>
             <Card
               padded="md"
-              className="rounded-3xl transition"
+              className="rounded-lg transition"
               style={{
                 borderColor: "#2d2b3a",
                 background: "#181620",
@@ -84,7 +84,7 @@ export function DashboardPage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <Card
-      className="rounded-xl"
+      className="rounded-lg"
       padded="sm"
       style={{ borderColor: "#2d2b3a", background: "#181620" }}
     >

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from qiskit import QuantumCircuit
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from backend.ibm_client import IBMClient
 
@@ -21,24 +22,6 @@ class IBMSubmittedJob:
     job: Any
     backend_name: str
     submitted_at_ms: float
-
-
-def _quasi_to_counts(quasi: dict[int, float], shots: int, bits: int) -> dict[str, int]:
-    safe_shots = max(1, int(shots))
-    counts: dict[str, int] = {}
-
-    for idx, prob in quasi.items():
-        p = max(0.0, float(prob))
-        state = format(int(idx), f"0{bits}b")
-        counts[state] = int(round(p * safe_shots))
-
-    total = sum(counts.values())
-    if total != safe_shots:
-        delta = safe_shots - total
-        key = max(counts, key=counts.get) if counts else ("0" * bits)
-        counts[key] = counts.get(key, 0) + delta
-
-    return counts
 
 
 def _normalize_counts(counts: dict[str, int], shots: int) -> dict[str, float]:
@@ -63,9 +46,12 @@ def submit_circuit_job(
 
     from qiskit_ibm_runtime import SamplerV2 as Sampler
 
+    pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    isa_circuit = pm.run(circuit)
+
     sampler = Sampler(mode=backend)
     start = time.perf_counter()
-    job = sampler.run([circuit], shots=max(1, int(shots)))
+    job = sampler.run([isa_circuit], shots=max(1, int(shots)))
     elapsed_ms = (time.perf_counter() - start) * 1000.0
     return IBMSubmittedJob(
         job=job,
@@ -86,16 +72,16 @@ def get_submitted_result(
     pub_res = result[0]
     data = pub_res.data
 
-    counts: dict[str, int]
-    if hasattr(data, "c"):
-        meas = data.c
-        counts = {str(k): int(v) for k, v in meas.get_counts().items()}
-    elif hasattr(data, "quasi_dists"):
-        quasi_dist = data.quasi_dists[0]
-        quasi_map = {int(k): float(v) for k, v in quasi_dist.items()}
-        counts = _quasi_to_counts(quasi_map, shots, bits=circuit_bits)
-    else:
-        raise RuntimeError("Unsupported IBM Runtime result format")
+    # Extract counts from the first classical register, regardless of its name.
+    # QuantumCircuit(n, m) + qc.measure() → register named 'c'
+    # QuantumCircuit.measure_all()        → register named 'meas'
+    creg = next(
+        (v for v in vars(data).values() if hasattr(v, "get_counts")),
+        None,
+    )
+    if creg is None:
+        raise RuntimeError("Unsupported IBM Runtime result format: no classical register found")
+    counts: dict[str, int] = {str(k): int(v) for k, v in creg.get_counts().items()}
 
     elapsed_ms = (time.perf_counter() - start) * 1000.0
 

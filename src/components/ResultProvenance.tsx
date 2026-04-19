@@ -47,7 +47,7 @@ export function ResultProvenance({
 }: ResultProvenanceProps) {
   return (
     <div
-      className="rounded-2xl border px-3 py-2.5"
+      className="rounded-lg border px-3 py-2.5"
       style={{ borderColor: "#2d2b3a", background: "#181620" }}
     >
       <div className="flex flex-wrap items-center gap-2">

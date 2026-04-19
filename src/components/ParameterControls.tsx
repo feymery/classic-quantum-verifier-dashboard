@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import type { Backend } from "../utils/constants";
-import { AlphaControl } from "./AlphaControl/index";
+import { AlphaControl } from "./AlphaControl/AlphaControl";
 import { BackendSelector } from "./BackendSelector";
 import { Card } from "../ui/Card";
 import { Text } from "../ui/Text";
@@ -56,44 +56,33 @@ export function ParameterControls({
         />
 
         <Card
-          className="rounded-4xl"
+          className="rounded-lg"
           padded="lg"
-          style={{ background: "#181620" }}
+          style={{ background: "var(--color-surface)" }}
         >
           <Text
             variant="label"
             color="muted"
-            className="mb-4 tracking-[0.3em]"
-            style={{ color: "#6b6780" }}
+            className="mb-4 tracking-[0.3em] text-subtle"
           >
             Experiment inputs
           </Text>
 
           <div className="space-y-4">
             <div>
-              <label
-                className="block text-sm font-medium"
-                style={{ color: "#ddd9ee" }}
-              >
+              <label className="block text-sm font-medium text-foreground">
                 Shots
               </label>
               <input
                 type="number"
                 value={shots}
                 onChange={onShotsChange}
-                className="w-full px-4 py-3 mt-2 text-sm border outline-none rounded-2xl"
-                style={{
-                  borderColor: "#2d2b3a",
-                  background: "#1e1c26",
-                  color: "#ddd9ee",
-                }}
+                className="w-full px-4 py-3 mt-2 text-sm border border-border bg-elevated text-foreground outline-none rounded-lg"
               />
             </div>
 
             <div>
-              <div className="mb-2 text-sm" style={{ color: "#6b6780" }}>
-                Noise λ
-              </div>
+              <div className="mb-2 text-sm text-subtle">Noise λ</div>
               <input
                 type="range"
                 value={noiseLambda}
@@ -103,17 +92,15 @@ export function ParameterControls({
                 onChange={(event) =>
                   onNoiseLambdaChange(Number(event.target.value))
                 }
-                className="w-full cursor-pointer accent-[#a78bfa]"
+                className="w-full cursor-pointer accent-accent"
               />
-              <div className="mt-2 text-sm" style={{ color: "#9490a8" }}>
+              <div className="mt-2 text-sm text-muted">
                 {noiseLambda.toFixed(3)}
               </div>
             </div>
 
             <div>
-              <div className="mb-2 text-sm" style={{ color: "#6b6780" }}>
-                Fake prover α
-              </div>
+              <div className="mb-2 text-sm text-subtle">Fake prover α</div>
               <input
                 type="range"
                 value={alphaFake}
@@ -123,9 +110,9 @@ export function ParameterControls({
                 onChange={(event) =>
                   onAlphaFakeChange(Number(event.target.value))
                 }
-                className="w-full cursor-pointer accent-[#a78bfa]"
+                className="w-full cursor-pointer accent-accent"
               />
-              <div className="mt-2 text-sm" style={{ color: "#9490a8" }}>
+              <div className="mt-2 text-sm text-muted">
                 {alphaFake.toFixed(4)}
               </div>
             </div>

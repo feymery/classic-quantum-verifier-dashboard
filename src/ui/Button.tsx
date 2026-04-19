@@ -1,24 +1,23 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { classNames } from "./utils/classNames";
+import { clsx as classNames } from "clsx";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "border border-[#a78bfa] bg-[#a78bfa] text-[#131217] hover:bg-[#c4b5fd] disabled:hover:bg-[#a78bfa]",
+    "border border-accent bg-accent text-canvas hover:bg-accent-light disabled:hover:bg-accent",
   secondary:
-    "border border-[#2d2b3a] bg-[#181620] text-[#ddd9ee] hover:bg-[#1f1b2a]",
+    "border border-border bg-surface text-foreground hover:bg-elevated",
   ghost:
-    "border border-transparent bg-transparent text-[#9490a8] hover:text-[#ddd9ee]",
-  danger:
-    "border border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.1)] text-[#f87171] hover:bg-[rgba(248,113,113,0.15)]",
+    "border border-transparent bg-transparent text-muted hover:text-foreground",
+  danger: "border border-danger/35 bg-danger/10 text-danger hover:bg-danger/15",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "rounded-xl px-3 py-1.5 text-xs",
-  md: "rounded-2xl px-4 py-2 text-sm",
-  lg: "rounded-3xl px-6 py-3 text-sm",
+  sm: "rounded-lg px-3 py-1.5 text-xs",
+  md: "rounded-lg px-4 py-2 text-sm",
+  lg: "rounded-lg px-6 py-3 text-sm",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

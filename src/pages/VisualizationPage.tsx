@@ -1,4 +1,4 @@
-import { PlotPanel } from "../components/PlotPanel/index";
+import { PlotPanel } from "../components/PlotPanel/PlotPanel";
 import { AlphaSweepChart } from "../components/charts/AlphaSweepChart";
 import { useAppState } from "../state/useAppState";
 

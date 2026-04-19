@@ -8,18 +8,16 @@ interface RowProps {
 }
 
 const accentMap: Record<AccentTone, string> = {
-  cyan: "text-[#a78bfa]",
+  cyan: "text-accent",
   amber: "text-amber-300",
   purple: "text-purple-300",
-  neutral: "text-[#ddd9ee]",
+  neutral: "text-foreground",
 };
 
 export function Row({ label, value, accent = "neutral" }: RowProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 border-t border-[#2d2b3a] first:border-t-0">
-      <span className="text-sm" style={{ color: "#9490a8" }}>
-        {label}
-      </span>
+    <div className="flex items-center justify-between gap-4 py-3 border-t border-border first:border-t-0">
+      <span className="text-sm text-muted">{label}</span>
       <span className={`${accentMap[accent]} text-sm font-medium`}>
         {value}
       </span>

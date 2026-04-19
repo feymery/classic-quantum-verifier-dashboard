@@ -1,30 +1,31 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/experiment", label: "Experiment" },
+  { to: "/1Qexperiment", label: "Experiment 1Q" },
   { to: "/visualization", label: "Visualization" },
-  { to: "/circuit", label: "Circuit" },
+  { to: "/2Qcircuit", label: "2Q Circuit" },
   { to: "/adversarial", label: "Adversarial" },
+  { to: "/traps", label: "Traps" },
 ];
 
 export function AppNavigation() {
   return (
-    <nav className="mb-6 overflow-x-auto rounded-4xl p-1">
+    <nav className="mb-6 overflow-x-auto border-b-[0.3px] border-border">
       <div className="flex gap-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className="min-w-32 rounded-3xl px-4 py-3 text-sm font-semibold transition"
+            className="px-4 py-3 text-sm font-semibold text-center transition min-w-32"
             style={({ isActive }) =>
               isActive
                 ? {
-                    background: "#a78bfa",
-                    color: "#131217",
-                    boxShadow: "0 4px 16px rgba(167,139,250,0.25)",
+                    color: "var(--color-accent)",
+                    borderBottom: "2px solid var(--color-accent)",
                   }
-                : { background: "#181620", color: "#9490a8" }
+                : {
+                    color: "var(--color-muted)",
+                  }
             }
           >
             {item.label}

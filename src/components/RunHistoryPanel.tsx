@@ -49,7 +49,7 @@ export function RunHistoryPanel({
   onClear,
 }: RunHistoryPanelProps) {
   return (
-    <Card className="rounded-3xl" padded="md">
+    <Card className="rounded-lg" padded="md">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Text variant="caption" className="uppercase tracking-[0.24em]">
@@ -75,10 +75,7 @@ export function RunHistoryPanel({
       </div>
 
       {entries.length === 0 ? (
-        <div
-          className="mt-4 rounded-2xl border px-4 py-5"
-          style={{ borderColor: "#2d2b3a", background: "#181620" }}
-        >
+        <div className="px-4 py-5 mt-4 border rounded-lg border-border bg-surface">
           <Text variant="caption" color="muted">
             No runs recorded yet. Execute 1Q or 2Q once and the timeline will
             persist locally in this browser.
@@ -89,8 +86,7 @@ export function RunHistoryPanel({
           {entries.map((entry) => (
             <div
               key={entry.id}
-              className="rounded-2xl border px-4 py-4"
-              style={{ borderColor: "#2d2b3a", background: "#181620" }}
+              className="px-4 py-4 border rounded-lg border-border bg-surface"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
@@ -124,7 +120,7 @@ export function RunHistoryPanel({
                 </div>
               </div>
 
-              <div className="mt-3 grid gap-3 md:grid-cols-5">
+              <div className="grid gap-3 mt-3 md:grid-cols-5">
                 <div>
                   <Text variant="caption" color="muted">
                     alpha
@@ -170,7 +166,7 @@ export function RunHistoryPanel({
               </div>
 
               {entry.error && (
-                <Text variant="caption" color="error" className="mt-3 block">
+                <Text variant="caption" color="error" className="block mt-3">
                   {entry.error}
                 </Text>
               )}

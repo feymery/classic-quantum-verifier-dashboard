@@ -13,7 +13,7 @@ import {
   runBackendExperiment2Q,
   startBackendExperiment2Q,
 } from "../modules/twoQubit/services/backendExperiment2Q";
-import { isLocalBackend } from "../utils/constants";
+import { isLocalBackend, type BackendId } from "../utils/constants";
 import type { ExperimentResult } from "../types/experiment";
 import type { ExperimentResult2Q } from "../types/experiment";
 import type {

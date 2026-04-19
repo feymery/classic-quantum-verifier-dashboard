@@ -43,7 +43,7 @@ export function AsyncJobBanner({
 
   return (
     <Card
-      className="mb-6 rounded-3xl border"
+      className="mb-6 rounded-lg border"
       padded="md"
       style={{ borderColor: "#3a334a", background: "#181620" }}
     >

@@ -5,8 +5,7 @@
 import { fetchJson } from "./apiClient";
 
 const API_BASE =
-  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() ||
-  "http://localhost:8000";
+  (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() || "/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
