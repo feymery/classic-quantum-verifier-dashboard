@@ -22,7 +22,7 @@ export function ConceptBox({
 
   return (
     <div
-      className="rounded-xl border overflow-hidden"
+      className="rounded-lg border overflow-hidden"
       style={{
         borderColor: open ? accentColor + "55" : "#2d2b3a",
         background: "#1e1c26",
@@ -41,7 +41,7 @@ export function ConceptBox({
           {title}
         </span>
         <span
-          className="font-mono text-base leading-none"
+          className=" text-base leading-none"
           style={{ color: "#4a4760" }}
           aria-hidden
         >

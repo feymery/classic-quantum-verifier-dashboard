@@ -31,10 +31,10 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
   return (
     <div className="relative w-full select-none" ref={trackRef}>
       {/* ── Track background ── */}
-      <div className="relative h-1.5 w-full rounded-full bg-[#2d2b3a] mt-2 mb-1">
+      <div className="relative h-1.5 w-full rounded-lg bg-[#2d2b3a] mt-2 mb-1">
         {/* Filled portion */}
         <div
-          className="absolute left-0 top-0 h-full rounded-full transition-all duration-75"
+          className="absolute left-0 top-0 h-full rounded-lg transition-all duration-75"
           style={{
             width: `${fillPct}%`,
             background:
@@ -54,7 +54,7 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
             >
               {/* Tick dot */}
               <div
-                className="w-2 h-2 rounded-full border transition-all duration-150"
+                className="w-2 h-2 rounded-lg border transition-all duration-150"
                 style={{
                   background: isSnapped ? ka.color : "#181620",
                   borderColor: ka.color,
@@ -91,14 +91,14 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
               style={{ left: `${pct}%` }}
             >
               <span
-                className="font-mono text-[10px] leading-none transition-colors duration-150"
+                className=" text-[10px] leading-none transition-colors duration-150"
                 style={{ color: isSnapped ? ka.color : "#6b6780" }}
               >
                 {ka.label}
               </span>
               {isSnapped && (
                 <span
-                  className="font-mono text-[9px] leading-none whitespace-nowrap"
+                  className=" text-[9px] leading-none whitespace-nowrap"
                   style={{ color: ka.color + "aa" }}
                 >
                   {ka.desc}
@@ -112,11 +112,11 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
       {/* ── Snap indicator ── */}
       {guidedMode && snappedIdx >= 0 && (
         <div
-          className="mt-1 flex items-center gap-1.5 font-mono text-[10px]"
+          className="mt-1 flex items-center gap-1.5  text-[10px]"
           style={{ color: KEY_ALPHAS[snappedIdx].color + "cc" }}
         >
           <span
-            className="inline-block w-1 h-1 rounded-full"
+            className="inline-block w-1 h-1 rounded-lg"
             style={{ background: KEY_ALPHAS[snappedIdx].color }}
           />
           snapped to {KEY_ALPHAS[snappedIdx].label}

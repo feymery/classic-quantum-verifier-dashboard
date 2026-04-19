@@ -1,4 +1,7 @@
-import type { EnergyAnalysis, VerifierDecision } from "../../../../physics/energy";
+import type {
+  EnergyAnalysis,
+  VerifierDecision,
+} from "../../../../physics/energy";
 import { EnergyCell, MarginCell, ThresholdSection } from "./EnergySummaryParts";
 
 interface EnergySummaryProps {
@@ -57,12 +60,12 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
           className="flex items-center justify-between px-2 py-1 rounded border"
           style={{ background: "#181620", borderColor: "#2d2b3a" }}
         >
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             deviation
           </span>
           <div className="flex items-center gap-2">
             <span
-              className="font-mono text-[11px] tabular-nums"
+              className=" text-[11px] tabular-nums"
               style={{
                 color:
                   Math.abs(analysis.deviation) < 0.01 ? "#34d399" : "#f59e0b",
@@ -71,10 +74,7 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
               {analysis.deviation >= 0 ? "+" : ""}
               {analysis.deviation.toFixed(4)}
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               ({analysis.relativePct.toFixed(1)}%)
             </span>
           </div>
@@ -90,11 +90,11 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
           className="flex items-center justify-between rounded px-3 py-2 border"
           style={{ background: cfg.bg, borderColor: cfg.border }}
         >
-          <span className="font-mono text-[11px]" style={{ color: cfg.color }}>
+          <span className=" text-[11px]" style={{ color: cfg.color }}>
             verifier decision
           </span>
           <span
-            className="font-mono text-sm font-semibold tracking-widest"
+            className=" text-sm font-semibold tracking-widest"
             style={{ color: cfg.color }}
           >
             {cfg.label}
@@ -105,7 +105,7 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
           className="rounded px-3 py-2 border"
           style={{ background: "#181620", borderColor: "#2d2b3a" }}
         >
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             {loading ? "computing…" : "run experiment to get decision"}
           </span>
         </div>

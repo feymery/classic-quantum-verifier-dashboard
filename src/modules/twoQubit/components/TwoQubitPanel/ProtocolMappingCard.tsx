@@ -24,10 +24,10 @@ export function ProtocolMappingCard() {
       style={{ borderColor: "#2d2b3a", background: "#181620" }}
     >
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px]" style={{ color: "#a78bfa" }}>
+        <span className=" text-[10px]" style={{ color: "#a78bfa" }}>
           mapping from 1Q base model
         </span>
-        <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
           pedagogical extension
         </span>
       </div>
@@ -42,32 +42,20 @@ export function ProtocolMappingCard() {
               borderColor: "#1e1c28",
             }}
           >
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#9490a8" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#9490a8" }}>
               {row.label}
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#a78bfacc" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#a78bfacc" }}>
               {row.oneQ}
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#a78bfa" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#a78bfa" }}>
               {row.twoQ}
             </span>
           </div>
         ))}
       </div>
 
-      <p
-        className="font-mono text-[10px] leading-relaxed"
-        style={{ color: "#9490a8" }}
-      >
+      <p className=" text-[10px] leading-relaxed" style={{ color: "#9490a8" }}>
         Complexity grows mainly from additional correlations, not from deep
         circuits. This keeps the section faithful to the 1Q protocol while
         showing why adversarial spoofing gets harder.

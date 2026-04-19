@@ -22,7 +22,7 @@ export function ComparisonPanel({
     <div className="space-y-2">
       {/* Toggle row */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
           comparison mode
         </span>
         <div className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export function ComparisonPanel({
               onClick={onClear}
               variant="ghost"
               size="sm"
-              className="px-0 py-0 font-mono text-[10px] font-normal hover:text-[#f87171]"
+              className="px-0 py-0  text-[10px] font-normal hover:text-[#f87171]"
               style={{ color: "#6b6780" }}
             >
               clear all
@@ -41,7 +41,7 @@ export function ComparisonPanel({
             onClick={onToggleMode}
             variant="secondary"
             size="sm"
-            className="rounded px-2.5 py-1 font-mono text-[10px] font-normal"
+            className="rounded px-2.5 py-1  text-[10px] font-normal"
             style={{
               background: compareMode ? "rgba(167,139,250,0.1)" : "#181620",
               borderColor: compareMode ? "#a78bfa" : "#2d2b3a",
@@ -56,7 +56,7 @@ export function ComparisonPanel({
       {/* Hint when mode is on but list is empty */}
       {compareMode && comparisonAlphas.length === 0 && (
         <p
-          className="font-mono text-[10px] leading-relaxed"
+          className=" text-[10px] leading-relaxed"
           style={{ color: "#6b6780" }}
         >
           click presets above to add α values to compare
@@ -78,23 +78,17 @@ export function ComparisonPanel({
               >
                 {/* Color swatch */}
                 <div
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  className="w-1.5 h-1.5 rounded-lg shrink-0"
                   style={{ background: color }}
                 />
 
                 {/* Alpha value */}
-                <span
-                  className="font-mono text-[11px] flex-1"
-                  style={{ color }}
-                >
+                <span className=" text-[11px] flex-1" style={{ color }}>
                   {formatAlpha(a)} = {a.toFixed(4)}
                 </span>
 
                 {/* Energy */}
-                <span
-                  className="font-mono text-[10px]"
-                  style={{ color: "#e8a020aa" }}
-                >
+                <span className=" text-[10px]" style={{ color: "#e8a020aa" }}>
                   E={e.toFixed(3)}
                 </span>
 
@@ -107,7 +101,7 @@ export function ComparisonPanel({
                         ? "error"
                         : "warning"
                   }
-                  className="rounded px-1.5 py-0 font-mono text-[9px] tracking-wider"
+                  className="rounded px-1.5 py-0  text-[9px] tracking-wider"
                   style={{
                     color:
                       decision === "accept"
@@ -127,7 +121,7 @@ export function ComparisonPanel({
                   onClick={() => onRemove(a)}
                   variant="ghost"
                   size="sm"
-                  className="ml-1 px-0 py-0 font-mono text-[10px] font-normal hover:text-[#f87171]"
+                  className="ml-1 px-0 py-0  text-[10px] font-normal hover:text-[#f87171]"
                   style={{ color: "#6b6780" }}
                   aria-label={`Remove α = ${a.toFixed(4)} from comparison`}
                 >

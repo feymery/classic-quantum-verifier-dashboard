@@ -30,7 +30,7 @@ export function EnergyGauge({ energy, energyTheory }: Props) {
     <div className="space-y-2">
       {/* Track */}
       <div
-        className="relative h-5 w-full overflow-hidden rounded-full"
+        className="relative h-5 w-full overflow-hidden rounded-lg"
         style={{ background: "#2d2b3a" }}
       >
         {/* Accept zone */}
@@ -62,13 +62,13 @@ export function EnergyGauge({ energy, energyTheory }: Props) {
 
         {/* Theoretical dot */}
         <div
-          className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60"
+          className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-lg opacity-60"
           style={{ left: `${theoryPct}%`, background: "#a78bfa" }}
         />
 
         {/* Energy needle */}
         <div
-          className="absolute top-0 h-full w-1 -translate-x-1/2 rounded-full transition-all duration-500"
+          className="absolute top-0 h-full w-1 -translate-x-1/2 rounded-lg transition-all duration-500"
           style={{ left: `${clampedPct}%`, background: color }}
         />
 
@@ -87,16 +87,16 @@ export function EnergyGauge({ energy, energyTheory }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
-            className="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold"
+            className="rounded-lg px-2 py-0.5  text-[10px] font-semibold"
             style={{ background: `${color}20`, color }}
           >
             {label}
           </span>
-          <span className="font-mono text-[11px]" style={{ color: "#ddd9ee" }}>
+          <span className=" text-[11px]" style={{ color: "#ddd9ee" }}>
             E = {energy.toFixed(3)}
           </span>
         </div>
-        <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
           theory: {energyTheory.toFixed(3)}
         </span>
       </div>

@@ -61,14 +61,14 @@ export function AlphaPresets({
             {/* Label row */}
             <div className="flex items-center justify-between">
               <span
-                className="font-mono text-[11px] font-medium leading-none"
+                className=" text-[11px] font-medium leading-none"
                 style={{ color: isActive ? ka.color : "#9490a8" }}
               >
                 {ka.label}
               </span>
               {isInComparison && (
                 <span
-                  className="w-1.5 h-1.5 rounded-full"
+                  className="w-1.5 h-1.5 rounded-lg"
                   style={{ background: ka.color }}
                 />
               )}
@@ -83,7 +83,7 @@ export function AlphaPresets({
                 {ka.desc}
               </span>
               <span
-                className="font-mono text-[10px] leading-none"
+                className=" text-[10px] leading-none"
                 style={{ color: isActive ? ka.color + "cc" : "#6b6780" }}
               >
                 {e.toFixed(2)}
@@ -93,7 +93,7 @@ export function AlphaPresets({
             {/* Compare mode badge */}
             {compareMode && !isInComparison && (
               <div
-                className="absolute inset-0 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 font-mono text-[10px]"
+                className="absolute inset-0 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100  text-[10px]"
                 style={{ background: `${ka.color}22`, color: ka.color }}
               >
                 + add to compare

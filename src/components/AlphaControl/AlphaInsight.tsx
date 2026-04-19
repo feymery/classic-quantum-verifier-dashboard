@@ -38,11 +38,11 @@ export function AlphaInsight({ alpha }: AlphaInsightProps) {
     >
       {/* Current value row */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px]" style={{ color: "#9490a8" }}>
+        <span className=" text-[11px]" style={{ color: "#9490a8" }}>
           current α
         </span>
         <span
-          className="font-mono text-sm font-semibold"
+          className=" text-sm font-semibold"
           style={{ color: preset?.color ?? "#ddd9ee" }}
         >
           {formatAlpha(alpha)} = {alpha.toFixed(4)}
@@ -51,10 +51,10 @@ export function AlphaInsight({ alpha }: AlphaInsightProps) {
 
       {/* Energy row */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px]" style={{ color: "#9490a8" }}>
+        <span className=" text-[11px]" style={{ color: "#9490a8" }}>
           E = sin²(α)
         </span>
-        <span className="font-mono text-sm" style={{ color: "#e8a020" }}>
+        <span className=" text-sm" style={{ color: "#e8a020" }}>
           {e.toFixed(4)}
         </span>
       </div>
@@ -74,11 +74,11 @@ export function AlphaInsight({ alpha }: AlphaInsightProps) {
         className="flex items-center justify-between pt-0.5 border-t"
         style={{ borderColor: "#2d2b3a" }}
       >
-        <span className="font-mono text-[11px]" style={{ color: "#9490a8" }}>
+        <span className=" text-[11px]" style={{ color: "#9490a8" }}>
           verifier
         </span>
         <span
-          className="font-mono text-[11px] font-semibold tracking-widest"
+          className=" text-[11px] font-semibold tracking-widest"
           style={{ color: style.color }}
         >
           {style.label}
@@ -115,7 +115,7 @@ function ThresholdBar({
 
   return (
     <div className="space-y-1">
-      <div className="relative h-1.5 w-full rounded-full bg-[#2d2b3a]">
+      <div className="relative h-1.5 w-full rounded-lg bg-[#2d2b3a]">
         {/* Reject zone */}
         <div
           className="absolute left-0 top-0 h-full rounded-l-full bg-[#f87171]/20"
@@ -133,7 +133,7 @@ function ThresholdBar({
         />
         {/* Current energy marker */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full border-2 transition-all duration-100"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-lg border-2 transition-all duration-100"
           style={{
             left: `${Math.min(pct, 100)}%`,
             borderColor: color ?? "#a78bfa",
@@ -155,19 +155,19 @@ function ThresholdBar({
       {/* Labels */}
       <div className="relative w-full">
         <span
-          className="absolute -translate-x-1/2 font-mono text-[9px]"
+          className="absolute -translate-x-1/2  text-[9px]"
           style={{ left: `${low * 100}%`, color: "#f87171aa" }}
         >
           {low}
         </span>
         <span
-          className="absolute -translate-x-1/2 font-mono text-[9px]"
+          className="absolute -translate-x-1/2  text-[9px]"
           style={{ left: `${high * 100}%`, color: "#f59e0baa" }}
         >
           {high}
         </span>
         <span
-          className="absolute right-0 font-mono text-[9px]"
+          className="absolute right-0  text-[9px]"
           style={{ color: "#34d399aa" }}
         >
           1

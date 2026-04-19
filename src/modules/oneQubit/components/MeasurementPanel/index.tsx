@@ -41,7 +41,7 @@ export function MeasurementPanel({
           <div className="flex items-center gap-2">
             <Badge
               variant="quantum"
-              className="rounded px-1.5 py-0.5 font-mono text-[10px]"
+              className="rounded px-1.5 py-0.5  text-[10px]"
             >
               step C
             </Badge>
@@ -76,10 +76,7 @@ export function MeasurementPanel({
               background: "rgba(248,113,113,0.05)",
             }}
           >
-            <span
-              className="font-mono text-[11px]"
-              style={{ color: "#f87171" }}
-            >
+            <span className=" text-[11px]" style={{ color: "#f87171" }}>
               {error}
             </span>
           </div>
@@ -98,7 +95,7 @@ export function MeasurementPanel({
           <div className="space-y-1 px-3 py-2.5">
             <SectionLabel>little-endian ordering</SectionLabel>
             <p
-              className="font-mono text-[10px] leading-relaxed"
+              className=" text-[10px] leading-relaxed"
               style={{ color: "#9490a8" }}
             >
               We display basis states as |q0 q1⟩ with q0 = clock qubit (left
@@ -150,7 +147,7 @@ export function MeasurementPanel({
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="font-mono text-[10px] uppercase tracking-widest"
+      className=" text-[10px] uppercase tracking-widest"
       style={{ color: "#6b6780" }}
     >
       {children}

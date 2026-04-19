@@ -14,7 +14,7 @@ export function ExperimentControlBar({
   statusText,
 }: ExperimentControlBarProps) {
   return (
-    <Card className="rounded-3xl" padded="lg">
+    <Card className="rounded-lg" padded="lg">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <Text variant="body" className="font-semibold">
@@ -56,7 +56,7 @@ function RunButton({ onRun, isRunning }: RunButtonProps) {
       size="lg"
       loading={isRunning}
       loadingLabel="Running..."
-      className="rounded-3xl run-experiment-btn"
+      className="rounded-lg run-experiment-btn"
     >
       Run experiment
     </Button>

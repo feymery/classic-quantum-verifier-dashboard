@@ -34,10 +34,7 @@ export function ShotHistogramMeta({
                   borderColor: CHART_COLORS.theoretical,
                 }}
               />
-              <span
-                className="font-mono text-[9px]"
-                style={{ color: diffColor }}
-              >
+              <span className=" text-[9px]" style={{ color: diffColor }}>
                 {diff >= 0 ? "+" : ""}
                 {(diff * 100).toFixed(1)}%
               </span>
@@ -47,7 +44,7 @@ export function ShotHistogramMeta({
       </div>
 
       <div
-        className="flex items-center gap-4 border-t pt-1 font-mono text-[10px]"
+        className="flex items-center gap-4 border-t pt-1  text-[10px]"
         style={{ borderColor: "#1e1c28", color: "#6b6780" }}
       >
         <span>{shots.toLocaleString()} shots</span>

@@ -32,18 +32,15 @@ export function ExpectationTable({
         className="grid grid-cols-[1fr_72px_72px_72px] gap-x-2 pb-1 border-b"
         style={{ borderColor: "#2d2b3a" }}
       >
-        <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
           observable
         </span>
-        <span
-          className="font-mono text-[10px] text-right"
-          style={{ color: "#6b6780" }}
-        >
+        <span className=" text-[10px] text-right" style={{ color: "#6b6780" }}>
           sampled
         </span>
         {exact && (
           <span
-            className="font-mono text-[10px] text-right"
+            className=" text-[10px] text-right"
             style={{ color: "#6b6780" }}
           >
             theoretical
@@ -51,7 +48,7 @@ export function ExpectationTable({
         )}
         {exact && (
           <span
-            className="font-mono text-[10px] text-right"
+            className=" text-[10px] text-right"
             style={{ color: "#6b6780" }}
           >
             Δ
@@ -72,10 +69,7 @@ export function ExpectationTable({
           >
             {/* Label + desc */}
             <div className="flex flex-col gap-0.5">
-              <span
-                className="font-mono text-[11px]"
-                style={{ color: "#ddd9ee" }}
-              >
+              <span className=" text-[11px]" style={{ color: "#ddd9ee" }}>
                 {label}
               </span>
               <span
@@ -93,10 +87,7 @@ export function ExpectationTable({
               ) : sampledVal !== undefined ? (
                 <ValueCell value={sampledVal} />
               ) : (
-                <span
-                  className="font-mono text-[11px]"
-                  style={{ color: "#6b6780" }}
-                >
+                <span className=" text-[11px]" style={{ color: "#6b6780" }}>
                   —
                 </span>
               )}
@@ -110,10 +101,7 @@ export function ExpectationTable({
                 ) : exactVal !== undefined ? (
                   <ValueCell value={exactVal} dim />
                 ) : (
-                  <span
-                    className="font-mono text-[11px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <span className=" text-[11px]" style={{ color: "#6b6780" }}>
                     —
                   </span>
                 )}
@@ -128,10 +116,7 @@ export function ExpectationTable({
                 ) : sampledVal !== undefined && exactVal !== undefined ? (
                   <DeltaCell value={sampledVal - exactVal} />
                 ) : (
-                  <span
-                    className="font-mono text-[11px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <span className=" text-[11px]" style={{ color: "#6b6780" }}>
                     —
                   </span>
                 )}
@@ -156,7 +141,7 @@ function ValueCell({ value, dim }: { value: number; dim?: boolean }) {
         : "#ddd9ee";
   const sign = value > 0 ? "+" : "";
   return (
-    <span className="font-mono text-[11px] tabular-nums" style={{ color }}>
+    <span className=" text-[11px] tabular-nums" style={{ color }}>
       {sign}
       {value.toFixed(4)}
     </span>
@@ -165,7 +150,7 @@ function ValueCell({ value, dim }: { value: number; dim?: boolean }) {
 
 function LoadingDots() {
   return (
-    <span className="font-mono text-[11px]" style={{ color: "#6b6780" }}>
+    <span className=" text-[11px]" style={{ color: "#6b6780" }}>
       ···
     </span>
   );
@@ -175,7 +160,7 @@ function DeltaCell({ value }: { value: number }) {
   const color = Math.abs(value) < 0.02 ? "#34d399" : "#f59e0b";
   const sign = value > 0 ? "+" : "";
   return (
-    <span className="font-mono text-[11px] tabular-nums" style={{ color }}>
+    <span className=" text-[11px] tabular-nums" style={{ color }}>
       {sign}
       {value.toFixed(4)}
     </span>

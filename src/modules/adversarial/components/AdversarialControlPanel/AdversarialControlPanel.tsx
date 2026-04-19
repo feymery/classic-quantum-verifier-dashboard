@@ -41,7 +41,7 @@ export function AdversarialControlPanel({
           className="flex items-center justify-between rounded-lg border px-3 py-2"
           style={{ borderColor: "#2d2b3a", background: "#1d1b25" }}
         >
-          <span className="font-mono text-[11px]" style={{ color: "#ddd9ee" }}>
+          <span className=" text-[11px]" style={{ color: "#ddd9ee" }}>
             adversarial mode
           </span>
           <Button
@@ -49,7 +49,7 @@ export function AdversarialControlPanel({
             onClick={() => onEnabledChange(!enabled)}
             size="sm"
             variant="secondary"
-            className="rounded-full px-3 py-1 font-mono text-[10px] font-normal"
+            className="rounded-lg px-3 py-1  text-[10px] font-normal"
             style={{
               background: enabled ? "#a78bfa" : "#2d2b3a",
               color: enabled ? "#131217" : "#9490a8",
@@ -61,16 +61,10 @@ export function AdversarialControlPanel({
 
         <label className="block space-y-2">
           <div className="flex items-center justify-between">
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               epsilon bias
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#c7a472" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#c7a472" }}>
               {epsilon.toFixed(4)}
             </span>
           </div>
@@ -81,13 +75,13 @@ export function AdversarialControlPanel({
             step={0.0025}
             value={epsilon}
             onChange={(e) => onEpsilonChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-full cursor-pointer appearance-none bg-[#2d2b3a] accent-[#c7a472] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-[#2d2b3a] accent-[#c7a472] shadow-inner shadow-black/30"
             aria-label="Epsilon bias"
           />
         </label>
 
         <label className="block space-y-2">
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             strategy type
           </span>
           <select
@@ -114,13 +108,13 @@ export function AdversarialControlPanel({
           className="space-y-1 rounded-lg border p-3"
           style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
-          <p className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <p className=" text-[10px]" style={{ color: "#6b6780" }}>
             α (claimed): {alpha.toFixed(4)}
           </p>
-          <p className="font-mono text-[10px]" style={{ color: "#c78572" }}>
+          <p className=" text-[10px]" style={{ color: "#c78572" }}>
             α_fake (manipulated): {alphaFake.toFixed(4)}
           </p>
-          <p className="font-mono text-[10px]" style={{ color: "#9490a8" }}>
+          <p className=" text-[10px]" style={{ color: "#9490a8" }}>
             {strategyDescriptions[strategyType]}
           </p>
         </div>

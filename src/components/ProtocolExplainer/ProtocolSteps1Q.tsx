@@ -24,7 +24,7 @@ const STEPS: Step[] = [
       <div className="space-y-1">
         <p>Both qubits are prepared in the ground state:</p>
         <code
-          className="block rounded px-2 py-1 font-mono text-xs"
+          className="block rounded px-2 py-1  text-xs"
           style={{ background: "#181620", color: "#a78bfa" }}
         >
           |ψ₀⟩ = |0⟩<sub style={{ fontSize: 10 }}>clock</sub> ⊗ |0⟩
@@ -45,7 +45,7 @@ const STEPS: Step[] = [
       <div className="space-y-1">
         <p>The Hadamard gate puts the clock qubit into superposition:</p>
         <code
-          className="block rounded px-2 py-1 font-mono text-xs"
+          className="block rounded px-2 py-1  text-xs"
           style={{ background: "#181620", color: "#b7a8cf" }}
         >
           H|0⟩ = (|0⟩ + |1⟩) / √2
@@ -68,13 +68,13 @@ const STEPS: Step[] = [
           A <em>controlled-U(α)</em> entangles the work qubit conditionally:
         </p>
         <code
-          className="block rounded px-2 py-1 font-mono text-xs"
+          className="block rounded px-2 py-1  text-xs"
           style={{ background: "#181620", color: "#a78bfa" }}
         >
           |η(α)⟩ = (|0⟩|0⟩ + |1⟩U(α)|0⟩) / √2
         </code>
         <code
-          className="block rounded px-2 py-1 font-mono text-xs mt-1"
+          className="block rounded px-2 py-1  text-xs mt-1"
           style={{ background: "#181620", color: "#a78bfa" }}
         >
           = (|0⟩|0⟩ + cos(α)|1⟩|0⟩ + sin(α)|1⟩|1⟩) / √2
@@ -107,13 +107,10 @@ const STEPS: Step[] = [
               className="rounded px-2 py-1"
               style={{ background: "#181620" }}
             >
-              <span className="font-mono text-xs" style={{ color: "#e8a020" }}>
+              <span className=" text-xs" style={{ color: "#e8a020" }}>
                 {name}
               </span>
-              <span
-                className="ml-2 font-mono text-[10px]"
-                style={{ color: "#6b6780" }}
-              >
+              <span className="ml-2  text-[10px]" style={{ color: "#6b6780" }}>
                 {desc}
               </span>
             </div>
@@ -136,7 +133,7 @@ const STEPS: Step[] = [
       <div className="space-y-2">
         <p>Linear inversion of the Hamiltonian (Stricker et al. Eq. C.1):</p>
         <code
-          className="block rounded px-2 py-1 font-mono text-[11px] leading-relaxed"
+          className="block rounded px-2 py-1  text-[11px] leading-relaxed"
           style={{ background: "#181620", color: "#34d399" }}
         >
           E = 3.5 − 2⟨Z₂⟩ + ⟨Z₁⟩ − ⟨Z₁Z₂⟩
@@ -175,17 +172,17 @@ export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
     <div className="space-y-2">
       {/* ── Circuit ── */}
       <div
-        className="rounded-xl border p-3"
+        className="rounded-lg border p-3"
         style={{ borderColor: "#2d2b3a", background: "#181620" }}
       >
         <p
-          className="mb-2 font-mono text-[10px] uppercase tracking-widest"
+          className="mb-2  text-[10px] uppercase tracking-widest"
           style={{ color: "#6b6780" }}
         >
           circuit
         </p>
         <Circuit1Q alpha={alpha} />
-        <p className="mt-1 font-mono text-[9px]" style={{ color: "#4a4760" }}>
+        <p className="mt-1  text-[9px]" style={{ color: "#4a4760" }}>
           q₀ = clock (MSB) · q₁ = work (LSB) · little-endian convention
         </p>
       </div>
@@ -196,7 +193,7 @@ export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
         return (
           <div
             key={step.id}
-            className="rounded-xl border overflow-hidden"
+            className="rounded-lg border overflow-hidden"
             style={{
               borderColor: isOpen ? step.color : "#2d2b3a",
               background: "#1e1c26",
@@ -209,7 +206,7 @@ export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
               aria-expanded={isOpen}
             >
               <span
-                className="shrink-0 rounded font-mono text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
+                className="shrink-0 rounded  text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
                 style={{
                   background: isOpen ? step.color : "#2d2b3a",
                   color: isOpen ? "#0f0e14" : "#6b6780",
@@ -225,7 +222,7 @@ export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
                 {step.title}
               </span>
               <span
-                className="font-mono text-lg leading-none"
+                className=" text-lg leading-none"
                 style={{ color: "#4a4760" }}
                 aria-hidden
               >

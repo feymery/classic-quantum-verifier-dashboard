@@ -32,7 +32,7 @@ export function TrapCard({
 
   return (
     <div
-      className="rounded-2xl border p-5 space-y-5 transition-colors duration-500"
+      className="rounded-lg border p-5 space-y-5 transition-colors duration-500"
       style={{
         borderColor: resolvedBorder,
         background: "#131217",
@@ -44,7 +44,7 @@ export function TrapCard({
         <div>
           <div className="flex items-center gap-3">
             <span
-              className="rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase"
+              className="rounded-lg px-2 py-0.5  text-[10px] font-bold uppercase"
               style={{
                 background: isActive ? "#2a2338" : "#1e1c2a",
                 color: isActive ? "#a78bfa" : "#4b4860",
@@ -53,7 +53,7 @@ export function TrapCard({
               {id}
             </span>
             <h2
-              className="font-mono text-[14px] font-semibold"
+              className=" text-[14px] font-semibold"
               style={{ color: isActive ? "#ddd9ee" : "#4b4860" }}
             >
               {title}
@@ -70,7 +70,7 @@ export function TrapCard({
         {actions ??
           (!isActive && (
             <span
-              className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px]"
+              className="shrink-0 rounded-lg px-2 py-0.5  text-[10px]"
               style={{ background: "#1e1c2a", color: "#6b6780" }}
             >
               próximamente

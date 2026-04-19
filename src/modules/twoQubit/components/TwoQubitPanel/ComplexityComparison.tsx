@@ -32,25 +32,25 @@ export function ComplexityComparison() {
         }}
       >
         <span
-          className="font-mono text-[10px] uppercase tracking-wider"
+          className=" text-[10px] uppercase tracking-wider"
           style={{ color: "#6b6780" }}
         >
           aspect
         </span>
         <span
-          className="font-mono text-[10px] uppercase tracking-wider"
+          className=" text-[10px] uppercase tracking-wider"
           style={{ color: "#a78bfa" }}
         >
           1-qubit
         </span>
         <span
-          className="font-mono text-[10px] uppercase tracking-wider"
+          className=" text-[10px] uppercase tracking-wider"
           style={{ color: "#a78bfa" }}
         >
           2-qubit
         </span>
         <span
-          className="font-mono text-[10px] uppercase tracking-wider"
+          className=" text-[10px] uppercase tracking-wider"
           style={{ color: "#6b6780" }}
         >
           why it matters
@@ -73,28 +73,19 @@ export function ComplexityComparison() {
               paddingLeft: 6,
             }}
           >
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#9490a8" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#9490a8" }}>
               {row.aspect}
             </span>
-            <span
-              className="font-mono text-[11px]"
-              style={{ color: "#a78bfacc" }}
-            >
+            <span className=" text-[11px]" style={{ color: "#a78bfacc" }}>
               {row.oneQ}
             </span>
             <span
-              className="font-mono text-[11px]"
+              className=" text-[11px]"
               style={{ color: row.highlight ? "#a78bfa" : "#a78bfacc" }}
             >
               {row.twoQ}
             </span>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#9490a8" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#9490a8" }}>
               {row.why}
             </span>
           </div>
@@ -107,7 +98,7 @@ export function ComplexityComparison() {
         style={{ borderColor: "#34d399", background: "rgba(52,211,153,0.04)" }}
       >
         <p
-          className="font-mono text-[10px] leading-relaxed"
+          className=" text-[10px] leading-relaxed"
           style={{ color: "#9490a8" }}
         >
           The CNOT creates entanglement between work qubits. ⟨Z₂Z₃⟩ = 1 exactly
@@ -125,10 +116,10 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       className="rounded border px-2.5 py-2"
       style={{ borderColor: "#2d2b3a", background: "#181620" }}
     >
-      <p className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+      <p className=" text-[9px]" style={{ color: "#6b6780" }}>
         {label}
       </p>
-      <p className="font-mono text-[11px] mt-1" style={{ color: "#a78bfa" }}>
+      <p className=" text-[11px] mt-1" style={{ color: "#a78bfa" }}>
         {value}
       </p>
     </div>

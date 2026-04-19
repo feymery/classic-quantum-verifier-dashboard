@@ -27,7 +27,7 @@ const TRAP_COLOR = "#f87171";
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className="mb-2 font-mono text-[10px] uppercase tracking-widest"
+      className="mb-2  text-[10px] uppercase tracking-widest"
       style={{ color: "#6b6780" }}
     >
       {children}
@@ -39,14 +39,14 @@ function ConceptBox({ mode }: { mode: "honest" | "trap1" }) {
   if (mode === "honest") {
     return (
       <div
-        className="rounded-xl border px-4 py-3 text-[12px] leading-relaxed"
+        className="rounded-lg border px-4 py-3 text-[12px] leading-relaxed"
         style={{
           borderColor: "#1e3a2a",
           background: "#0f1f16",
           color: "#86efac",
         }}
       >
-        <span className="mr-2 font-mono font-semibold">✓ HONEST PROVER</span>
+        <span className="mr-2  font-semibold">✓ HONEST PROVER</span>
         El probador aplica U(α) correctamente. El estado del reloj cuántico
         lleva coherencia temporal, lo que se manifiesta como correlaciones XY en
         el Hamiltoniano. La energía medida cae por debajo del umbral de
@@ -56,20 +56,19 @@ function ConceptBox({ mode }: { mode: "honest" | "trap1" }) {
   }
   return (
     <div
-      className="rounded-xl border px-4 py-3 text-[12px] leading-relaxed"
+      className="rounded-lg border px-4 py-3 text-[12px] leading-relaxed"
       style={{
         borderColor: "#3a1e1e",
         background: "#1f0f0f",
         color: "#fca5a5",
       }}
     >
-      <span className="mr-2 font-mono font-semibold">✗ TRAMPA DETECTADA</span>
-      El probador omitió <span className="font-mono">H(q_clock)</span>,{" "}
-      <span className="font-mono">RY(α/2)</span> y{" "}
-      <span className="font-mono">CZ</span>. El estado clásico{" "}
-      <span className="font-mono">|00⟩</span> no tiene superposición temporal.
-      Las correlaciones X₁X₂ y Z₁X₂ son exactamente 0, empujando la energía a E
-      = 1.00 — muy por encima del umbral de rechazo de 0.50.
+      <span className="mr-2  font-semibold">✗ TRAMPA DETECTADA</span>
+      El probador omitió <span className="">H(q_clock)</span>,{" "}
+      <span className="">RY(α/2)</span> y <span className="">CZ</span>. El
+      estado clásico <span className="">|00⟩</span> no tiene superposición
+      temporal. Las correlaciones X₁X₂ y Z₁X₂ son exactamente 0, empujando la
+      energía a E = 1.00 — muy por encima del umbral de rechazo de 0.50.
     </div>
   );
 }
@@ -84,7 +83,7 @@ function ExpectationsTable({ exp }: { exp: Record<string, number> }) {
   ];
   return (
     <table
-      className="w-full text-right font-mono text-[11px]"
+      className="w-full text-right  text-[11px]"
       style={{ borderCollapse: "collapse" }}
     >
       <tbody>
@@ -132,7 +131,7 @@ export function Trap1Card() {
   const toggleButton = (
     <button
       onClick={() => setMode(isTrap ? "honest" : "trap1")}
-      className="shrink-0 rounded-xl px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wide transition-all duration-300"
+      className="shrink-0 rounded-lg px-4 py-2  text-[11px] font-bold uppercase tracking-wide transition-all duration-300"
       style={
         isTrap
           ? {
@@ -163,10 +162,7 @@ export function Trap1Card() {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <SectionLabel>parámetro α</SectionLabel>
-          <span
-            className="font-mono text-[11px]"
-            style={{ color: accentColor }}
-          >
+          <span className=" text-[11px]" style={{ color: accentColor }}>
             {degs}° ({alpha.toFixed(3)} rad)
           </span>
         </div>
@@ -182,7 +178,7 @@ export function Trap1Card() {
           disabled={isTrap}
         />
         {isTrap && (
-          <p className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <p className=" text-[10px]" style={{ color: "#6b6780" }}>
             α no afecta la trampa — el circuito está completamente omitido
           </p>
         )}
@@ -195,7 +191,7 @@ export function Trap1Card() {
           {isTrap && (
             <button
               onClick={() => setShowDiff((v) => !v)}
-              className="font-mono text-[10px] underline-offset-2"
+              className=" text-[10px] underline-offset-2"
               style={{ color: "#6b6780" }}
             >
               {showDiff ? "ocultar diferencias" : "mostrar diferencias"}
@@ -235,7 +231,7 @@ export function Trap1Card() {
         </div>
         <div>
           <SectionLabel>resumen</SectionLabel>
-          <div className="space-y-1.5 font-mono text-[11px]">
+          <div className="space-y-1.5  text-[11px]">
             <div className="flex justify-between">
               <span style={{ color: "#6b6780" }}>modo</span>
               <span style={{ color: accentColor }}>{mode}</span>

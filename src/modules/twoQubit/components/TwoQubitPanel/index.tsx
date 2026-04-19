@@ -49,10 +49,7 @@ export function TwoQubitPanel({
                 Circuit: 1 clock + 2 work qubits
               </span>
             </div>
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               H · ctrl-U(α) · CNOT
             </span>
           </div>
@@ -81,10 +78,7 @@ export function TwoQubitPanel({
                 color="#a78bfa"
               />
             </div>
-            <p
-              className="font-mono text-[9px] mt-2"
-              style={{ color: "#6b6780" }}
-            >
+            <p className=" text-[9px] mt-2" style={{ color: "#6b6780" }}>
               all other amplitudes = 0 · little-endian: q₀=clock (MSB), q₂=work2
               (LSB)
             </p>
@@ -96,7 +90,7 @@ export function TwoQubitPanel({
 
       {/* ── Row 2: Execution meta (read-only) ── */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
           read-only
         </span>
       </div>
@@ -119,7 +113,7 @@ export function TwoQubitPanel({
             background: "rgba(248,113,113,0.05)",
           }}
         >
-          <span className="font-mono text-[11px]" style={{ color: "#f87171" }}>
+          <span className=" text-[11px]" style={{ color: "#f87171" }}>
             {error}
           </span>
         </div>
@@ -155,10 +149,10 @@ function Amplitude({
 }) {
   return (
     <div>
-      <div className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+      <div className=" text-[10px]" style={{ color: "#6b6780" }}>
         {label}
       </div>
-      <div className="font-mono text-[11px]" style={{ color }}>
+      <div className=" text-[11px]" style={{ color }}>
         {value}
       </div>
     </div>

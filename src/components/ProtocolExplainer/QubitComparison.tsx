@@ -54,10 +54,10 @@ function ObsChip({
       className="rounded px-2 py-1 flex items-baseline gap-1.5"
       style={{ background: "#181620" }}
     >
-      <span className="font-mono text-xs shrink-0" style={{ color }}>
+      <span className=" text-xs shrink-0" style={{ color }}>
         {name}
       </span>
-      <span className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+      <span className=" text-[9px]" style={{ color: "#6b6780" }}>
         {desc}
       </span>
     </div>
@@ -67,7 +67,7 @@ function ObsChip({
 function SideHeader({ label, color }: { label: string; color: string }) {
   return (
     <div
-      className="rounded px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider mb-2"
+      className="rounded px-2 py-1  text-[10px] font-semibold uppercase tracking-wider mb-2"
       style={{ background: color + "22", color }}
     >
       {label}
@@ -82,24 +82,24 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* 1Q panel */}
         <div
-          className="rounded-xl border p-3 space-y-2"
+          className="rounded-lg border p-3 space-y-2"
           style={{ borderColor: "#a78bfa44", background: "#181620" }}
         >
           <SideHeader label="1-Qubit Protocol" color="#a78bfa" />
           <Circuit1Q alpha={alpha} />
-          <p className="font-mono text-[9px]" style={{ color: "#4a4760" }}>
+          <p className=" text-[9px]" style={{ color: "#4a4760" }}>
             2 qubits · ctrl-U(α) · no work entanglement
           </p>
         </div>
 
         {/* 2Q panel */}
         <div
-          className="rounded-xl border p-3 space-y-2"
+          className="rounded-lg border p-3 space-y-2"
           style={{ borderColor: "#34d39944", background: "#181620" }}
         >
           <SideHeader label="2-Qubit Extension" color="#34d399" />
           <CircuitDiagram alpha={alpha} />
-          <p className="font-mono text-[9px]" style={{ color: "#4a4760" }}>
+          <p className=" text-[9px]" style={{ color: "#4a4760" }}>
             3 qubits · ctrl-U(α) + CNOT · entangled work register
           </p>
         </div>
@@ -108,11 +108,11 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
       {/* ── Observable comparison ── */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <div
-          className="rounded-xl border p-3 space-y-1.5"
+          className="rounded-lg border p-3 space-y-1.5"
           style={{ borderColor: "#2d2b3a", background: "#1e1c26" }}
         >
           <p
-            className="font-mono text-[10px] uppercase tracking-wider mb-2"
+            className=" text-[10px] uppercase tracking-wider mb-2"
             style={{ color: "#a78bfa" }}
           >
             1Q observables (5)
@@ -120,17 +120,17 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
           {OBS_1Q.map((o) => (
             <ObsChip key={o.name} name={o.name} desc={o.desc} color="#a78bfa" />
           ))}
-          <p className="font-mono text-[9px] mt-1" style={{ color: "#4a4760" }}>
+          <p className=" text-[9px] mt-1" style={{ color: "#4a4760" }}>
             ★ X₁Z₂ = cross-term for Hamiltonian inversion (Eq. C.1)
           </p>
         </div>
 
         <div
-          className="rounded-xl border p-3 space-y-1.5"
+          className="rounded-lg border p-3 space-y-1.5"
           style={{ borderColor: "#2d2b3a", background: "#1e1c26" }}
         >
           <p
-            className="font-mono text-[10px] uppercase tracking-wider mb-2"
+            className=" text-[10px] uppercase tracking-wider mb-2"
             style={{ color: "#34d399" }}
           >
             2Q observables (9)
@@ -143,11 +143,11 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
 
       {/* ── Complexity diff table ── */}
       <div
-        className="rounded-xl border overflow-hidden"
+        className="rounded-lg border overflow-hidden"
         style={{ borderColor: "#2d2b3a" }}
       >
         <div
-          className="grid px-3 py-2 text-[10px] font-mono uppercase tracking-wider"
+          className="grid px-3 py-2 text-[10px]  uppercase tracking-wider"
           style={{
             gridTemplateColumns: "1fr 1fr 1fr",
             background: "#181620",
@@ -169,10 +169,10 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
             }}
           >
             <span style={{ color: "#9490a8" }}>{row.aspect}</span>
-            <span className="font-mono" style={{ color: "#a78bfa" }}>
+            <span className="" style={{ color: "#a78bfa" }}>
               {row.oneQ}
             </span>
-            <span className="font-mono" style={{ color: "#34d399" }}>
+            <span className="" style={{ color: "#34d399" }}>
               {row.twoQ}
             </span>
           </div>

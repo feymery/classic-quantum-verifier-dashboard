@@ -28,10 +28,10 @@ interface StepTagProps {
 export function StatCell({ label, value, color }: StatCellProps) {
   return (
     <div className="p-2.5" style={{ background: "#181620" }}>
-      <div className="font-mono text-[9px] mb-1" style={{ color: "#6b6780" }}>
+      <div className=" text-[9px] mb-1" style={{ color: "#6b6780" }}>
         {label}
       </div>
-      <div className="font-mono text-[13px] font-semibold" style={{ color }}>
+      <div className=" text-[13px] font-semibold" style={{ color }}>
         {value}
       </div>
     </div>
@@ -54,10 +54,10 @@ export function CritLambdaRow({
         borderLeft: `2px solid ${reached ? color : "#2d2b3a"}`,
       }}
     >
-      <span className="font-mono text-[10px]" style={{ color: "#9490a8" }}>
+      <span className=" text-[10px]" style={{ color: "#9490a8" }}>
         {label}
       </span>
-      <span className="font-mono text-[11px]" style={{ color }}>
+      <span className=" text-[11px]" style={{ color }}>
         {value !== null
           ? `λ = ${value.toFixed(3)}`
           : `n/a (E = ${threshold} at α = π/4)`}
@@ -80,7 +80,7 @@ export function LegendDot({ color, label, dashed = false }: LegendDotProps) {
           strokeDasharray={dashed ? "4 3" : undefined}
         />
       </svg>
-      <span className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+      <span className=" text-[9px]" style={{ color: "#6b6780" }}>
         {label}
       </span>
     </div>
@@ -89,10 +89,7 @@ export function LegendDot({ color, label, dashed = false }: LegendDotProps) {
 
 export function StepTag({ children }: StepTagProps) {
   return (
-    <Badge
-      variant="quantum"
-      className="rounded px-1.5 py-0.5 font-mono text-[10px]"
-    >
+    <Badge variant="quantum" className="rounded px-1.5 py-0.5  text-[10px]">
       {children}
     </Badge>
   );

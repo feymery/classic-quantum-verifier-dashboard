@@ -15,7 +15,7 @@ export function ComparisonPlotTable({ summaryRows }: ComparisonPlotTableProps) {
         {["", "α", "label", "E(α)", "decision"].map((h) => (
           <span
             key={h}
-            className="font-mono text-[9px] uppercase tracking-wider"
+            className=" text-[9px] uppercase tracking-wider"
             style={{ color: "#6b6780" }}
           >
             {h}
@@ -42,29 +42,26 @@ export function ComparisonPlotTable({ summaryRows }: ComparisonPlotTableProps) {
             style={{ borderColor: "#1e1c28" }}
           >
             <div
-              className="mt-0.5 h-2 w-2 rounded-full"
+              className="mt-0.5 h-2 w-2 rounded-lg"
               style={{ background: row.color }}
             />
             <span
-              className="font-mono text-[11px] tabular-nums"
+              className=" text-[11px] tabular-nums"
               style={{ color: row.color }}
             >
               {row.alpha.toFixed(4)}
             </span>
-            <span
-              className="font-mono text-[11px]"
-              style={{ color: "#9490a8" }}
-            >
+            <span className=" text-[11px]" style={{ color: "#9490a8" }}>
               {row.label}
             </span>
             <span
-              className="font-mono text-[11px] tabular-nums"
+              className=" text-[11px] tabular-nums"
               style={{ color: "#e8a020" }}
             >
               {row.energy.toFixed(4)}
             </span>
             <span
-              className="font-mono text-[10px] tracking-wider"
+              className=" text-[10px] tracking-wider"
               style={{ color: dColor }}
             >
               {decision.toUpperCase().slice(0, 3)}

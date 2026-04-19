@@ -45,10 +45,10 @@ export function CircuitPage() {
       />
 
       {/* ── How the protocol scales ── */}
-      <Card className="rounded-3xl" padded="md">
+      <Card className="rounded-lg" padded="md">
         <div className="flex items-center gap-2 mb-4">
           <span
-            className="rounded font-mono text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
+            className="rounded  text-[9px] px-1.5 py-0.5 uppercase tracking-wider"
             style={{ background: "#2d2b3a", color: "#9490a8" }}
           >
             guide
@@ -112,7 +112,7 @@ export function CircuitPage() {
                   style={{ background: "#181620" }}
                 >
                   <span
-                    className="font-mono text-[9px] rounded px-1"
+                    className=" text-[9px] rounded px-1"
                     style={{
                       background: (color as string) + "33",
                       color: color as string,
@@ -120,10 +120,7 @@ export function CircuitPage() {
                   >
                     {label}
                   </span>
-                  <code
-                    className="font-mono text-xs"
-                    style={{ color: "#ddd9ee" }}
-                  >
+                  <code className=" text-xs" style={{ color: "#ddd9ee" }}>
                     {circuit}
                   </code>
                 </div>

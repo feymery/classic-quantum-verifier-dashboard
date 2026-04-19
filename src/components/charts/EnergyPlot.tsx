@@ -133,7 +133,7 @@ function Legend({
           style={{ width: 16, height: 1.5, background: color, flexShrink: 0 }}
         />
       )}
-      <span className="font-mono text-[10px]" style={{ color: "#9490a8" }}>
+      <span className=" text-[10px]" style={{ color: "#9490a8" }}>
         {label}
       </span>
     </div>
@@ -142,10 +142,7 @@ function Legend({
 
 function StepTag({ children }: { children: React.ReactNode }) {
   return (
-    <Badge
-      variant="quantum"
-      className="rounded px-1.5 py-0.5 font-mono text-[10px]"
-    >
+    <Badge variant="quantum" className="rounded px-1.5 py-0.5  text-[10px]">
       {children}
     </Badge>
   );

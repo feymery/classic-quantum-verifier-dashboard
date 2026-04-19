@@ -47,22 +47,19 @@ export function TrapsPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span
-            className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest"
+            className="rounded-lg px-2 py-0.5  text-[10px] uppercase tracking-widest"
             style={{ background: "#1e1c2a", color: "#6b6780" }}
           >
             capa física
           </span>
           <span
-            className="font-mono text-[10px] uppercase tracking-widest"
+            className=" text-[10px] uppercase tracking-widest"
             style={{ color: "#4b4860" }}
           >
             módulo de trampas
           </span>
         </div>
-        <h1
-          className="font-mono text-xl font-bold"
-          style={{ color: "#ddd9ee" }}
-        >
+        <h1 className=" text-xl font-bold" style={{ color: "#ddd9ee" }}>
           Trampas del Protocolo
         </h1>
         <p className="mt-1 max-w-2xl text-[13px]" style={{ color: "#9490a8" }}>

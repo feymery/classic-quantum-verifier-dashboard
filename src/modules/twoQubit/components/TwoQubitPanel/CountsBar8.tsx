@@ -20,10 +20,7 @@ export function CountsBar8({ counts, shots }: CountsBar8Props) {
           <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
             Shot Counts — 8 basis states
           </span>
-          <span
-            className="ml-auto font-mono text-[10px]"
-            style={{ color: "#6b6780" }}
-          >
+          <span className="ml-auto  text-[10px]" style={{ color: "#6b6780" }}>
             {shots} shots
           </span>
         </div>
@@ -43,10 +40,7 @@ export function CountsBar8({ counts, shots }: CountsBar8Props) {
 
             return (
               <div key={s} className="flex items-center gap-2">
-                <span
-                  className="w-8 shrink-0 font-mono text-[11px]"
-                  style={{ color }}
-                >
+                <span className="w-8 shrink-0  text-[11px]" style={{ color }}>
                   |{s}⟩
                 </span>
                 <div
@@ -65,22 +59,16 @@ export function CountsBar8({ counts, shots }: CountsBar8Props) {
                 </div>
                 <div className="flex w-32 shrink-0 items-center justify-end gap-1.5">
                   <span
-                    className="font-mono text-[11px]"
+                    className=" text-[11px]"
                     style={{ color, fontVariantNumeric: "tabular-nums" }}
                   >
                     {count}
                   </span>
-                  <span
-                    className="font-mono text-[10px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <span className=" text-[10px]" style={{ color: "#6b6780" }}>
                     ({(freq * 100).toFixed(1)}%)
                   </span>
                   {!isExpected && count > 0 && (
-                    <span
-                      className="font-mono text-[9px]"
-                      style={{ color: "#f87171" }}
-                    >
+                    <span className=" text-[9px]" style={{ color: "#f87171" }}>
                       !
                     </span>
                   )}
@@ -90,7 +78,7 @@ export function CountsBar8({ counts, shots }: CountsBar8Props) {
           })}
         </div>
 
-        <p className="font-mono text-[9px]" style={{ color: "#6b6780" }}>
+        <p className=" text-[9px]" style={{ color: "#6b6780" }}>
           expected non-zero: |000⟩, |100⟩, |111⟩ · any other state = shot noise
           or error
         </p>

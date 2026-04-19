@@ -31,7 +31,7 @@ export function ShotHistogramChart({
   if (!hasCounts) {
     return (
       <div
-        className="flex items-center justify-center rounded border font-mono text-[10px]"
+        className="flex items-center justify-center rounded border  text-[10px]"
         style={{
           height: HISTOGRAM_HEIGHT,
           borderColor: "#2d2b3a",

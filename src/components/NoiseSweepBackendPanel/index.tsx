@@ -76,7 +76,7 @@ export function NoiseSweepBackendPanel({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
-              className="px-1.5 py-0.5 rounded font-mono text-[9px] font-semibold tracking-wider"
+              className="px-1.5 py-0.5 rounded  text-[9px] font-semibold tracking-wider"
               style={{
                 background: "rgba(167,139,250,0.12)",
                 color: "#a78bfa",
@@ -89,13 +89,13 @@ export function NoiseSweepBackendPanel({
               Backend Noise Sweep
             </span>
           </div>
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             AerSimulator + NoiseModel
           </span>
         </div>
 
         <p
-          className="font-mono text-[10px] leading-relaxed"
+          className=" text-[10px] leading-relaxed"
           style={{ color: "#6b6780" }}
         >
           Runs the 3 measurement circuits at α = {alpha.toFixed(4)} rad with
@@ -113,7 +113,7 @@ export function NoiseSweepBackendPanel({
         </Button>
 
         {loadState === "error" && (
-          <p className="font-mono text-[10px]" style={{ color: "#f87171" }}>
+          <p className=" text-[10px]" style={{ color: "#f87171" }}>
             Error: {errorMsg}
           </p>
         )}
@@ -228,19 +228,16 @@ export function NoiseSweepBackendPanel({
                       border: `1px solid #2d2b3a`,
                     }}
                   >
-                    <div className="font-mono text-[10px]" style={{ color }}>
+                    <div className=" text-[10px]" style={{ color }}>
                       {v}
                     </div>
                     <div
-                      className="font-mono text-sm font-bold"
+                      className=" text-sm font-bold"
                       style={{ color: "#ddd9ee" }}
                     >
                       {count}
                     </div>
-                    <div
-                      className="font-mono text-[9px]"
-                      style={{ color: "#6b6780" }}
-                    >
+                    <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                       points
                     </div>
                   </div>

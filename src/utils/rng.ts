@@ -3,8 +3,6 @@
  * Shared deterministic PRNG utilities.
  *
  * Single source of truth for the Lehmer LCG used by all sampling functions.
- * Having it here eliminates the identical `makeLCG` / `seededRng` copies
- * that previously lived in measurements.ts and measurements2Q.ts.
  */
 
 /**

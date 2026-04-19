@@ -39,7 +39,7 @@ export function NoisePanel({
               Noise Model
             </span>
           </div>
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             depolarising channel
           </span>
         </div>
@@ -50,16 +50,10 @@ export function NoisePanel({
           style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               λ depolarising noise
             </span>
-            <span
-              className="font-mono text-[11px]"
-              style={{ color: "#a78bfa" }}
-            >
+            <span className=" text-[11px]" style={{ color: "#a78bfa" }}>
               {noiseLambda.toFixed(3)}
             </span>
           </div>
@@ -70,7 +64,7 @@ export function NoisePanel({
             step={0.005}
             value={noiseLambda}
             onChange={(e) => onNoiseLambdaChange(Number(e.target.value))}
-            className="w-full h-1.5 rounded-full cursor-pointer appearance-none bg-[#2d2b3a] accent-[#a78bfa] shadow-inner shadow-black/30"
+            className="w-full h-1.5 rounded-lg cursor-pointer appearance-none bg-[#2d2b3a] accent-[#a78bfa] shadow-inner shadow-black/30"
             aria-label="Depolarising noise lambda"
           />
           <div className="flex items-center gap-1.5 mt-2">
@@ -80,7 +74,7 @@ export function NoisePanel({
                 onClick={() => onNoiseLambdaChange(value)}
                 variant="secondary"
                 size="sm"
-                className="rounded px-2 py-0.5 font-mono text-[9px] font-normal"
+                className="rounded px-2 py-0.5  text-[9px] font-normal"
                 style={{
                   borderColor:
                     Math.abs(noiseLambda - value) < 0.001
@@ -134,11 +128,11 @@ export function NoisePanel({
           className="flex items-center justify-between px-3 py-2 border rounded"
           style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             verifier decision at current noise
           </span>
           <span
-            className="font-mono text-xs font-semibold tracking-widest"
+            className=" text-xs font-semibold tracking-widest"
             style={{ color: decisionColor }}
           >
             {analysis.decision.toUpperCase()}
@@ -168,17 +162,14 @@ export function NoisePanel({
           className="px-3 py-2 border rounded"
           style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             E_noisy = 0.5 + (1 − λ) · (sin²(α) − 0.5)
           </span>
         </div>
 
         {/* Sweep chart */}
         <div>
-          <p
-            className="font-mono text-[10px] mb-2"
-            style={{ color: "#6b6780" }}
-          >
+          <p className=" text-[10px] mb-2" style={{ color: "#6b6780" }}>
             energy vs λ sweep — vertical line = current λ
           </p>
           <NoiseSweepPlot alpha={alpha} lambda={noiseLambda} />

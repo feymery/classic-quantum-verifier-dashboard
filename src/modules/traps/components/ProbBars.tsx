@@ -21,22 +21,22 @@ export function ProbBars({ counts, shots, accentColor = "#a78bfa" }: Props) {
         return (
           <div key={state} className="flex items-center gap-3">
             <span
-              className="w-8 shrink-0 font-mono text-[11px]"
+              className="w-8 shrink-0  text-[11px]"
               style={{ color: "#9490a8" }}
             >
               |{state}⟩
             </span>
             <div
-              className="relative h-4 flex-1 overflow-hidden rounded-full"
+              className="relative h-4 flex-1 overflow-hidden rounded-lg"
               style={{ background: "#2d2b3a" }}
             >
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-lg transition-all duration-500"
                 style={{ width: `${pct}%`, background: accentColor }}
               />
             </div>
             <span
-              className="w-12 shrink-0 text-right font-mono text-[11px]"
+              className="w-12 shrink-0 text-right  text-[11px]"
               style={{ color: "#ddd9ee" }}
             >
               {pct.toFixed(1)}%

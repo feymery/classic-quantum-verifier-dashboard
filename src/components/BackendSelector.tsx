@@ -17,46 +17,39 @@ export function BackendSelector({
   onChange,
 }: BackendSelectorProps) {
   return (
-    <Card className="rounded-4xl" padded="lg" style={{ background: "#181620" }}>
+    <Card
+      className="rounded-lg"
+      padded="lg"
+      style={{ background: "var(--color-surface)" }}
+    >
       <div className="flex items-center justify-between gap-4 mb-4">
         <div>
           <Text
             variant="label"
             color="muted"
-            className="tracking-[0.24em]"
-            style={{ color: "#6b6780" }}
+            className="tracking-[0.24em] text-subtle"
           >
             Backend
           </Text>
         </div>
         <Badge
           variant={backendStatus === "running" ? "success" : "neutral"}
-          className={`rounded-full px-3 py-1 text-xs ${
+          className={`rounded-lg px-3 py-1 text-xs ${
             backendStatus === "running"
               ? "bg-emerald-500/10 text-emerald-300"
-              : ""
+              : "bg-elevated text-subtle"
           }`}
-          style={
-            backendStatus !== "running"
-              ? { background: "#1e1c26", color: "#6b6780" }
-              : undefined
-          }
         >
           {backendStatus}
         </Badge>
       </div>
-      <label className="block text-sm font-medium" style={{ color: "#ddd9ee" }}>
+      <label className="block text-sm font-medium text-foreground">
         Backend
       </label>
       <select
         value={selectedBackend}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full px-4 py-3 mt-2 text-sm border outline-none rounded-2xl"
-        style={{
-          borderColor: "#2d2b3a",
-          background: "#1e1c26",
-          color: "#ddd9ee",
-        }}
+        className="w-full px-4 py-3 mt-2 text-sm border border-border bg-elevated text-foreground outline-none rounded-lg"
       >
         {backends.map((backend) => (
           <option key={backend.id} value={backend.id}>

@@ -31,16 +31,13 @@ export function DashboardHeader({
   onConfirmToken,
 }: DashboardHeaderProps) {
   return (
-    <Card className="mb-6 rounded-4xl" padded="lg" as="header">
+    <Card className="mb-6 rounded-lg" padded="lg" as="header">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <Text variant="label" color="accent" className="tracking-[0.28em]">
             QV Dashboard
           </Text>
-          <h1
-            className="mt-3 text-3xl font-semibold"
-            style={{ color: "#ddd9ee" }}
-          >
+          <h1 className="mt-3 text-3xl font-semibold text-foreground">
             Quantum Verifier Protocol
           </h1>
           <Text variant="body" color="muted" className="max-w-2xl mt-2">
@@ -53,7 +50,7 @@ export function DashboardHeader({
           <label htmlFor="backend-select">
             <Badge
               variant="neutral"
-              className="px-4 py-2 text-sm text-[#ddd9ee]"
+              className="px-4 py-2 text-sm text-foreground"
             >
               backend
             </Badge>
@@ -64,12 +61,7 @@ export function DashboardHeader({
             onChange={(event) =>
               onBackendChange(event.target.value as BackendId)
             }
-            className="px-4 py-3 text-sm border outline-none rounded-2xl"
-            style={{
-              borderColor: "#2d2b3a",
-              background: "#181620",
-              color: "#ddd9ee",
-            }}
+            className="px-4 py-3 text-sm border border-border bg-surface text-foreground outline-none rounded-lg"
           >
             {BACKENDS.map((option) => (
               <option key={option.id} value={option.id}>
@@ -79,10 +71,10 @@ export function DashboardHeader({
           </select>
           <Badge
             variant="neutral"
-            className="flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-normal"
+            className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-normal"
           >
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-2.5 w-2.5 rounded-lg"
               style={{ backgroundColor: backend.dotColor }}
             />
             {backendStatus}
@@ -124,10 +116,7 @@ function IbmTokenSection({
   onConfirmToken,
 }: IbmTokenSectionProps) {
   return (
-    <div
-      className="px-5 py-4 mt-6 border rounded-3xl"
-      style={{ borderColor: "#2d2b3a", background: "#181620" }}
-    >
+    <div className="px-5 py-4 mt-6 border border-border bg-surface rounded-lg">
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="ibm-token">
           <Text
@@ -147,7 +136,7 @@ function IbmTokenSection({
           aria-expanded={showToken}
           size="md"
           variant="secondary"
-          className={`rounded-2xl border text-sm font-normal ${
+          className={`rounded-lg border text-sm font-normal ${
             ibmTokenSet
               ? "bg-emerald-500/10 text-emerald-200 border-emerald-500/20"
               : "bg-rose-500/10 text-rose-200 border-rose-500/20"
@@ -167,22 +156,19 @@ function IbmTokenSection({
             onChange={(event) => onTokenChange(event.target.value)}
             placeholder="paste token — never stored or logged"
             autoComplete="off"
-            className="flex-1 min-w-0 px-4 py-3 text-sm border outline-none rounded-2xl"
-            style={{
-              borderColor: "#2d2b3a",
-              background: "#131217",
-              color: "#ddd9ee",
-            }}
+            className="flex-1 min-w-0 px-4 py-3 text-sm border border-border bg-canvas text-foreground outline-none rounded-lg"
           />
           <Button
             onClick={onConfirmToken}
             variant="secondary"
             size="lg"
-            className="rounded-2xl border text-sm font-normal disabled:opacity-40"
+            className="rounded-lg border text-sm font-normal disabled:opacity-40"
             style={{
-              borderColor: "rgba(167,139,250,0.3)",
-              background: "rgba(167,139,250,0.1)",
-              color: "#d8b4fe",
+              borderColor:
+                "color-mix(in srgb, var(--color-accent) 30%, transparent)",
+              background:
+                "color-mix(in srgb, var(--color-accent) 10%, transparent)",
+              color: "var(--color-accent-dim)",
             }}
             disabled={!ibmToken}
           >

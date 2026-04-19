@@ -90,7 +90,7 @@ function SweepTooltip({ active, payload }: any) {
   const verdictColor = VERDICT_COLOR[d.verdict];
   return (
     <div
-      className="px-3 py-2 font-mono text-xs border rounded-lg"
+      className="px-3 py-2  text-xs border rounded-lg"
       style={{
         background: CHART_COLORS.tooltip,
         borderColor: CHART_COLORS.tooltipBorder,
@@ -144,7 +144,7 @@ export function AlphaSweepChart({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
-              className="rounded px-1.5 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider"
+              className="rounded px-1.5 py-0.5  text-[9px] font-medium uppercase tracking-wider"
               style={{ background: "#1e1c2a", color: "#9490a8" }}
             >
               sweep
@@ -159,7 +159,7 @@ export function AlphaSweepChart({
             variant="secondary"
             onClick={runSweep}
             disabled={loading}
-            className="font-mono text-[10px] px-3 py-1"
+            className=" text-[10px] px-3 py-1"
           >
             {loading ? "running…" : "Run Sweep"}
           </Button>
@@ -168,7 +168,7 @@ export function AlphaSweepChart({
         {/* Legend */}
         {data && (
           <div
-            className="flex flex-wrap items-center gap-4 text-[10px] font-mono"
+            className="flex flex-wrap items-center gap-4 text-[10px] "
             style={{ color: "#9490a8" }}
           >
             <span className="flex items-center gap-1">
@@ -184,21 +184,21 @@ export function AlphaSweepChart({
             </span>
             <span className="flex items-center gap-1">
               <span
-                className="inline-block w-2 h-2 rounded-full"
+                className="inline-block w-2 h-2 rounded-lg"
                 style={{ background: CHART_COLORS.accept }}
               />
               accept
             </span>
             <span className="flex items-center gap-1">
               <span
-                className="inline-block w-2 h-2 rounded-full"
+                className="inline-block w-2 h-2 rounded-lg"
                 style={{ background: CHART_COLORS.thresholdHigh }}
               />
               marginal
             </span>
             <span className="flex items-center gap-1">
               <span
-                className="inline-block w-2 h-2 rounded-full"
+                className="inline-block w-2 h-2 rounded-lg"
                 style={{ background: CHART_COLORS.reject }}
               />
               reject
@@ -208,10 +208,7 @@ export function AlphaSweepChart({
 
         {/* Error */}
         {error && (
-          <p
-            className="font-mono text-xs"
-            style={{ color: CHART_COLORS.reject }}
-          >
+          <p className=" text-xs" style={{ color: CHART_COLORS.reject }}>
             {error}
           </p>
         )}

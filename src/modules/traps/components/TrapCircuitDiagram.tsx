@@ -132,7 +132,7 @@ export function TrapCircuitDiagram({
     <div className="flex flex-col gap-3 sm:flex-row">
       {/* ── Honest circuit ── */}
       <div className="flex-1 space-y-1">
-        <p className="font-mono text-[10px]" style={{ color: "#34d399" }}>
+        <p className=" text-[10px]" style={{ color: "#34d399" }}>
           honest prover
         </p>
         <svg
@@ -187,7 +187,7 @@ export function TrapCircuitDiagram({
       {/* ── Trap 1 circuit ── */}
       <div className="flex-1 space-y-1">
         <p
-          className="font-mono text-[10px]"
+          className=" text-[10px]"
           style={{ color: showTrap ? "#f87171" : "#6b6780" }}
         >
           {showTrap ? "trap 1 — |00⟩ classical" : "trap 1 (inactive)"}

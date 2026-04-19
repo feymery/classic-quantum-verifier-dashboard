@@ -36,7 +36,7 @@ export function ComparisonPlot({
   if (comparisonAlphas.length === 0) {
     return (
       <Card
-        className="flex items-center justify-center rounded-lg font-mono text-[10px]"
+        className="flex items-center justify-center rounded-lg  text-[10px]"
         padded="md"
         style={{
           height: 80,
@@ -59,7 +59,7 @@ export function ComparisonPlot({
           <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
             Comparison
           </span>
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             {comparisonAlphas.length} α values
           </span>
         </div>
@@ -73,10 +73,7 @@ export function ComparisonPlot({
 
 function StepTag({ children }: { children: React.ReactNode }) {
   return (
-    <Badge
-      variant="quantum"
-      className="rounded px-1.5 py-0.5 font-mono text-[10px]"
-    >
+    <Badge variant="quantum" className="rounded px-1.5 py-0.5  text-[10px]">
       {children}
     </Badge>
   );

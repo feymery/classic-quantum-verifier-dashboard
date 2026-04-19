@@ -1,10 +1,10 @@
 import { Panel } from "../ui/Panel";
 
-const VERDICT_COLOR: Record<string, string> = {
-  accept: "#34d399",
-  reject: "#f87171",
-  marginal: "#f59e0b",
-  boundary: "#f59e0b",
+const VERDICT_VAR: Record<string, string> = {
+  accept: "var(--color-success)",
+  reject: "var(--color-danger)",
+  marginal: "var(--color-warning)",
+  boundary: "var(--color-warning)",
 };
 
 interface EnergyPanelProps {
@@ -23,29 +23,24 @@ export function EnergyPanel({
   verdict,
 }: EnergyPanelProps) {
   const verdictColor = verdict
-    ? (VERDICT_COLOR[verdict] ?? "#9490a8")
+    ? (VERDICT_VAR[verdict] ?? "var(--color-muted)")
     : undefined;
 
   return (
     <Panel step="step E" title={title} description={description}>
       <div className="space-y-2">
-        <p className="text-4xl font-semibold" style={{ color: "#a78bfa" }}>
+        <p className="text-4xl font-semibold text-accent">
           {energy}
           {energyError != null && (
-            <span
-              className="ml-2 text-base font-normal"
-              style={{ color: "#9490a8" }}
-            >
+            <span className="ml-2 text-base font-normal text-muted">
               ± {energyError.toFixed(4)}
             </span>
           )}
         </p>
-        <p className="text-sm" style={{ color: "#6b6780" }}>
-          energy estimate
-        </p>
+        <p className="text-sm text-subtle">energy estimate</p>
         {verdict && (
           <p
-            className="font-mono text-xs font-medium uppercase tracking-wider"
+            className=" text-xs font-medium uppercase tracking-wider"
             style={{ color: verdictColor }}
           >
             {verdict}

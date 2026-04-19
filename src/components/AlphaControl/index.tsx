@@ -53,7 +53,7 @@ export function AlphaControl({
           <div className="flex items-center gap-2">
             <Badge
               variant="quantum"
-              className="rounded px-1.5 py-0.5 font-mono text-[10px]"
+              className="rounded px-1.5 py-0.5  text-[10px]"
             >
               step B
             </Badge>
@@ -78,10 +78,7 @@ export function AlphaControl({
         {/* Slider */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               α input mode
             </span>
             <div
@@ -92,7 +89,7 @@ export function AlphaControl({
                 onClick={() => setGuidedMode(true)}
                 size="sm"
                 variant="secondary"
-                className="rounded-none border-0 px-2 py-1 font-mono text-[10px]"
+                className="rounded-none border-0 px-2 py-1  text-[10px]"
                 style={{
                   color: guidedMode ? "#0f0e14" : "#9490a8",
                   background: guidedMode ? "#a78bfa" : "#181620",
@@ -104,7 +101,7 @@ export function AlphaControl({
                 onClick={() => setGuidedMode(false)}
                 size="sm"
                 variant="secondary"
-                className="rounded-none border-0 px-2 py-1 font-mono text-[10px]"
+                className="rounded-none border-0 px-2 py-1  text-[10px]"
                 style={{
                   color: !guidedMode ? "#0f0e14" : "#9490a8",
                   background: !guidedMode ? "#e8a020" : "#181620",
@@ -121,7 +118,7 @@ export function AlphaControl({
             guidedMode={guidedMode}
           />
 
-          <p className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <p className=" text-[10px]" style={{ color: "#6b6780" }}>
             {guidedMode
               ? "guided: slider snaps to key protocol values"
               : "free: continuous alpha selection, no snapping"}

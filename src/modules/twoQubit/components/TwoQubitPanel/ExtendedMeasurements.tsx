@@ -34,10 +34,7 @@ export function ExtendedMeasurements({
           <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
             Extended Measurements
           </span>
-          <span
-            className="font-mono text-[10px] ml-auto"
-            style={{ color: "#6b6780" }}
-          >
+          <span className=" text-[10px] ml-auto" style={{ color: "#6b6780" }}>
             10 observables
           </span>
         </div>
@@ -47,13 +44,10 @@ export function ExtendedMeasurements({
           {(["primary", "crosscheck", "cnot"] as const).map((k) => (
             <div key={k} className="flex items-center gap-1.5">
               <div
-                className="w-1.5 h-1.5 rounded-full"
+                className="w-1.5 h-1.5 rounded-lg"
                 style={{ background: SPECIAL_COLORS[k] }}
               />
-              <span
-                className="font-mono text-[9px]"
-                style={{ color: "#6b6780" }}
-              >
+              <span className=" text-[9px]" style={{ color: "#6b6780" }}>
                 {k === "primary"
                   ? "energy primary"
                   : k === "crosscheck"
@@ -74,20 +68,17 @@ export function ExtendedMeasurements({
               borderColor: "#2d2b3a",
             }}
           >
-            <span
-              className="font-mono text-[10px]"
-              style={{ color: "#6b6780" }}
-            >
+            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
               observable
             </span>
             <span
-              className="font-mono text-[10px] text-right"
+              className=" text-[10px] text-right"
               style={{ color: "#6b6780" }}
             >
               sampled
             </span>
             <span
-              className="font-mono text-[10px] text-right"
+              className=" text-[10px] text-right"
               style={{ color: "#6b6780" }}
             >
               exact
@@ -115,13 +106,13 @@ export function ExtendedMeasurements({
                 <div className="flex items-center gap-1.5">
                   {special && (
                     <div
-                      className="w-1 h-1 rounded-full shrink-0"
+                      className="w-1 h-1 rounded-lg shrink-0"
                       style={{ background: SPECIAL_COLORS[special] }}
                     />
                   )}
                   <div className="flex flex-col gap-0.5">
                     <span
-                      className="font-mono text-[11px]"
+                      className=" text-[11px]"
                       style={{ color: accentColor ?? "#ddd9ee" }}
                     >
                       {label}
@@ -171,7 +162,7 @@ function Val({ v, color, dim }: { v: number; color?: string; dim?: boolean }) {
     : (color ?? (v > 0 ? "#e8a020" : v < 0 ? "#a78bfa" : "#ddd9ee"));
   return (
     <span
-      className="font-mono text-[11px]"
+      className=" text-[11px]"
       style={{ color: c, fontVariantNumeric: "tabular-nums" }}
     >
       {v >= 0 ? "+" : ""}
@@ -182,7 +173,7 @@ function Val({ v, color, dim }: { v: number; color?: string; dim?: boolean }) {
 
 function Dots() {
   return (
-    <span className="font-mono text-[11px]" style={{ color: "#6b6780" }}>
+    <span className=" text-[11px]" style={{ color: "#6b6780" }}>
       ···
     </span>
   );
@@ -190,7 +181,7 @@ function Dots() {
 
 function Dash() {
   return (
-    <span className="font-mono text-[11px]" style={{ color: "#6b6780" }}>
+    <span className=" text-[11px]" style={{ color: "#6b6780" }}>
       —
     </span>
   );

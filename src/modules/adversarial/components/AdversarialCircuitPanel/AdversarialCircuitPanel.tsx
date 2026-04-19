@@ -92,7 +92,7 @@ export function AdversarialCircuitPanel({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
-              className="px-1.5 py-0.5 rounded font-mono text-[9px] font-semibold tracking-wider"
+              className="px-1.5 py-0.5 rounded  text-[9px] font-semibold tracking-wider"
               style={{
                 background: "rgba(167,139,250,0.12)",
                 color: "#a78bfa",
@@ -105,13 +105,13 @@ export function AdversarialCircuitPanel({
               Circuit-Level Adversarial Analysis
             </span>
           </div>
-          <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
             bitstring distribution comparison
           </span>
         </div>
 
         <p
-          className="font-mono text-[10px] leading-relaxed"
+          className=" text-[10px] leading-relaxed"
           style={{ color: "#6b6780" }}
         >
           Runs the full measurement circuit for α = {alpha.toFixed(4)} (honest)
@@ -131,7 +131,7 @@ export function AdversarialCircuitPanel({
         </Button>
 
         {loadState === "error" && (
-          <p className="font-mono text-[10px]" style={{ color: "#f87171" }}>
+          <p className=" text-[10px]" style={{ color: "#f87171" }}>
             Error: {errorMsg}
           </p>
         )}
@@ -199,20 +199,17 @@ export function AdversarialCircuitPanel({
                   className="p-2 space-y-1 rounded"
                   style={{ background: "#181620", border: "1px solid #2d2b3a" }}
                 >
-                  <div
-                    className="font-mono text-[10px]"
-                    style={{ color: "#9490a8" }}
-                  >
+                  <div className=" text-[10px]" style={{ color: "#9490a8" }}>
                     {label}
                   </div>
                   <div
-                    className="font-mono text-sm font-bold"
+                    className=" text-sm font-bold"
                     style={{ color: "#ddd9ee" }}
                   >
                     E = {result[key].energy.toFixed(4)}
                   </div>
                   <div
-                    className="font-mono text-[10px] font-semibold"
+                    className=" text-[10px] font-semibold"
                     style={{ color: verdictColor(result[key].verdict) }}
                   >
                     {result[key].verdict}
@@ -226,70 +223,49 @@ export function AdversarialCircuitPanel({
               className="p-3 rounded"
               style={{ background: "#181620", border: "1px solid #2d2b3a" }}
             >
-              <div
-                className="font-mono text-[10px] mb-2"
-                style={{ color: "#9490a8" }}
-              >
+              <div className=" text-[10px] mb-2" style={{ color: "#9490a8" }}>
                 distribution metrics
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     TVD
                   </div>
                   <div
-                    className="font-mono text-xs font-bold"
+                    className=" text-xs font-bold"
                     style={{ color: "#e8a020" }}
                   >
                     {result.metrics.tvd.toFixed(4)}
                   </div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     total variation
                   </div>
                 </div>
                 <div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     KL div
                   </div>
                   <div
-                    className="font-mono text-xs font-bold"
+                    className=" text-xs font-bold"
                     style={{ color: "#a78bfa" }}
                   >
                     {result.metrics.kl_honest_to_fake.toFixed(4)}
                   </div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     nats
                   </div>
                 </div>
                 <div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     ΔE
                   </div>
                   <div
-                    className="font-mono text-xs font-bold"
+                    className=" text-xs font-bold"
                     style={{ color: "#34d399" }}
                   >
                     {result.metrics.delta_energy.toFixed(4)}
                   </div>
-                  <div
-                    className="font-mono text-[9px]"
-                    style={{ color: "#6b6780" }}
-                  >
+                  <div className=" text-[9px]" style={{ color: "#6b6780" }}>
                     energy gap
                   </div>
                 </div>

@@ -64,7 +64,7 @@ export function EnergyPlotSummary({
               (head) => (
                 <span
                   key={head}
-                  className="font-mono text-[10px] text-right first:text-left"
+                  className=" text-[10px] text-right first:text-left"
                   style={{ color: "#6b6780" }}
                 >
                   {head}
@@ -95,17 +95,17 @@ export function EnergyPlotSummary({
                   key={`cmp-row-${i}`}
                   className="grid grid-cols-[84px_76px_76px_60px_72px_72px] gap-x-2 px-2.5 py-1.5"
                 >
-                  <span className="font-mono text-[11px]" style={{ color }}>
+                  <span className=" text-[11px]" style={{ color }}>
                     {formatAlpha(ca)}
                   </span>
                   <span
-                    className="font-mono text-[11px] text-right"
+                    className=" text-[11px] text-right"
                     style={{ color: "#a78bfa" }}
                   >
                     {theory.toFixed(4)}
                   </span>
                   <span
-                    className="font-mono text-[11px] text-right"
+                    className=" text-[11px] text-right"
                     style={{ color: "#e8a020" }}
                   >
                     {measured !== undefined
@@ -115,7 +115,7 @@ export function EnergyPlotSummary({
                         : "--"}
                   </span>
                   <span
-                    className="font-mono text-[11px] text-right"
+                    className=" text-[11px] text-right"
                     style={{
                       color:
                         delta === null
@@ -152,10 +152,10 @@ function Stat({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-mono text-[10px]" style={{ color: "#6b6780" }}>
+      <span className=" text-[10px]" style={{ color: "#6b6780" }}>
         {label}
       </span>
-      <span className="font-mono text-[11px]" style={{ color }}>
+      <span className=" text-[11px]" style={{ color }}>
         {value}
       </span>
     </div>
@@ -169,10 +169,7 @@ function DecisionBadge({
 }) {
   if (!decision) {
     return (
-      <span
-        className="text-right font-mono text-[10px]"
-        style={{ color: "#6b6780" }}
-      >
+      <span className="text-right  text-[10px]" style={{ color: "#6b6780" }}>
         --
       </span>
     );
@@ -187,7 +184,7 @@ function DecisionBadge({
 
   return (
     <span
-      className="text-right font-mono text-[9px] tracking-wide"
+      className="text-right  text-[9px] tracking-wide"
       style={{ color: style.color }}
     >
       {style.label}

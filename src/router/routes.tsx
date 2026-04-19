@@ -15,7 +15,7 @@ function withPageLoader(node: ReactNode) {
     <Suspense
       fallback={
         <div
-          className="rounded-3xl border px-4 py-5 font-mono text-[11px]"
+          className="rounded-lg border px-4 py-5  text-[11px]"
           style={{
             borderColor: "#2d2b3a",
             background: "#181620",

@@ -11,21 +11,24 @@ const NAV_ITEMS = [
 
 export function AppNavigation() {
   return (
-    <nav className="mb-6 overflow-x-auto rounded-4xl p-1">
+    <nav className="mb-6 overflow-x-auto rounded-lg p-1">
       <div className="flex gap-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className="min-w-32 rounded-3xl px-4 py-3 text-sm font-semibold transition"
+            className="min-w-32 rounded-lg px-4 py-3 text-sm font-semibold transition"
             style={({ isActive }) =>
               isActive
                 ? {
-                    background: "#a78bfa",
-                    color: "#131217",
-                    boxShadow: "0 4px 16px rgba(167,139,250,0.25)",
+                    background: "var(--color-accent)",
+                    color: "var(--color-canvas)",
+                    boxShadow: "var(--shadow-glow)",
                   }
-                : { background: "#181620", color: "#9490a8" }
+                : {
+                    background: "var(--color-surface)",
+                    color: "var(--color-muted)",
+                  }
             }
           >
             {item.label}
