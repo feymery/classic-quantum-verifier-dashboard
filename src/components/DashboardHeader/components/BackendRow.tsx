@@ -31,7 +31,7 @@ export function BackendRow({
         id="backend-select"
         value={selectedBackend}
         onChange={(event) => onBackendChange(event.target.value as BackendId)}
-        className="px-4 py-3 text-sm border rounded-lg outline-none border-border bg-surface text-foreground"
+        className="p-2 text-xs border rounded-lg outline-none border-border bg-surface text-foreground"
       >
         {BACKENDS.map((option) => (
           <option key={option.id} value={option.id}>
@@ -42,7 +42,7 @@ export function BackendRow({
 
       <Badge
         variant="neutral"
-        className="flex items-center gap-2 px-4 py-3 text-sm font-normal rounded-lg"
+        className="flex items-center gap-2 px-4 py-2 text-sm font-normal rounded-lg"
       >
         <span
           className="h-2.5 w-2.5 rounded-lg"

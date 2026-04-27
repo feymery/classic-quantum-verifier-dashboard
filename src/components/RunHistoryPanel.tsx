@@ -53,7 +53,7 @@ export function RunHistoryPanel({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Text variant="caption" className="uppercase tracking-[0.24em]">
-            run timeline
+            Run History
           </Text>
           <Text variant="body" className="mt-2 font-semibold">
             Persistent experiment history
