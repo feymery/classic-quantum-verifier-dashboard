@@ -1,27 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="926" height="752" viewBox="0 0 926 752">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="50%" r="75%">
-      <stop offset="0%" stop-color="#373444"/>
-      <stop offset="100%" stop-color="#2a2634"/>
+    <radialGradient id="bg" cx="50%" cy="45%" r="80%">
+      <stop offset="0%" stop-color="#3a344d"/>
+      <stop offset="100%" stop-color="#241f31"/>
     </radialGradient>
     <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="2.5" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
-  <rect width="926" height="752" fill="url(#bg)"/>
-  <g stroke="#c9a8ef" stroke-width="4" opacity="0.68" filter="url(#glow)">
-    <path d="M0 0H926M0 150H926M0 300H926M0 450H926M0 600H926M0 752H926"/>
-    <path d="M0 0V752M140 0V752M280 0V752M420 0V752M560 0V752M700 0V752M840 0V752M926 0V752"/>
-    <path d="M0 0L280 300M140 0L420 300M280 0L560 300M420 0L700 300M560 0L840 300M700 0L926 150M0 150L140 300M140 150L280 300M280 150L420 300M420 150L560 300M560 150L700 300M700 150L840 300M840 150L926 300M0 300L140 450M140 300L280 450M280 300L420 450M420 300L560 450M560 300L700 450M700 300L840 450M840 300L926 450M0 450L140 600M140 450L280 600M280 450L420 600M420 450L560 600M560 450L700 600M700 450L840 600M840 450L926 600"/>
-    <path d="M280 0L280 300M560 0L560 300M700 150L700 450M140 0L140 300M0 150L0 450" opacity="0.55"/>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g filter="url(#glow)" fill="none" stroke="#caa7ef" stroke-width="3" opacity="0.8">
+    <path d="M0 0H512M0 128H512M0 256H512M0 384H512M0 512H512"/>
+    <path d="M0 0V512M128 0V512M256 0V512M384 0V512M512 0V512"/>
+    <path d="M0 0L128 128M128 0L256 128M256 0L384 128M384 0L512 128M0 128L128 256M128 128L256 256M256 128L384 256M384 128L512 256M0 256L128 384M128 256L256 384M256 256L384 384M384 256L512 384M0 384L128 512M128 384L256 512M256 384L384 512M384 384L512 512" opacity="0.35"/>
   </g>
-  <g fill="#c9a8ef">
-    <circle cx="280" cy="100" r="18"/>
-    <circle cx="700" cy="400" r="20"/>
-  </g>
-  <g fill="#f6f2f6" font-family="Arial, Helvetica, sans-serif" font-weight="700">
-    <text x="145" y="240" font-size="120">A</text>
-    <text x="720" y="590" font-size="120">B</text>
+  <circle cx="128" cy="96" r="14" fill="#d9baf7" filter="url(#glow)"/>
+  <line x1="352" y1="320" x2="512" y2="320" stroke="#caa7ef" stroke-width="3" opacity="0.75" filter="url(#glow)"/>
+  <circle cx="352" cy="320" r="16" fill="#d9baf7" filter="url(#glow)"/>
+  <g fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, Arial, sans-serif" font-weight="800">
+    <text x="76" y="182" font-size="98">A</text>
+    <text x="360" y="402" font-size="98">B</text>
   </g>
 </svg>
