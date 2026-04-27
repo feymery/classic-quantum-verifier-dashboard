@@ -54,21 +54,16 @@ def _run_ibm(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], 
     x_circuit  = build_measurement_circuit(alpha, basis="x")
     client = get_shared_client()
 
-    z_result  = ibm_executor.run_circuit(z_circuit,  shots, client)
-    zx_result = ibm_executor.run_circuit(zx_circuit, shots, client)
-    x_result  = ibm_executor.run_circuit(x_circuit,  shots, client)
-
-    execution_time = (
-        float(z_result.metadata.get("execution_time_ms", 0.0))
-        + float(zx_result.metadata.get("execution_time_ms", 0.0))
-        + float(x_result.metadata.get("execution_time_ms", 0.0))
+    # Single IBM job for all 3 basis circuits — avoids 3 separate queue waits.
+    z_result, zx_result, x_result = ibm_executor.run_circuits_batch(
+        [z_circuit, zx_circuit, x_circuit], shots, client
     )
+
+    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
     meta = {
         "execution_backend": "ibm",
         "backend_name": str(z_result.metadata.get("backend_name", "ibm")),
-        "ibm_job_id_z":  str(z_result.metadata.get("job_id", "")),
-        "ibm_job_id_zx": str(zx_result.metadata.get("job_id", "")),
-        "ibm_job_id_x":  str(x_result.metadata.get("job_id", "")),
+        "ibm_job_id": str(z_result.metadata.get("job_id", "")),
     }
     return z_result.counts, zx_result.counts, x_result.counts, "ibm", execution_time, meta
 
@@ -118,24 +113,16 @@ def _run_ibm_2q(
     x23_circuit = build_measurement_circuit(alpha, basis="x23")
     client = get_shared_client()
 
-    z_result   = ibm_executor.run_circuit(z_circuit,   shots, client)
-    x12_result = ibm_executor.run_circuit(x12_circuit, shots, client)
-    x13_result = ibm_executor.run_circuit(x13_circuit, shots, client)
-    x23_result = ibm_executor.run_circuit(x23_circuit, shots, client)
-
-    execution_time = (
-        float(z_result.metadata.get("execution_time_ms", 0.0))
-        + float(x12_result.metadata.get("execution_time_ms", 0.0))
-        + float(x13_result.metadata.get("execution_time_ms", 0.0))
-        + float(x23_result.metadata.get("execution_time_ms", 0.0))
+    # Single IBM job for all 4 basis circuits — avoids 4 separate queue waits.
+    z_result, x12_result, x13_result, x23_result = ibm_executor.run_circuits_batch(
+        [z_circuit, x12_circuit, x13_circuit, x23_circuit], shots, client
     )
+
+    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
     meta = {
         "execution_backend": "ibm",
         "backend_name": str(z_result.metadata.get("backend_name", "ibm")),
-        "ibm_job_id_z":   str(z_result.metadata.get("job_id", "")),
-        "ibm_job_id_x12": str(x12_result.metadata.get("job_id", "")),
-        "ibm_job_id_x13": str(x13_result.metadata.get("job_id", "")),
-        "ibm_job_id_x23": str(x23_result.metadata.get("job_id", "")),
+        "ibm_job_id": str(z_result.metadata.get("job_id", "")),
     }
     return (
         z_result.counts,

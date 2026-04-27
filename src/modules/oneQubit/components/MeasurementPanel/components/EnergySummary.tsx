@@ -68,14 +68,21 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
               className=" text-[11px] tabular-nums"
               style={{
                 color:
-                  Math.abs(analysis.deviation) < 0.01 ? "#34d399" : "#f59e0b",
+                  analysis.deviation != null &&
+                  Math.abs(analysis.deviation) < 0.01
+                    ? "#34d399"
+                    : "#f59e0b",
               }}
             >
-              {analysis.deviation >= 0 ? "+" : ""}
-              {analysis.deviation.toFixed(4)}
+              {analysis.deviation != null
+                ? analysis.deviation >= 0
+                  ? "+"
+                  : ""
+                : ""}
+              {analysis.deviation?.toFixed(4) ?? "—"}
             </span>
             <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-              ({analysis.relativePct.toFixed(1)}%)
+              ({analysis.relativePct?.toFixed(1) ?? "—"}%)
             </span>
           </div>
         </div>

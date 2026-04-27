@@ -5,7 +5,6 @@ import {
   ExperimentPage,
   VisualizationPage,
   CircuitPage,
-  AdversarialPage,
   TrapsPage,
   FundamentalsPage,
 } from "./lazyPages";
@@ -41,7 +40,6 @@ export const appRouter = createBrowserRouter([
       { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
       { path: "visualization", element: withPageLoader(<VisualizationPage />) },
       { path: "2Qcircuit", element: withPageLoader(<CircuitPage />) },
-      { path: "adversarial", element: withPageLoader(<AdversarialPage />) },
       { path: "traps", element: withPageLoader(<TrapsPage />) },
     ],
   },

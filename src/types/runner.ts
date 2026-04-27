@@ -5,6 +5,7 @@
  */
 
 import type { BackendId } from "../utils/constants";
+import type { ExperimentResult, ExperimentResult2Q } from "./experiment";
 
 // ── Execution state ───────────────────────────────────────────────────────────
 
@@ -35,6 +36,10 @@ export interface RunHistoryEntry {
   decision: string | null;
   comparisonAlphas: number[];
   error: string | null;
+  /** Full backend response — stored so past results can be replayed without re-running. */
+  result: ExperimentResult | ExperimentResult2Q | null;
+  /** Comparison curve results associated with this run. */
+  comparisonResults: ExperimentResult[];
 }
 
 // ── Async IBM Runtime jobs ────────────────────────────────────────────────────

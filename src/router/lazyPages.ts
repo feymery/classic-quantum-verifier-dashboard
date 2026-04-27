@@ -15,11 +15,6 @@ export const CircuitPage = lazy(async () => {
   return { default: module.CircuitPage };
 });
 
-export const AdversarialPage = lazy(async () => {
-  const module = await import("../modules/adversarial/pages/AdversarialPage");
-  return { default: module.AdversarialPage };
-});
-
 export const TrapsPage = lazy(async () => {
   const module = await import("../pages/TrapsPage");
   return { default: module.TrapsPage };

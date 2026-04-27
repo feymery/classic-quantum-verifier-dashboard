@@ -33,14 +33,14 @@ export function EnergyPlotSummary({
           value={currentE.toFixed(4)}
           color={CHART_COLORS.theoretical}
         />
-        {estimatedE !== undefined && (
+        {estimatedE != null && (
           <Stat
             label="estimated"
             value={estimatedE.toFixed(4)}
             color={CHART_COLORS.estimated}
           />
         )}
-        {estimatedE !== undefined && (
+        {estimatedE != null && (
           <Stat
             label="Δ"
             value={`${estimatedE - currentE >= 0 ? "+" : ""}${(estimatedE - currentE).toFixed(4)}`}
@@ -108,7 +108,7 @@ export function EnergyPlotSummary({
                     className=" text-[11px] text-right"
                     style={{ color: "#e8a020" }}
                   >
-                    {measured !== undefined
+                    {measured != null
                       ? measured.toFixed(4)
                       : comparisonLoading
                         ? "..."

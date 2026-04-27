@@ -46,7 +46,7 @@ export const KEY_ALPHA_VALUES = KEY_ALPHAS.map((k) => k.value);
 
 // ── Backend options ──────────────────────────────────────────────────────────
 
-export type BackendId = "mock" | "aer" | "fake_ibm" | "ibm_runtime";
+export type BackendId = "mock" | "aer" | "ibm_runtime";
 
 export interface Backend {
   id: BackendId;
@@ -69,12 +69,6 @@ export const BACKENDS: Backend[] = [
     requiresToken: false,
   },
   {
-    id: "fake_ibm",
-    label: "Fake IBM",
-    dotColor: "#f59e0b",
-    requiresToken: false,
-  },
-  {
     id: "ibm_runtime",
     label: "IBM Quantum",
     dotColor: "#9a91ad",
@@ -83,7 +77,7 @@ export const BACKENDS: Backend[] = [
 ];
 
 // ── Backend name mapping (frontend → API) ────────────────────────────────────
-// "mock" and "fake_ibm" are local-only; they never reach the FastAPI backend.
+// "mock" is local-only and never reaches the FastAPI backend.
 // "aer" maps to the synchronous Aer executor.
 // "ibm_runtime" maps to the async IBM Runtime executor.
 
@@ -100,7 +94,6 @@ export function mapBackendId(backend: BackendId): ApiBackendId | null {
     case "ibm_runtime":
       return "ibm";
     case "mock":
-    case "fake_ibm":
       return null;
   }
 }

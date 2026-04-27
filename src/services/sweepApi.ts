@@ -9,6 +9,15 @@ const API_BASE =
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+export interface AlphaSweepObservables {
+  Z1: number;
+  Z2: number;
+  Z1Z2: number;
+  Z1X2: number;
+  X1Z2: number;
+  X1X2: number;
+}
+
 export interface AlphaSweepPoint {
   alpha: number;
   energy_est: number;
@@ -16,6 +25,10 @@ export interface AlphaSweepPoint {
   energy_theory: number;
   lambda_min: number;
   verdict: "accept" | "reject" | "marginal";
+  /** Measured expectation values for all 6 operators (Figure 2a) */
+  observables?: AlphaSweepObservables;
+  /** Theoretical expectation values ⟨O⟩ for the honest clock state (Figure 2a) */
+  observables_theory?: AlphaSweepObservables;
 }
 
 export interface AlphaSweepResult {

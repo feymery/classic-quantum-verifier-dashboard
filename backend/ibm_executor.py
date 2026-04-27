@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -8,6 +9,27 @@ from qiskit import QuantumCircuit
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from backend.ibm_client import IBMClient
+
+logger = logging.getLogger(__name__)
+
+
+def _log_isa_circuit(isa_circuit: QuantumCircuit, backend_name: str, label: str = "") -> None:
+    """Log the transpiled ISA circuit that will be physically submitted to IBM."""
+    tag = f" [{label}]" if label else ""
+    separator = "\u2501" * 60
+    circuit_text = isa_circuit.draw(output="text", fold=-1)
+    logger.info(
+        "\n%s\n  IBM CIRCUIT SUBMITTED TO %s%s\n  depth=%d  gates=%d  qubits=%d\n%s\n%s\n%s",
+        separator,
+        backend_name.upper(),
+        tag,
+        isa_circuit.depth(),
+        sum(isa_circuit.count_ops().values()),
+        isa_circuit.num_qubits,
+        separator,
+        circuit_text,
+        separator,
+    )
 
 
 @dataclass(frozen=True)
@@ -48,6 +70,8 @@ def submit_circuit_job(
 
     pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
     isa_circuit = pm.run(circuit)
+
+    _log_isa_circuit(isa_circuit, getattr(backend, "name", "ibm"))
 
     sampler = Sampler(mode=backend)
     start = time.perf_counter()
@@ -136,6 +160,10 @@ def run_circuits_batch(
     pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
     isa_circuits = [pm.run(c) for c in circuits]
 
+    backend_name: str = getattr(backend, "name", "ibm")
+    for i, isa in enumerate(isa_circuits):
+        _log_isa_circuit(isa, backend_name, label=f"circuit {i + 1}/{len(isa_circuits)}")
+
     sampler = Sampler(mode=backend)
     start = time.perf_counter()
     job = sampler.run([(isa,) for isa in isa_circuits], shots=max(1, int(shots)))
@@ -144,7 +172,6 @@ def run_circuits_batch(
     result = job.result()
     fetch_ms = (time.perf_counter() - start) * 1000.0
     job_id: str = getattr(job, "job_id", lambda: "")()  # type: ignore[assignment]
-    backend_name: str = getattr(backend, "name", "ibm")
 
     results: list[IBMExecutionResult] = []
     for i, pub_res in enumerate(result):

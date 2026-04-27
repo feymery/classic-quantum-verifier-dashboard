@@ -7,7 +7,7 @@ from backend.circuit_builder import build_measurement_circuit, build_measurement
 from backend.energy import compute_energy as _compute_energy
 from backend.ibm_client import IBMClient, get_shared_client
 from backend.jobs.job_runner import submit_job
-from backend.measurement_mapper import map_measurements, map_measurements_2q
+from backend.measurement_mapper import map_measurements, map_measurements_2q, extract_x1z2
 
 
 logger = logging.getLogger(__name__)
@@ -98,28 +98,46 @@ def sweep_alpha(shots: int, n_points: int = 30, backend: str = "aer") -> list[di
     """Run n_points experiments at evenly spaced α ∈ [0, π/2].
 
     Each point returns alpha, energy_est, energy_error, energy_theory,
-    lambda_min, and verdict — reproducing Figure 2(b) of Stricker et al.
+    lambda_min, verdict — reproducing Figure 2(b) — plus observables and
+    observables_theory for all 6 operators to reproduce Figure 2(a).
     """
     import math
 
     results = []
     for i in range(n_points):
         alpha = (i / max(1, n_points - 1)) * (math.pi / 2)
+        ca = math.cos(alpha)
+        sa = math.sin(alpha)
+        energy_theory = sa ** 2
+        obs_theory = {
+            "Z1":   0.0,
+            "Z2":   round(ca ** 2, 6),
+            "Z1Z2": round(sa ** 2, 6),
+            "Z1X2": round(-sa * ca, 6),
+            "X1Z2": round(ca, 6),
+            "X1X2": round(sa, 6),
+        }
         try:
             counts_z, counts_zx, counts_x, _backend_used, _exec_time = _run_with_aer(alpha, shots)
+            # Extra X1Z2 circuit (k1,k2)=(1,0) — shown in Figure 2(a) of the paper
+            x1z2_circuit = build_measurement_circuit(alpha, basis="x1z2")
+            x1z2_result = aer_executor.run_circuit(x1z2_circuit, shots)
+            x1z2_val = extract_x1z2(x1z2_result.counts, shots)
+
             mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
             energy = _compute_energy(alpha, mapped.observables)
             energy_error = _compute_energy_error(alpha, mapped.observables, shots)
             verdict = _verdict(energy, energy_error)
             lambda_min = _compute_lambda_min(alpha)
-            energy_theory = math.sin(alpha) ** 2
+            obs_measured = {k: round(v, 6) for k, v in mapped.observables.items()}
+            obs_measured["X1Z2"] = round(x1z2_val, 6)
         except Exception as exc:
             logger.warning("sweep_alpha failed at alpha=%.4f: %s", alpha, exc)
             energy = 0.0
             energy_error = 0.0
-            energy_theory = math.sin(alpha) ** 2
             lambda_min = energy_theory
             verdict = "marginal"
+            obs_measured = {k: round(v, 6) for k, v in obs_theory.items()}
 
         results.append({
             "alpha": round(alpha, 6),
@@ -128,6 +146,8 @@ def sweep_alpha(shots: int, n_points: int = 30, backend: str = "aer") -> list[di
             "energy_theory": round(energy_theory, 6),
             "lambda_min": round(lambda_min, 6),
             "verdict": verdict,
+            "observables": obs_measured,
+            "observables_theory": obs_theory,
         })
     return results
 
