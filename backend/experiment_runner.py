@@ -359,14 +359,9 @@ def _run_with_ibm(
     x_circuit  = build_measurement_circuit(alpha, basis="x")
     client = get_shared_client()
 
-    z_result  = ibm_executor.run_circuit(z_circuit, shots, client)
-    zx_result = ibm_executor.run_circuit(zx_circuit, shots, client)
-    x_result  = ibm_executor.run_circuit(x_circuit, shots, client)
-    execution_time = (
-        float(z_result.metadata.get("execution_time_ms", 0.0))
-        + float(zx_result.metadata.get("execution_time_ms", 0.0))
-        + float(x_result.metadata.get("execution_time_ms", 0.0))
-    )
+    results = ibm_executor.run_circuits_batch([z_circuit, zx_circuit, x_circuit], shots, client)
+    z_result, zx_result, x_result = results
+    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
     return z_result.counts, zx_result.counts, x_result.counts, "ibm", execution_time
 
 
@@ -380,16 +375,11 @@ def _run_with_ibm_2q(
     x23_circuit = build_measurement_circuit_2q(alpha, basis="x23")
     client = get_shared_client()
 
-    z_result = ibm_executor.run_circuit(z_circuit, shots, client)
-    x12_result = ibm_executor.run_circuit(x12_circuit, shots, client)
-    x13_result = ibm_executor.run_circuit(x13_circuit, shots, client)
-    x23_result = ibm_executor.run_circuit(x23_circuit, shots, client)
-    execution_time = (
-        float(z_result.metadata.get("execution_time_ms", 0.0))
-        + float(x12_result.metadata.get("execution_time_ms", 0.0))
-        + float(x13_result.metadata.get("execution_time_ms", 0.0))
-        + float(x23_result.metadata.get("execution_time_ms", 0.0))
+    results = ibm_executor.run_circuits_batch(
+        [z_circuit, x12_circuit, x13_circuit, x23_circuit], shots, client
     )
+    z_result, x12_result, x13_result, x23_result = results
+    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
     return (
         z_result.counts,
         x12_result.counts,

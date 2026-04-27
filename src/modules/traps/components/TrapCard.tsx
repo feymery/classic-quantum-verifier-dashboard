@@ -1,8 +1,8 @@
 /**
- * TrapCard.tsx — Shell universal para todas las trampas del protocolo.
+ * TrapCard.tsx — Universal shell for all protocol traps.
  *
- * Si se pasa `children`: renderiza el header activo + el contenido.
- * Si no:                  renderiza el header en modo "próximamente" (skeleton).
+ * With `children`: renders the active header + body content.
+ * Without:         renders the header in "coming soon" skeleton mode.
  */
 
 import type { ReactNode } from "react";
@@ -11,11 +11,11 @@ interface Props {
   id: string;
   title: string;
   description: string;
-  /** Slot derecho del header (p.ej. toggle button). */
+  /** Right slot of the header (e.g. toggle button). */
   actions?: ReactNode;
-  /** Color del borde del contenedor — por defecto #2d2b3a. */
+  /** Container border color — defaults to #2d2b3a. */
   borderColor?: string;
-  /** Cuerpo de la card; si está ausente se muestra el skeleton. */
+  /** Card body; if absent the skeleton is shown. */
   children?: ReactNode;
 }
 
@@ -73,7 +73,7 @@ export function TrapCard({
               className="shrink-0 rounded-lg px-2 py-0.5  text-[10px]"
               style={{ background: "#1e1c2a", color: "#6b6780" }}
             >
-              próximamente
+              coming soon
             </span>
           ))}
       </div>

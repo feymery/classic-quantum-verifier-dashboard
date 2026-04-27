@@ -1,12 +1,9 @@
-import { TwoQubitPanel } from "../components/TwoQubitPanel/TwoQubitPanel";
-import {
-  QubitComparison,
-  ConceptBox,
-} from "../../../components/ProtocolExplainer";
-import { ExperimentControlBar } from "../../../components/ExperimentControlBar";
-import { useAppState } from "../../../state/useAppState";
-import { Card } from "../../../ui/Card";
-import { Text } from "../../../ui/Text";
+import { TwoQubitPanel } from "../modules/twoQubit/components/TwoQubitPanel/TwoQubitPanel";
+import { QubitComparison, ConceptBox } from "../components/ProtocolExplainer";
+import { ExperimentControlBar } from "../components/ExperimentControlBar";
+import { useAppState } from "../state/useAppState";
+import { Card } from "../ui/Card";
+import { Text } from "../ui/Text";
 
 export function CircuitPage() {
   const { dashboard, runner, runForMode } = useAppState();

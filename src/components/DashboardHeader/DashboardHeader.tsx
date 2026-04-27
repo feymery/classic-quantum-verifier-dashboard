@@ -3,9 +3,8 @@ import type { BackendStatus } from "../../types/dashboard";
 import { Card } from "../../ui/Card";
 import {
   HeaderTitle,
-  ParameterRow,
   BackendRow,
-  InfoStrip,
+  HeaderStrip,
   IbmTokenSection,
 } from "./components";
 
@@ -17,10 +16,8 @@ export interface DashboardHeaderProps {
   // parameters
   alpha: number;
   shots: number;
-  noiseLambda: number;
   // derived / read-only
   energy: string;
-  comparisonCount: number;
   latestJobId: string | null;
   // IBM credentials
   ibmToken: string;
@@ -32,12 +29,12 @@ export interface DashboardHeaderProps {
   onBackendChange: (id: BackendId) => void;
   onAlphaChange: (value: number) => void;
   onShotsChange: (value: number) => void;
-  onNoiseLambdaChange: (value: number) => void;
   onTokenChange: (token: string) => void;
   onInstanceChange: (instance: string) => void;
   onBackendNameChange: (name: string) => void;
   onToggleShowToken: () => void;
   onConfirmToken: () => void;
+  onOpenHistory: () => void;
 }
 
 export function DashboardHeader(props: DashboardHeaderProps) {
@@ -47,9 +44,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     backendStatus,
     alpha,
     shots,
-    noiseLambda,
     energy,
-    comparisonCount,
     latestJobId,
     ibmToken,
     ibmTokenSet,
@@ -59,27 +54,18 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     onBackendChange,
     onAlphaChange,
     onShotsChange,
-    onNoiseLambdaChange,
     onTokenChange,
     onInstanceChange,
     onBackendNameChange,
     onToggleShowToken,
     onConfirmToken,
+    onOpenHistory,
   } = props;
 
   return (
-    <Card className="mb-6 rounded-lg" padded="lg" as="header">
+    <Card className="rounded-lg" padded="lg" as="header">
       <div className="flex flex-col gap-4 lg:flex-row lg:justify-between">
         <HeaderTitle />
-
-        <ParameterRow
-          alpha={alpha}
-          shots={shots}
-          noiseLambda={noiseLambda}
-          onAlphaChange={onAlphaChange}
-          onShotsChange={onShotsChange}
-          onNoiseLambdaChange={onNoiseLambdaChange}
-        />
         <BackendRow
           selectedBackend={selectedBackend}
           backend={backend}
@@ -88,10 +74,14 @@ export function DashboardHeader(props: DashboardHeaderProps) {
         />
       </div>
 
-      <InfoStrip
+      <HeaderStrip
+        alpha={alpha}
+        shots={shots}
+        onAlphaChange={onAlphaChange}
+        onShotsChange={onShotsChange}
         energy={energy}
-        comparisonCount={comparisonCount}
         latestJobId={latestJobId}
+        onOpenHistory={onOpenHistory}
       />
 
       {selectedBackend === "ibm_runtime" && (
