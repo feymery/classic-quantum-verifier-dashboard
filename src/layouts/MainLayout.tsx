@@ -17,6 +17,14 @@ export function MainLayout() {
     dashboard.setComparisonAlphas(entry.comparisonAlphas);
   };
 
+  const loadHistoryResult = (entry: (typeof runner.history)[number]) => {
+    dashboard.setAlpha(entry.alpha);
+    dashboard.setShots(entry.shots);
+    dashboard.setSelectedBackend(entry.requestedBackend);
+    dashboard.setComparisonAlphas(entry.comparisonAlphas);
+    runner.restoreResult(entry);
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -53,6 +61,9 @@ export function MainLayout() {
           job={runner.activeAsyncJob}
           onDismiss={runner.dismissActiveAsyncJob}
           onRetry={runner.retryActiveAsyncJob}
+          onResume={() => {
+            if (runner.activeAsyncJob) runner.resumeJob(runner.activeAsyncJob);
+          }}
         />
 
         <main className="my-8">
@@ -65,6 +76,7 @@ export function MainLayout() {
         onClose={() => setHistoryOpen(false)}
         entries={runner.history}
         onRestore={restoreHistoryEntry}
+        onLoadResult={loadHistoryResult}
         onClear={runner.clearHistory}
       />
     </div>

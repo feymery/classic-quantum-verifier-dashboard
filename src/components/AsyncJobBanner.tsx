@@ -8,6 +8,7 @@ interface AsyncJobBannerProps {
   job: ActiveAsyncJob | null;
   onDismiss: () => void;
   onRetry: () => void;
+  onResume: () => void;
 }
 
 function modeLabel(mode: ActiveAsyncJob["mode"]): string {
@@ -35,9 +36,11 @@ export function AsyncJobBanner({
   job,
   onDismiss,
   onRetry,
+  onResume,
 }: AsyncJobBannerProps) {
   if (!job) return null;
 
+  const isInFlight = job.status === "queued" || job.status === "running";
   const canRetry = job.status === "failed" || job.status === "done";
   const canDismiss = job.status === "done" || job.status === "failed";
 
@@ -75,6 +78,15 @@ export function AsyncJobBanner({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={onResume}
+            variant="secondary"
+            size="sm"
+            disabled={!isInFlight}
+            title="Re-attach polling to this job — useful after a page refresh or timeout"
+          >
+            Resume polling
+          </Button>
           <Button variant="secondary" size="sm" disabled>
             Cancel unavailable
           </Button>

@@ -66,6 +66,29 @@ def _expectation_x1x2_from_x_counts(counts: dict[str, int], shots: int) -> float
     return x1x2_sum / safe_shots
 
 
+def extract_x1z2(counts: dict[str, int], shots: int) -> float:
+    """Extract ⟨X₁Z₂⟩ from the (k1,k2)=(1,0) measurement circuit.
+
+    The circuit applies H to q_prover (q0) only before measurement.
+    After the basis rotation: measuring q0 in Z gives the X₁ eigenvalue;
+    measuring q1 directly in Z gives the Z₂ eigenvalue.
+    Product = X₁Z₂ eigenvalue.
+
+    Theoretical value for the honest clock state:
+        ⟨X₁Z₂⟩ = cos(α)
+    """
+    safe_shots = max(1, int(shots))
+    x1z2_sum = 0.0
+
+    for state, count in counts.items():
+        q0, q1, _ = _decode_qiskit_bitstring(state)
+        x1 = _bit_to_eigen(q0)   # H was applied → Z measurement = X eigenvalue
+        z2 = _bit_to_eigen(q1)   # direct Z measurement
+        x1z2_sum += (x1 * z2) * count
+
+    return x1z2_sum / safe_shots
+
+
 def _expectation_z1x2_from_zx_counts(counts: dict[str, int], shots: int) -> float:
     """Extract Z1X2 expectation from the ZX-basis measurement counts.
 

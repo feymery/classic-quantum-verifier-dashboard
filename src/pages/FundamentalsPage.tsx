@@ -1,4 +1,5 @@
 import { ProtocolGuide1Q } from "../modules/oneQubit/components/ProtocolGuide1Q/ProtocolGuide1Q";
+import { NoisePanel } from "../components/NoisePanel/NoisePanel";
 import { useAppState } from "../state/useAppState";
 
 export function FundamentalsPage() {
@@ -12,6 +13,12 @@ export function FundamentalsPage() {
       </p>
 
       <ProtocolGuide1Q alpha={dashboard.alpha} />
+
+      <NoisePanel
+        alpha={dashboard.alpha}
+        noiseLambda={dashboard.noiseLambda}
+        onNoiseLambdaChange={dashboard.setNoiseLambda}
+      />
     </div>
   );
 }

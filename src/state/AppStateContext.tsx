@@ -26,9 +26,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const runForMode = useCallback(
     (mode: RunMode) => {
-      const activeTab = mode === "twoQ" ? 1 : 0;
       runner.runExperiment({
-        activeTab,
+        mode,
         alpha: dashboard.alpha,
         shots: dashboard.shots,
         backend: dashboard.selectedBackend,

@@ -6,6 +6,7 @@ interface RunHistoryDrawerProps {
   onClose: () => void;
   entries: RunHistoryEntry[];
   onRestore: (entry: RunHistoryEntry) => void;
+  onLoadResult: (entry: RunHistoryEntry) => void;
   onClear: () => void;
 }
 
@@ -14,6 +15,7 @@ export function RunHistoryDrawer({
   onClose,
   entries,
   onRestore,
+  onLoadResult,
   onClear,
 }: RunHistoryDrawerProps) {
   if (!open) return null;
@@ -53,6 +55,10 @@ export function RunHistoryDrawer({
             entries={entries}
             onRestore={(entry) => {
               onRestore(entry);
+              onClose();
+            }}
+            onLoadResult={(entry) => {
+              onLoadResult(entry);
               onClose();
             }}
             onClear={onClear}

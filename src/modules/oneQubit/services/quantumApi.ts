@@ -2,7 +2,7 @@
  * quantumApi.ts — unified 1Q experiment entrypoint.
  *
  * Routes every run request to the correct execution path:
- *   - "mock" / "fake_ibm"  → local simulator (simulate1Q)
+ *   - "mock"               → local simulator (simulate1Q)
  *   - "aer" / "ibm_runtime" → FastAPI backend (backendExperiment1Q),
  *                              with automatic fallback to local simulator
  *                              when the backend is unreachable.

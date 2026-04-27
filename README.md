@@ -119,6 +119,19 @@ To retheme the app, edit that block — Tailwind generates utilities from it aut
 
 ---
 
+## IBM Quantum credentials
+
+IBM API token, instance CRN, and backend name are stored in `localStorage` under the keys `qvd.ibm.*` so they survive page refreshes without requiring the user to re-enter them.
+
+**Security notes:**
+
+- `localStorage` is scoped to the browser origin and is inaccessible from other origins.
+- Credentials are never sent to any server other than the local FastAPI backend (`http://localhost:8000`).
+- **Do not deploy this dashboard on a public or shared host.** It is designed for local developer use only. On a shared host, any authenticated user of that origin could read the stored token from the browser's dev tools.
+- To clear saved credentials, use the "Clear" button in the IBM credentials section or run `localStorage.clear()` in the browser console.
+
+---
+
 ## How the experiment runs (end-to-end)
 
 ``` text
