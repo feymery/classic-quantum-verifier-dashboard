@@ -12,7 +12,7 @@ import { buildTrapState } from "../physics/traps";
 import { TrapCard } from "./TrapCard";
 import { ProbBars } from "./ProbBars";
 import { EnergyGauge } from "./EnergyGauge";
-import { TrapCircuitDiagram } from "./TrapCircuitDiagram";
+import { TrapCircuitDiagram2Q } from "./TrapCircuitDiagram";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -46,7 +46,7 @@ function ConceptBox({ mode }: { mode: "honest" | "trap1" }) {
           color: "#86efac",
         }}
       >
-        <span className="mr-2  font-semibold">✓ HONEST PROVER</span>
+        <span className="mr-2 font-semibold">✓ HONEST PROVER</span>
         El probador aplica U(α) correctamente. El estado del reloj cuántico
         lleva coherencia temporal, lo que se manifiesta como correlaciones XY en
         el Hamiltoniano. La energía medida cae por debajo del umbral de
@@ -63,7 +63,7 @@ function ConceptBox({ mode }: { mode: "honest" | "trap1" }) {
         color: "#fca5a5",
       }}
     >
-      <span className="mr-2  font-semibold">✗ TRAMPA DETECTADA</span>
+      <span className="mr-2 font-semibold">✗ TRAMPA DETECTADA</span>
       El probador omitió <span className="">H(q_clock)</span>,{" "}
       <span className="">RY(α/2)</span> y <span className="">CZ</span>. El
       estado clásico <span className="">|00⟩</span> no tiene superposición
@@ -198,7 +198,7 @@ export function Trap1Card() {
             </button>
           )}
         </div>
-        <TrapCircuitDiagram
+        <TrapCircuitDiagram2Q
           alpha={alpha}
           showTrap={isTrap}
           highlightDiff={showDiff}

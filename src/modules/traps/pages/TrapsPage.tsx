@@ -7,6 +7,7 @@
 
 import { Fragment } from "react";
 import { Trap1Card } from "../components/Trap1Card";
+import { ClassicalStateTrap } from "../components/ClassicalStateTrap";
 import { TrapCard } from "../components/TrapCard";
 
 // ── Definición de trampas ─────────────────────────────────────────────────────
@@ -21,6 +22,11 @@ type PendingTrap = {
 type TrapEntry = ActiveTrap | PendingTrap;
 
 const TRAPS: TrapEntry[] = [
+  {
+    kind: "active",
+    key: "classicalStateTrap",
+    node: <ClassicalStateTrap />,
+  },
   { kind: "active", key: "trap1", node: <Trap1Card /> },
   {
     kind: "pending",
@@ -59,7 +65,7 @@ export function TrapsPage() {
             módulo de trampas
           </span>
         </div>
-        <h1 className=" text-xl font-bold" style={{ color: "#ddd9ee" }}>
+        <h1 className="text-xl font-bold " style={{ color: "#ddd9ee" }}>
           Trampas del Protocolo
         </h1>
         <p className="mt-1 max-w-2xl text-[13px]" style={{ color: "#9490a8" }}>

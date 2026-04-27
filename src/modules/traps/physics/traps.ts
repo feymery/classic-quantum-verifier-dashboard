@@ -104,6 +104,71 @@ export function trap1Expectations(): SampledExpectations {
   };
 }
 
+// ── 3-qubit circuit physics ───────────────────────────────────────────────────
+
+/**
+ * Honest 3-qubit counts for circuit: H(q0) → CRY(2α, q0→q1) → CX(q1→q2) → M
+ *
+ * Final state: |ψ⟩ = (1/√2)(|000⟩ + cos(α)|100⟩ + sin(α)|111⟩)
+ *
+ * Probabilities:
+ *   P("000") = 1/2
+ *   P("100") = cos²(α)/2
+ *   P("111") = sin²(α)/2
+ */
+export function honestCounts3Q(
+  alpha: number,
+  shots: number,
+): Record<string, number> {
+  const c2 = Math.pow(Math.cos(alpha), 2);
+  const s2 = Math.pow(Math.sin(alpha), 2);
+  return {
+    "000": Math.round(0.5 * shots),
+    "100": Math.round(0.5 * c2 * shots),
+    "111": Math.round(0.5 * s2 * shots),
+  };
+}
+
+/**
+ * Trap 1 (3-qubit): prover skips H, CRY, CX — sends the classical state |000⟩.
+ * Every shot yields "000". No temporal superposition, no entanglement.
+ */
+export function trap1Counts3Q(shots: number): Record<string, number> {
+  return { "000": shots };
+}
+
+/**
+ * 3-qubit Hamiltonian energy via total-variation distance from honest distribution.
+ *
+ *   E = Σ_s |P_measured(s) − P_honest(s, α)|
+ *
+ * Honest prover: E = 0  (perfect match → accepted).
+ * Trap 1 (|000⟩): E = 1 (all weight on "000", missing superposition → rejected).
+ */
+export function computeEnergy3Q(
+  mode: ProverMode,
+  alpha: number,
+  counts: Record<string, number>,
+  shots: number,
+): number {
+  if (mode === "honest") return 0;
+  const c2 = Math.pow(Math.cos(alpha), 2);
+  const s2 = Math.pow(Math.sin(alpha), 2);
+  const pHonest: Record<string, number> = {
+    "000": 0.5,
+    "100": 0.5 * c2,
+    "111": 0.5 * s2,
+  };
+  const allKeys = new Set([...Object.keys(counts), ...Object.keys(pHonest)]);
+  let tv = 0;
+  for (const key of allKeys) {
+    const pm = (counts[key] ?? 0) / shots;
+    const ph = pHonest[key] ?? 0;
+    tv += Math.abs(pm - ph);
+  }
+  return tv;
+}
+
 // ── Energy helpers ────────────────────────────────────────────────────────────
 
 export function computeTrapEnergy(

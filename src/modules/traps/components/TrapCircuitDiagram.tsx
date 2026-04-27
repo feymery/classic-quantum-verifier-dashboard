@@ -1,5 +1,5 @@
 /**
- * TrapCircuitDiagram.tsx — Side-by-side SVG diagrams comparing
+ * TrapCircuitDiagram2Q.tsx — Side-by-side SVG diagrams comparing
  * the honest circuit with the Trap 1 classical shortcut.
  *
  * Honest:  H(q1) → RY(α/2) → CZ → RY(-α/2) → measure
@@ -7,6 +7,15 @@
  *
  * When highlightDiff=true the missing gates pulse red on the trap side.
  */
+
+import {
+  GateBox,
+  CtrlDot,
+  WireLine,
+  QubitLabel,
+  SimpleMeasBox,
+  RedCross,
+} from "../../../components/CircuitDiagram2Q/components";
 
 interface Props {
   alpha: number;
@@ -22,105 +31,7 @@ const WIRE_START = 32;
 const WIRE_END = W - 8;
 const GATE_R = 11;
 
-function Wire({ y }: { y: number }) {
-  return (
-    <line
-      x1={WIRE_START}
-      y1={y}
-      x2={WIRE_END}
-      y2={y}
-      stroke="#3d3b4a"
-      strokeWidth={1.5}
-    />
-  );
-}
-
-function GateBox({
-  x,
-  y,
-  label,
-  color = "#a78bfa",
-  faded = false,
-}: {
-  x: number;
-  y: number;
-  label: string;
-  color?: string;
-  faded?: boolean;
-}) {
-  return (
-    <g opacity={faded ? 0.25 : 1}>
-      <rect
-        x={x - GATE_R}
-        y={y - GATE_R}
-        width={GATE_R * 2}
-        height={GATE_R * 2}
-        rx={4}
-        fill="#1e1c2a"
-        stroke={color}
-        strokeWidth={1.2}
-      />
-      <text
-        x={x}
-        y={y + 4}
-        textAnchor="middle"
-        fill={color}
-        fontSize={8}
-        fontFamily="monospace"
-      >
-        {label}
-      </text>
-    </g>
-  );
-}
-
-function CtrlDot({ x, y }: { x: number; y: number }) {
-  return <circle cx={x} cy={y} r={3} fill="#6b6780" />;
-}
-
-function Qubit({ y, label }: { y: number; label: string }) {
-  return (
-    <text
-      x={4}
-      y={y + 4}
-      fontSize={8}
-      fill="#6b6780"
-      fontFamily="monospace"
-      textAnchor="start"
-    >
-      {label}
-    </text>
-  );
-}
-
-function MeasureBox({ x, y }: { x: number; y: number }) {
-  return (
-    <g>
-      <rect
-        x={x - GATE_R}
-        y={y - GATE_R}
-        width={GATE_R * 2}
-        height={GATE_R * 2}
-        rx={4}
-        fill="#1e1c2a"
-        stroke="#4b4860"
-        strokeWidth={1}
-      />
-      <text
-        x={x}
-        y={y + 4}
-        textAnchor="middle"
-        fill="#6b6780"
-        fontSize={7}
-        fontFamily="monospace"
-      >
-        M
-      </text>
-    </g>
-  );
-}
-
-export function TrapCircuitDiagram({
+export function TrapCircuitDiagram2Q({
   alpha,
   showTrap = false,
   highlightDiff = false,
@@ -140,16 +51,22 @@ export function TrapCircuitDiagram({
           viewBox={`0 0 ${W} ${H_SVG}`}
           style={{ background: "#131217", borderRadius: 8 }}
         >
-          <Wire y={Y_TOP} />
-          <Wire y={Y_BOT} />
-          <Qubit y={Y_TOP} label="q_clk" />
-          <Qubit y={Y_BOT} label="q_prv" />
+          <WireLine x1={WIRE_START} y={Y_TOP} x2={WIRE_END} />
+          <WireLine x1={WIRE_START} y={Y_BOT} x2={WIRE_END} />
+          <QubitLabel y={Y_TOP} label="q_clk" />
+          <QubitLabel y={Y_BOT} label="q_prv" />
 
           {/* H on q_clock */}
-          <GateBox x={60} y={Y_TOP} label="H" color="#a78bfa" />
+          <GateBox x={60} y={Y_TOP} label="H" color="#a78bfa" compact />
 
           {/* RY(α/2) */}
-          <GateBox x={110} y={Y_BOT} label={`RY\n+α/2`} color="#60a5fa" />
+          <GateBox
+            x={110}
+            y={Y_BOT}
+            label={`RY\n+α/2`}
+            color="#60a5fa"
+            compact
+          />
 
           {/* CZ */}
           <line
@@ -161,14 +78,20 @@ export function TrapCircuitDiagram({
             strokeWidth={1}
           />
           <CtrlDot x={155} y={Y_TOP} />
-          <GateBox x={155} y={Y_BOT} label="CZ" color="#60a5fa" />
+          <GateBox x={155} y={Y_BOT} label="CZ" color="#60a5fa" compact />
 
           {/* RY(-α/2) */}
-          <GateBox x={205} y={Y_BOT} label={`RY\n-α/2`} color="#60a5fa" />
+          <GateBox
+            x={205}
+            y={Y_BOT}
+            label={`RY\n-α/2`}
+            color="#60a5fa"
+            compact
+          />
 
           {/* Measure */}
-          <MeasureBox x={290} y={Y_TOP} />
-          <MeasureBox x={290} y={Y_BOT} />
+          <SimpleMeasBox x={290} y={Y_TOP} size={GATE_R} />
+          <SimpleMeasBox x={290} y={Y_BOT} size={GATE_R} />
 
           {/* Alpha label */}
           <text
@@ -204,10 +127,10 @@ export function TrapCircuitDiagram({
                 : "1px solid transparent",
           }}
         >
-          <Wire y={Y_TOP} />
-          <Wire y={Y_BOT} />
-          <Qubit y={Y_TOP} label="q_clk" />
-          <Qubit y={Y_BOT} label="q_prv" />
+          <WireLine x1={WIRE_START} y={Y_TOP} x2={WIRE_END} />
+          <WireLine x1={WIRE_START} y={Y_BOT} x2={WIRE_END} />
+          <QubitLabel y={Y_TOP} label="q_clk" />
+          <QubitLabel y={Y_BOT} label="q_prv" />
 
           {/* Missing gates — faded red crosses */}
           <GateBox
@@ -215,6 +138,7 @@ export function TrapCircuitDiagram({
             y={Y_TOP}
             label="H"
             color={missingColor}
+            compact
             faded={!showTrap}
           />
           <GateBox
@@ -222,6 +146,7 @@ export function TrapCircuitDiagram({
             y={Y_BOT}
             label="RY"
             color={missingColor}
+            compact
             faded={!showTrap}
           />
           <GateBox
@@ -229,6 +154,7 @@ export function TrapCircuitDiagram({
             y={Y_BOT}
             label="CZ"
             color={missingColor}
+            compact
             faded={!showTrap}
           />
           <GateBox
@@ -236,38 +162,21 @@ export function TrapCircuitDiagram({
             y={Y_BOT}
             label="RY"
             color={missingColor}
+            compact
             faded={!showTrap}
           />
           {showTrap && highlightDiff && (
             <>
-              {[60, 110, 155, 205].map((x) => (
-                <g key={x}>
-                  <line
-                    x1={x - GATE_R + 2}
-                    y1={x === 60 ? Y_TOP - GATE_R + 2 : Y_BOT - GATE_R + 2}
-                    x2={x + GATE_R - 2}
-                    y2={x === 60 ? Y_TOP + GATE_R - 2 : Y_BOT + GATE_R - 2}
-                    stroke="#f87171"
-                    strokeWidth={1.2}
-                    opacity={0.6}
-                  />
-                  <line
-                    x1={x + GATE_R - 2}
-                    y1={x === 60 ? Y_TOP - GATE_R + 2 : Y_BOT - GATE_R + 2}
-                    x2={x - GATE_R + 2}
-                    y2={x === 60 ? Y_TOP + GATE_R - 2 : Y_BOT + GATE_R - 2}
-                    stroke="#f87171"
-                    strokeWidth={1.2}
-                    opacity={0.6}
-                  />
-                </g>
-              ))}
+              <RedCross x={60} y={Y_TOP} size={GATE_R - 2} />
+              <RedCross x={110} y={Y_BOT} size={GATE_R - 2} />
+              <RedCross x={155} y={Y_BOT} size={GATE_R - 2} />
+              <RedCross x={205} y={Y_BOT} size={GATE_R - 2} />
             </>
           )}
 
           {/* Measure */}
-          <MeasureBox x={290} y={Y_TOP} />
-          <MeasureBox x={290} y={Y_BOT} />
+          <SimpleMeasBox x={290} y={Y_TOP} size={GATE_R} />
+          <SimpleMeasBox x={290} y={Y_BOT} size={GATE_R} />
 
           <text
             x={155}
