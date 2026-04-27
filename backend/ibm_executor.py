@@ -63,7 +63,6 @@ def submit_circuit_job(
 def get_submitted_result(
     submitted: IBMSubmittedJob,
     shots: int,
-    circuit_bits: int,
 ) -> IBMExecutionResult:
     """Fetch final result for a previously submitted IBM Runtime job."""
     start = time.perf_counter()
@@ -111,4 +110,63 @@ def run_circuit(circuit: QuantumCircuit, shots: int, client: IBMClient) -> IBMEx
         raise RuntimeError("IBM backend not initialized")
 
     submitted = submit_circuit_job(circuit, shots, client)
-    return get_submitted_result(submitted, shots, circuit_bits=circuit.num_qubits)
+    return get_submitted_result(submitted, shots)
+
+
+def run_circuits_batch(
+    circuits: list[QuantumCircuit],
+    shots: int,
+    client: IBMClient,
+) -> list[IBMExecutionResult]:
+    """Submit all circuits as a single IBM Runtime Sampler job.
+
+    Returns one IBMExecutionResult per circuit, in the same order.
+    This avoids creating one IBM job per measurement basis.
+    """
+    from qiskit_ibm_runtime import SamplerV2 as Sampler
+
+    availability = client.connect()
+    if not availability.available:
+        raise RuntimeError(availability.reason or "IBM Runtime unavailable")
+
+    backend = client.get_backend()
+    if backend is None or client.service is None:
+        raise RuntimeError("IBM backend not initialized")
+
+    pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    isa_circuits = [pm.run(c) for c in circuits]
+
+    sampler = Sampler(mode=backend)
+    start = time.perf_counter()
+    job = sampler.run([(isa,) for isa in isa_circuits], shots=max(1, int(shots)))
+    submit_ms = (time.perf_counter() - start) * 1000.0
+
+    result = job.result()
+    fetch_ms = (time.perf_counter() - start) * 1000.0
+    job_id: str = getattr(job, "job_id", lambda: "")()  # type: ignore[assignment]
+    backend_name: str = getattr(backend, "name", "ibm")
+
+    results: list[IBMExecutionResult] = []
+    for i, pub_res in enumerate(result):
+        data = pub_res.data
+        creg = next(
+            (v for v in vars(data).values() if hasattr(v, "get_counts")),
+            None,
+        )
+        if creg is None:
+            raise RuntimeError(
+                f"Unsupported IBM Runtime result format: no classical register in PUB {i}"
+            )
+        counts: dict[str, int] = {str(k): int(v) for k, v in creg.get_counts().items()}
+        results.append(
+            IBMExecutionResult(
+                counts=counts,
+                probabilities=_normalize_counts(counts, shots),
+                metadata={
+                    "job_id": job_id,
+                    "backend_name": backend_name,
+                    "execution_time_ms": fetch_ms + submit_ms,
+                },
+            )
+        )
+    return results

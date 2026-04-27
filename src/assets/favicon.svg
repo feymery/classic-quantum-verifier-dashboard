@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="926" height="752" viewBox="0 0 926 752">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#373444"/>
+      <stop offset="100%" stop-color="#2a2634"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="926" height="752" fill="url(#bg)"/>
+  <g stroke="#c9a8ef" stroke-width="4" opacity="0.68" filter="url(#glow)">
+    <path d="M0 0H926M0 150H926M0 300H926M0 450H926M0 600H926M0 752H926"/>
+    <path d="M0 0V752M140 0V752M280 0V752M420 0V752M560 0V752M700 0V752M840 0V752M926 0V752"/>
+    <path d="M0 0L280 300M140 0L420 300M280 0L560 300M420 0L700 300M560 0L840 300M700 0L926 150M0 150L140 300M140 150L280 300M280 150L420 300M420 150L560 300M560 150L700 300M700 150L840 300M840 150L926 300M0 300L140 450M140 300L280 450M280 300L420 450M420 300L560 450M560 300L700 450M700 300L840 450M840 300L926 450M0 450L140 600M140 450L280 600M280 450L420 600M420 450L560 600M560 450L700 600M700 450L840 600M840 450L926 600"/>
+    <path d="M280 0L280 300M560 0L560 300M700 150L700 450M140 0L140 300M0 150L0 450" opacity="0.55"/>
+  </g>
+  <g fill="#c9a8ef">
+    <circle cx="280" cy="100" r="18"/>
+    <circle cx="700" cy="400" r="20"/>
+  </g>
+  <g fill="#f6f2f6" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="145" y="240" font-size="120">A</text>
+    <text x="720" y="590" font-size="120">B</text>
+  </g>
+</svg>
