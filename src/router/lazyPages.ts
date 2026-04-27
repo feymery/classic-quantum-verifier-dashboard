@@ -11,7 +11,7 @@ export const VisualizationPage = lazy(async () => {
 });
 
 export const CircuitPage = lazy(async () => {
-  const module = await import("../modules/twoQubit/pages/CircuitPage");
+  const module = await import("../pages/Circuit2QPage");
   return { default: module.CircuitPage };
 });
 
@@ -21,6 +21,6 @@ export const AdversarialPage = lazy(async () => {
 });
 
 export const TrapsPage = lazy(async () => {
-  const module = await import("../modules/traps/pages/TrapsPage");
+  const module = await import("../pages/TrapsPage");
   return { default: module.TrapsPage };
 });

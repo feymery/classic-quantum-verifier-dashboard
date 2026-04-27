@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 import { TrapCard } from "./TrapCard";
 import { EnergyGauge } from "./EnergyGauge";
 import { ProbBars } from "./ProbBars";
+import { TrapCircuitDiagram2Q } from "./TrapCircuitDiagram";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -42,21 +43,6 @@ const VERDICT_SUBTITLE: Record<TrapState2Q, string> = {
   "01": "✗ Detected — H_prop exposes missing U(α) transition",
 };
 
-// ── SVG layout ──────────────────────────────────────────────────────────────────────────
-
-const SVG_W = 680;
-const SVG_H = 110;
-const Y_PROVER = 34;
-const Y_CLOCK = 76;
-const WIRE_L = 72;
-const WIRE_R = SVG_W - 20;
-const X_GATE_A = 104;
-const X_GATE_H = 230;
-const X_GATE_CRY = 400;
-const X_MEAS = SVG_W - 30;
-const GATE_W = 26;
-const GATE_H = 20;
-
 // ── Physics ───────────────────────────────────────────────────────────────────────────
 
 interface EnergyBreakdown {
@@ -74,7 +60,12 @@ function trapEnergyBreakdown(
   const H_out = validOutput ? 0 : 0.5;
   const H_in_penalty = trapState === "10" ? 1.5 : 0.25;
   const H_prop = 1.5 * (1 - Math.cos(2 * alpha) / 2);
-  return { H_out, H_in: H_in_penalty, H_prop, total: H_out + H_in_penalty + H_prop };
+  return {
+    H_out,
+    H_in: H_in_penalty,
+    H_prop,
+    total: H_out + H_in_penalty + H_prop,
+  };
 }
 
 function honestCounts2Q(alpha: number, shots: number): Record<string, number> {
@@ -90,7 +81,10 @@ function honestCounts2Q(alpha: number, shots: number): Record<string, number> {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-2 text-[10px] uppercase tracking-widest" style={{ color: "#6b6780" }}>
+    <p
+      className="mb-2 text-[10px] uppercase tracking-widest"
+      style={{ color: "#6b6780" }}
+    >
       {children}
     </p>
   );
@@ -98,195 +92,44 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ── ConceptBox ────────────────────────────────────────────────────────────────────
 
-function ConceptBox({ mode, trapState }: { mode: Mode; trapState: TrapState2Q }) {
+function ConceptBox({
+  mode,
+  trapState,
+}: {
+  mode: Mode;
+  trapState: TrapState2Q;
+}) {
   if (mode === "honest") {
     return (
       <div
         className="rounded-lg border px-4 py-3 text-[12px] leading-relaxed"
-        style={{ borderColor: "#1e3a2a", background: "#0f1f16", color: "#86efac" }}
+        style={{
+          borderColor: "#1e3a2a",
+          background: "#0f1f16",
+          color: "#86efac",
+        }}
       >
         <span className="mr-2 font-semibold">✓ HONEST PROVER</span>
-        The prover applies H and CRY(2α) correctly. The clock qubit enters superposition,
-        and the Hamiltonian sees coherent temporal correlations across all three time
-        steps simultaneously. Energy = 0 — accepted.
+        The prover applies H and CRY(2α) correctly. The clock qubit enters
+        superposition, and the Hamiltonian sees coherent temporal correlations
+        across all three time steps simultaneously. Energy = 0 — accepted.
       </div>
     );
   }
   return (
     <div
       className="rounded-lg border px-4 py-3 text-[12px] leading-relaxed"
-      style={{ borderColor: "#3a1e1e", background: "#1f0f0f", color: "#fca5a5" }}
+      style={{
+        borderColor: "#3a1e1e",
+        background: "#1f0f0f",
+        color: "#fca5a5",
+      }}
     >
       <span className="mr-2 font-semibold">✗ TRAP DETECTED</span>
-      The prover skipped H and CRY(2α) entirely and submitted the classical state{" "}
-      <span className="font-mono">|{trapState}⟩</span> with no temporal superposition.{" "}
-      {VERDICT_SUBTITLE[trapState]}
+      The prover skipped H and CRY(2α) entirely and submitted the classical
+      state <span className="font-mono">|{trapState}⟩</span> with no temporal
+      superposition. {VERDICT_SUBTITLE[trapState]}
     </div>
-  );
-}
-
-// ── SVG helpers ─────────────────────────────────────────────────────────────────────
-
-function SvgGateBox({
-  x,
-  y,
-  label,
-  sub,
-  color = "#a78bfa",
-  faded = false,
-}: {
-  x: number;
-  y: number;
-  label: string;
-  sub?: string;
-  color?: string;
-  faded?: boolean;
-}) {
-  const w = sub ? 62 : GATE_W;
-  return (
-    <g opacity={faded ? 0.22 : 1}>
-      <rect
-        x={x - w / 2}
-        y={y - GATE_H / 2}
-        width={w}
-        height={GATE_H}
-        rx={3}
-        fill="#1e1c2a"
-        stroke={color}
-        strokeWidth={1.2}
-      />
-      <text
-        x={x}
-        y={y + (sub ? -1 : 4)}
-        textAnchor="middle"
-        fill={color}
-        fontSize={sub ? 7.5 : 9}
-        fontFamily="monospace"
-      >
-        {label}
-      </text>
-      {sub && (
-        <text
-          x={x}
-          y={y + 8}
-          textAnchor="middle"
-          fill={color}
-          fontSize={6}
-          fontFamily="monospace"
-          opacity={0.75}
-        >
-          {sub}
-        </text>
-      )}
-    </g>
-  );
-}
-
-function SvgCross({ x, y }: { x: number; y: number }) {
-  return (
-    <g>
-      <line x1={x - 9} y1={y - 9} x2={x + 9} y2={y + 9} stroke={TRAP_COLOR} strokeWidth={1.5} opacity={0.75} />
-      <line x1={x + 9} y1={y - 9} x2={x - 9} y2={y + 9} stroke={TRAP_COLOR} strokeWidth={1.5} opacity={0.75} />
-    </g>
-  );
-}
-
-function SvgMeasBox({ x, y }: { x: number; y: number }) {
-  return (
-    <g>
-      <rect x={x - 12} y={y - 10} width={24} height={20} rx={3} fill="#1e1c2a" stroke="#3d3b4a" strokeWidth={1} />
-      <text x={x} y={y + 4} textAnchor="middle" fill="#6b6780" fontSize={8} fontFamily="monospace">
-        M
-      </text>
-    </g>
-  );
-}
-
-// ── Circuit SVG ────────────────────────────────────────────────────────────────────────
-
-function CircuitSVG({
-  alpha,
-  trapState,
-  isTrap,
-  highlightDiff,
-}: {
-  alpha: number;
-  trapState: TrapState2Q;
-  isTrap: boolean;
-  highlightDiff: boolean;
-}) {
-  const gateColor = isTrap ? "#6b6780" : "#a78bfa";
-  const cryColor = isTrap ? "#6b6780" : "#6366f1";
-  const fadeTrap = isTrap && highlightDiff;
-
-  return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-      style={{ background: "#1e1c2a", borderRadius: 8 }}
-      role="img"
-      aria-label="2-qubit clock-state circuit"
-    >
-      {/* qubit labels */}
-      <text x={8} y={Y_PROVER + 4} textAnchor="start" fill="#6b6780" fontSize={9} fontFamily="monospace">
-        |0⟩_prover
-      </text>
-      <text x={8} y={Y_CLOCK + 4} textAnchor="start" fill="#6b6780" fontSize={9} fontFamily="monospace">
-        |0⟩_clock
-      </text>
-
-      {/* wires */}
-      <line x1={WIRE_L} y1={Y_PROVER} x2={WIRE_R} y2={Y_PROVER} stroke="#3d3b4a" strokeWidth={1.5} />
-      <line x1={WIRE_L} y1={Y_CLOCK} x2={WIRE_R} y2={Y_CLOCK} stroke="#3d3b4a" strokeWidth={1.5} />
-
-      {/* a gate — identity, always present */}
-      <SvgGateBox x={X_GATE_A} y={Y_PROVER} label="a" color="#6b6780" />
-
-      {/* H gate */}
-      <SvgGateBox x={X_GATE_H} y={Y_CLOCK} label="H" color={gateColor} faded={fadeTrap} />
-      {fadeTrap && <SvgCross x={X_GATE_H} y={Y_CLOCK} />}
-
-      {/* CRY gate */}
-      <g opacity={fadeTrap ? 0.22 : 1}>
-        <line
-          x1={X_GATE_CRY}
-          y1={Y_PROVER + GATE_H / 2 + 1}
-          x2={X_GATE_CRY}
-          y2={Y_CLOCK - 5}
-          stroke={cryColor}
-          strokeWidth={1.2}
-        />
-        <circle cx={X_GATE_CRY} cy={Y_CLOCK} r={4} fill={cryColor} />
-      </g>
-      <SvgGateBox
-        x={X_GATE_CRY}
-        y={Y_PROVER}
-        label="CRY"
-        sub={`2α=${(2 * alpha).toFixed(2)}`}
-        color={cryColor}
-        faded={fadeTrap}
-      />
-      {fadeTrap && <SvgCross x={X_GATE_CRY} y={Y_PROVER} />}
-
-      {/* Measurement */}
-      <SvgMeasBox x={X_MEAS} y={Y_PROVER} />
-      <SvgMeasBox x={X_MEAS} y={Y_CLOCK} />
-
-      {/* Trap annotation */}
-      {isTrap && (
-        <text
-          x={SVG_W / 2}
-          y={SVG_H - 5}
-          textAnchor="middle"
-          fill={TRAP_COLOR}
-          fontSize={8}
-          fontFamily="monospace"
-          opacity={0.65}
-        >
-          submits |{trapState}⟩ directly — no quantum evolution
-        </text>
-      )}
-    </svg>
   );
 }
 
@@ -294,7 +137,13 @@ function CircuitSVG({
 
 const ALL_STATES: TrapState2Q[] = ["00", "10", "11", "01"];
 
-function ZBasisTable({ trapState, alpha }: { trapState: TrapState2Q; alpha: number }) {
+function ZBasisTable({
+  trapState,
+  alpha,
+}: {
+  trapState: TrapState2Q;
+  alpha: number;
+}) {
   const hProbs: Record<TrapState2Q, number> = {
     "00": (1 + Math.cos(alpha)) / 4,
     "01": (1 - Math.cos(alpha)) / 4,
@@ -305,7 +154,10 @@ function ZBasisTable({ trapState, alpha }: { trapState: TrapState2Q; alpha: numb
     "This outcome appears in the honest distribution — Z-basis alone cannot tell honest from trap. Only H_prop reveals the deception.";
 
   return (
-    <table className="w-full text-right text-[11px]" style={{ borderCollapse: "collapse" }}>
+    <table
+      className="w-full text-right text-[11px]"
+      style={{ borderCollapse: "collapse" }}
+    >
       <thead>
         <tr>
           {["Outcome", "Honest prob.", "Trap prob.", "Note"].map((h) => (
@@ -333,7 +185,10 @@ function ZBasisTable({ trapState, alpha }: { trapState: TrapState2Q; alpha: numb
                 borderBottom: "1px solid #1e1c2a",
               }}
             >
-              <td className="py-1 pl-2 text-left font-mono" style={{ color: isAmber ? "#fbbf24" : "#ddd9ee" }}>
+              <td
+                className="py-1 pl-2 text-left font-mono"
+                style={{ color: isAmber ? "#fbbf24" : "#ddd9ee" }}
+              >
                 |{state}⟩{" "}
                 {isAmber && (
                   <span className="text-[9px]" title={amberTooltip}>
@@ -344,11 +199,21 @@ function ZBasisTable({ trapState, alpha }: { trapState: TrapState2Q; alpha: numb
               <td className="py-1 pl-2 font-mono" style={{ color: "#9490a8" }}>
                 {hP.toFixed(3)}
               </td>
-              <td className="py-1 pl-2 font-mono" style={{ color: tP === 1 ? TRAP_COLOR : "#4b4860" }}>
+              <td
+                className="py-1 pl-2 font-mono"
+                style={{ color: tP === 1 ? TRAP_COLOR : "#4b4860" }}
+              >
                 {tP.toFixed(1)}
               </td>
-              <td className="py-1 pl-2 text-left" style={{ color: "#6b6780", fontStyle: "italic" }}>
-                {state === "10" ? "H_in penalty" : isAmber ? "Appears in honest dist." : "—"}
+              <td
+                className="py-1 pl-2 text-left"
+                style={{ color: "#6b6780", fontStyle: "italic" }}
+              >
+                {state === "10"
+                  ? "H_in penalty"
+                  : isAmber
+                    ? "Appears in honest dist."
+                    : "—"}
               </td>
             </tr>
           );
@@ -432,7 +297,10 @@ export default function ClassicalStateTrap() {
           onChange={(e) => setAlpha(parseFloat(e.target.value))}
           className="w-full accent-violet-400"
         />
-        <div className="flex justify-between text-[10px]" style={{ color: "#4b4860" }}>
+        <div
+          className="flex justify-between text-[10px]"
+          style={{ color: "#4b4860" }}
+        >
           <span>0 (near-classical)</span>
           <span>π/4 (max entanglement)</span>
           <span>π/2 (full rotation)</span>
@@ -447,14 +315,23 @@ export default function ClassicalStateTrap() {
             value={trapState}
             onChange={(e) => setTrapState(e.target.value as TrapState2Q)}
             className="w-full rounded-lg px-3 py-2 font-mono text-[12px] outline-none"
-            style={{ background: "#1e1c2a", border: "1px solid #3d3b4a", color: "#ddd9ee" }}
+            style={{
+              background: "#1e1c2a",
+              border: "1px solid #3d3b4a",
+              color: "#ddd9ee",
+            }}
           >
             <option value="00">|00⟩ — correct input, wrong output</option>
             <option value="01">|01⟩ — may appear in honest distribution</option>
             <option value="10">|10⟩ — penalized directly by H_in</option>
-            <option value="11">|11⟩ — correct output, wrong history (hardest to detect)</option>
+            <option value="11">
+              |11⟩ — correct output, wrong history (hardest to detect)
+            </option>
           </select>
-          <p className="text-[11px]" style={{ color: "#9490a8", fontStyle: "italic" }}>
+          <p
+            className="text-[11px]"
+            style={{ color: "#9490a8", fontStyle: "italic" }}
+          >
             {STATE_HINT[trapState]}
           </p>
           <div
@@ -465,12 +342,12 @@ export default function ClassicalStateTrap() {
               color: "#fcd34d",
             }}
           >
-            <span className="mr-2 font-semibold">⚠ Hardest to detect</span>
-            A smart prover always chooses{" "}
-            <span className="font-mono">|11⟩</span> — it satisfies H_out and appears in the
-            honest measurement distribution. Only{" "}
-            <span className="font-mono">H_prop</span> reveals the deception, because the
-            quantum transition U(α) was never actually performed.
+            <span className="mr-2 font-semibold">⚠ Hardest to detect</span>A
+            smart prover always chooses <span className="font-mono">|11⟩</span>{" "}
+            — it satisfies H_out and appears in the honest measurement
+            distribution. Only <span className="font-mono">H_prop</span> reveals
+            the deception, because the quantum transition U(α) was never
+            actually performed.
           </div>
         </div>
       )}
@@ -489,24 +366,45 @@ export default function ClassicalStateTrap() {
             </button>
           )}
         </div>
-        <CircuitSVG alpha={alpha} trapState={trapState} isTrap={isTrap} highlightDiff={showDiff} />
+        <TrapCircuitDiagram2Q
+          alpha={alpha}
+          isTrap={isTrap}
+          highlightDiff={showDiff}
+          annotation={`submits |${trapState}⟩ directly — no quantum evolution`}
+        />
       </div>
 
       {/* ── measurement distribution ── */}
       <div>
-        <SectionLabel>measurement distribution ({DEFAULT_SHOTS} shots)</SectionLabel>
+        <SectionLabel>
+          measurement distribution ({DEFAULT_SHOTS} shots)
+        </SectionLabel>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[11px] font-medium" style={{ color: HONEST_COLOR }}>
+            <p
+              className="mb-2 text-[11px] font-medium"
+              style={{ color: HONEST_COLOR }}
+            >
               Honest |η(α)⟩
             </p>
-            <ProbBars counts={honestCts} shots={DEFAULT_SHOTS} accentColor={HONEST_COLOR} />
+            <ProbBars
+              counts={honestCts}
+              shots={DEFAULT_SHOTS}
+              accentColor={HONEST_COLOR}
+            />
           </div>
           <div>
-            <p className="mb-2 text-[11px] font-medium" style={{ color: isTrap ? TRAP_COLOR : "#4b4860" }}>
+            <p
+              className="mb-2 text-[11px] font-medium"
+              style={{ color: isTrap ? TRAP_COLOR : "#4b4860" }}
+            >
               Trap |{trapState}⟩
             </p>
-            <ProbBars counts={trapCts} shots={DEFAULT_SHOTS} accentColor={isTrap ? TRAP_COLOR : "#4b4860"} />
+            <ProbBars
+              counts={trapCts}
+              shots={DEFAULT_SHOTS}
+              accentColor={isTrap ? TRAP_COLOR : "#4b4860"}
+            />
           </div>
         </div>
       </div>
@@ -517,7 +415,10 @@ export default function ClassicalStateTrap() {
         <EnergyGauge energy={isTrap ? trapEnergy.total : 0} energyTheory={0} />
         {isTrap && (
           <>
-            <div className="mt-2 flex gap-4 text-[10px]" style={{ color: "#6b6780" }}>
+            <div
+              className="mt-2 flex gap-4 text-[10px]"
+              style={{ color: "#6b6780" }}
+            >
               <span>H_out = {trapEnergy.H_out.toFixed(2)}</span>
               <span>H_in = {trapEnergy.H_in.toFixed(2)}</span>
               <span style={{ color: TRAP_COLOR, fontWeight: 600 }}>
@@ -526,7 +427,10 @@ export default function ClassicalStateTrap() {
             </div>
             <p
               className="mt-1.5 text-[11px]"
-              style={{ color: trapState === "11" ? "#f59e0b" : TRAP_COLOR, fontStyle: "italic" }}
+              style={{
+                color: trapState === "11" ? "#f59e0b" : TRAP_COLOR,
+                fontStyle: "italic",
+              }}
             >
               {VERDICT_SUBTITLE[trapState]}
             </p>
