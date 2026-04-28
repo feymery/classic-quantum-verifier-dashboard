@@ -7,6 +7,7 @@ import { Text } from "../ui/Text";
 interface RunHistoryPanelProps {
   entries: RunHistoryEntry[];
   onRestore: (entry: RunHistoryEntry) => void;
+  onLoadResult: (entry: RunHistoryEntry) => void;
   onClear: () => void;
 }
 
@@ -46,6 +47,7 @@ function decisionVariant(
 export function RunHistoryPanel({
   entries,
   onRestore,
+  onLoadResult,
   onClear,
 }: RunHistoryPanelProps) {
   return (
@@ -53,7 +55,7 @@ export function RunHistoryPanel({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Text variant="caption" className="uppercase tracking-[0.24em]">
-            run timeline
+            Run History
           </Text>
           <Text variant="body" className="mt-2 font-semibold">
             Persistent experiment history
@@ -110,6 +112,15 @@ export function RunHistoryPanel({
                   <Text variant="caption" color="muted">
                     {formatTimestamp(entry.createdAt)}
                   </Text>
+                  {entry.result && (
+                    <Button
+                      onClick={() => onLoadResult(entry)}
+                      variant="primary"
+                      size="sm"
+                    >
+                      Load results
+                    </Button>
+                  )}
                   <Button
                     onClick={() => onRestore(entry)}
                     variant="secondary"

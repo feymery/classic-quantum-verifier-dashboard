@@ -72,7 +72,7 @@ export function IbmTokenSection({
               type="password"
               value={ibmToken}
               onChange={(event) => onTokenChange(event.target.value)}
-              placeholder="paste token — never stored or logged"
+              placeholder="paste token — saved locally in this browser"
               autoComplete="off"
               className="w-full px-4 py-3 text-sm border rounded-lg outline-none border-border bg-canvas text-foreground"
             />

@@ -5,7 +5,7 @@
  */
 
 import { Circuit1Q } from "./Circuit1Q";
-import { CircuitDiagram } from "../../CircuitDiagram/CircuitDiagram";
+import { CircuitDiagram2Q } from "../../CircuitDiagram2Q/CircuitDiagram2Q";
 
 interface QubitComparisonProps {
   alpha: number;
@@ -98,7 +98,7 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
           style={{ borderColor: "#34d39944", background: "#181620" }}
         >
           <SideHeader label="2-Qubit Extension" color="#34d399" />
-          <CircuitDiagram alpha={alpha} />
+          <CircuitDiagram2Q alpha={alpha} />
           <p className=" text-[9px]" style={{ color: "#4a4760" }}>
             3 qubits · ctrl-U(α) + CNOT · entangled work register
           </p>

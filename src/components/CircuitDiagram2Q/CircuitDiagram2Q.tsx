@@ -1,5 +1,5 @@
 /**
- * CircuitDiagram/index.tsx
+ * CircuitDiagram2Q/index.tsx
  * SVG schematic of the 3-qubit clock-state preparation circuit.
  *
  * Layout (left → right):
@@ -17,7 +17,7 @@ import {
   roleStyle,
 } from "./components/CircuitTextStyles";
 
-interface CircuitDiagramProps {
+interface CircuitDiagram2QProps {
   alpha: number;
 }
 
@@ -44,7 +44,7 @@ const CNOT_COLOR = "#34d399";
 const MEAS_COLOR = "#e8a020";
 const ACTIVE_COLOR = "#a78bfa";
 
-export function CircuitDiagram({ alpha }: CircuitDiagramProps) {
+export function CircuitDiagram2Q({ alpha }: CircuitDiagram2QProps) {
   const alphaStr = alpha.toFixed(3);
 
   return (

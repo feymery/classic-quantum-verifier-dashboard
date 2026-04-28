@@ -3,15 +3,23 @@ import { BACKENDS, type BackendId } from "../utils/constants";
 import { energyFromAlpha } from "../utils/physics";
 import { formatEnergy } from "../utils/physics";
 import { fetchJson } from "../services/apiClient";
+import { useIbmCredentials } from "./useIbmCredentials";
 
 export function useDashboardState() {
   const [alpha, setAlpha] = useState<number>(Math.PI / 4);
   const [shots, setShots] = useState<number>(1024);
   const [selectedBackend, setSelectedBackend] = useState<BackendId>("mock");
-  const [ibmToken, setIbmToken] = useState<string>("");
-  const [ibmTokenSet, setIbmTokenSet] = useState<boolean>(false);
-  const [ibmInstance, setIbmInstance] = useState<string>("");
-  const [ibmBackendName, setIbmBackendName] = useState<string>("");
+  const {
+    ibmToken,
+    ibmTokenSet,
+    ibmInstance,
+    ibmBackendName,
+    setIbmToken,
+    setIbmTokenSet,
+    setIbmInstance,
+    setIbmBackendName,
+    clearIbmCredentials,
+  } = useIbmCredentials();
   const [noiseLambda, setNoiseLambda] = useState<number>(0.05);
   const [alphaFake, setAlphaFake] = useState<number>(1.1);
   const [comparisonAlphas, setComparisonAlphas] = useState<number[]>([]);
@@ -44,7 +52,7 @@ export function useDashboardState() {
       setIbmTokenSet(true);
       setShowToken(false);
     }
-  }, [ibmToken, ibmInstance, ibmBackendName]);
+  }, [ibmToken, ibmInstance, ibmBackendName, setIbmTokenSet]);
 
   const toggleShowToken = useCallback(() => setShowToken((v) => !v), []);
 
@@ -74,6 +82,7 @@ export function useDashboardState() {
     setAlphaFake,
     setComparisonAlphas,
     setShowToken,
+    clearIbmCredentials,
     confirmToken,
     toggleShowToken,
     updateShotsFromEvent(event: ChangeEvent<HTMLInputElement>) {

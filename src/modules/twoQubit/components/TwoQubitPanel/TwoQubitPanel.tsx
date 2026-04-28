@@ -1,4 +1,4 @@
-import { CircuitDiagram } from "../../../../components/CircuitDiagram/CircuitDiagram";
+import { CircuitDiagram2Q } from "../../../../components/CircuitDiagram2Q/CircuitDiagram2Q";
 import { ExtendedMeasurements } from "./components/ExtendedMeasurements";
 import { ComplexityComparison } from "./components/ComplexityComparison";
 import { buildClockState2Q } from "../../physics/hamiltonian2Q";
@@ -54,7 +54,7 @@ export function TwoQubitPanel({
             </span>
           </div>
 
-          <CircuitDiagram alpha={alpha} />
+          <CircuitDiagram2Q alpha={alpha} />
 
           {/* Amplitude summary */}
           <div

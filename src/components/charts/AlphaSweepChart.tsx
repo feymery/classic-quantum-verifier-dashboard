@@ -1,13 +1,12 @@
 /**
  * AlphaSweepChart.tsx
- * Reproduces Figure 2(b) of Stricker et al.:
- *   E_est ± σ_E vs α with the accept / reject threshold bands.
+ * Reproduces Figures 2(a) and 2(b) of Stricker et al. in a single panel:
  *
- * Uses a ComposedChart:
- *   • Area between (energy_est - error) and (energy_est + error) — uncertainty band
- *   • Line for E_theory = sin²(α)
- *   • Scatter for the measured E_est points, coloured by verdict
- *   • ReferenceLine at 0.4 (accept) and 0.5 (reject)
+ *   (a) Expectation values ⟨O⟩ vs α for the 6 operators
+ *       Z₁Z₂, Z₁, Z₂, Z₁X₂, X₁Z₂, X₁X₂
+ *   (b) Estimated energy E_est ± σ_E vs α with accept/reject threshold bands.
+ *
+ * A single "Run Sweep" button triggers both charts from the same backend call.
  */
 
 import { useState, useCallback } from "react";
@@ -29,6 +28,7 @@ import { CHART_COLORS, CHART_HEIGHT, axisProps, gridProps } from "./chartTheme";
 import { runAlphaSweep, type AlphaSweepPoint } from "../../services/sweepApi";
 import { THRESHOLD_LOW, THRESHOLD_HIGH } from "../../utils/constants";
 import { formatAlpha } from "../../utils/alphaUtils";
+import { ExpectationSweepChart } from "./ExpectationSweepChart";
 
 // ── Chart data shape ──────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ function SweepTooltip({ active, payload }: any) {
   const verdictColor = VERDICT_COLOR[d.verdict];
   return (
     <div
-      className="px-3 py-2  text-xs border rounded-lg"
+      className="px-3 py-2 text-xs border rounded-lg"
       style={{
         background: CHART_COLORS.tooltip,
         borderColor: CHART_COLORS.tooltipBorder,
@@ -116,11 +116,16 @@ interface AlphaSweepChartProps {
   nPoints?: number;
 }
 
+interface SweepData {
+  raw: AlphaSweepPoint[];
+  chart: SweepChartPoint[];
+}
+
 export function AlphaSweepChart({
   shots = 1024,
   nPoints = 30,
 }: AlphaSweepChartProps) {
-  const [data, setData] = useState<SweepChartPoint[] | null>(null);
+  const [data, setData] = useState<SweepData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,7 +134,7 @@ export function AlphaSweepChart({
     setError(null);
     try {
       const result = await runAlphaSweep(shots, nPoints);
-      setData(toChartPoints(result.points));
+      setData({ raw: result.points, chart: toChartPoints(result.points) });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sweep failed");
     } finally {
@@ -150,7 +155,7 @@ export function AlphaSweepChart({
               sweep
             </span>
             <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
-              E_est ± σ vs α — Figure 2(b)
+              Figure 2 — expectation values &amp; energy vs α
             </span>
           </div>
 
@@ -165,50 +170,9 @@ export function AlphaSweepChart({
           </Button>
         </div>
 
-        {/* Legend */}
-        {data && (
-          <div
-            className="flex flex-wrap items-center gap-4 text-[10px] "
-            style={{ color: "#9490a8" }}
-          >
-            <span className="flex items-center gap-1">
-              <span style={{ color: CHART_COLORS.theoretical }}>——</span>{" "}
-              E_theory = sin²(α)
-            </span>
-            <span className="flex items-center gap-1">
-              <span
-                className="inline-block w-4 h-2 rounded-sm"
-                style={{ background: "rgba(167,139,250,0.15)" }}
-              />
-              ±σ band
-            </span>
-            <span className="flex items-center gap-1">
-              <span
-                className="inline-block w-2 h-2 rounded-lg"
-                style={{ background: CHART_COLORS.accept }}
-              />
-              accept
-            </span>
-            <span className="flex items-center gap-1">
-              <span
-                className="inline-block w-2 h-2 rounded-lg"
-                style={{ background: CHART_COLORS.thresholdHigh }}
-              />
-              marginal
-            </span>
-            <span className="flex items-center gap-1">
-              <span
-                className="inline-block w-2 h-2 rounded-lg"
-                style={{ background: CHART_COLORS.reject }}
-              />
-              reject
-            </span>
-          </div>
-        )}
-
         {/* Error */}
         {error && (
-          <p className=" text-xs" style={{ color: CHART_COLORS.reject }}>
+          <p className="text-xs " style={{ color: CHART_COLORS.reject }}>
             {error}
           </p>
         )}
@@ -218,7 +182,7 @@ export function AlphaSweepChart({
           <div
             className="flex items-center justify-center rounded-lg"
             style={{
-              height: CHART_HEIGHT,
+              height: CHART_HEIGHT + 40,
               background: "rgba(14,13,20,0.4)",
               border: "1px dashed #2d2b3a",
               color: "#9490a8",
@@ -226,127 +190,182 @@ export function AlphaSweepChart({
               fontFamily: "'Courier New', monospace",
             }}
           >
-            click Run Sweep to reproduce Figure 2(b)
+            click Run Sweep to reproduce Figures 2(a) and 2(b)
           </div>
         )}
 
-        {/* Chart */}
+        {/* Side-by-side: (a) left, (b) right */}
         {data && (
-          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-            <ComposedChart
-              data={data}
-              margin={{ top: 8, right: 16, bottom: 4, left: -10 }}
-            >
-              <CartesianGrid {...gridProps} />
-              <XAxis
-                dataKey="alpha"
-                {...axisProps}
-                tickFormatter={(v: number) => formatAlpha(v)}
-                domain={[0, Math.PI / 2]}
-                type="number"
-                label={{
-                  value: "α (radians)",
-                  position: "insideBottom",
-                  offset: -2,
-                  style: {
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: 9,
-                    fill: "#6b6780",
-                  },
-                }}
-              />
-              <YAxis
-                {...axisProps}
-                domain={[0, 1.05]}
-                tickFormatter={(v: number) => v.toFixed(1)}
-                label={{
-                  value: "E",
-                  angle: -90,
-                  position: "insideLeft",
-                  offset: 14,
-                  style: {
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: 9,
-                    fill: "#6b6780",
-                  },
-                }}
-              />
-              <Tooltip content={<SweepTooltip />} />
+          <div className="grid grid-cols-2 gap-4">
+            {/* ── Figure 2(a) ── */}
+            <ExpectationSweepChart points={data.raw} />
 
-              {/* Threshold lines */}
-              <ReferenceLine
-                y={THRESHOLD_LOW}
-                stroke={CHART_COLORS.thresholdLow}
-                strokeDasharray="4 3"
-                strokeWidth={1}
-                label={{
-                  value: `accept < ${THRESHOLD_LOW}`,
-                  position: "insideTopRight",
-                  style: {
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: 8,
-                    fill: CHART_COLORS.thresholdLow,
-                  },
-                }}
-              />
-              <ReferenceLine
-                y={THRESHOLD_HIGH}
-                stroke={CHART_COLORS.thresholdHigh}
-                strokeDasharray="4 3"
-                strokeWidth={1}
-                label={{
-                  value: `reject ≥ ${THRESHOLD_HIGH}`,
-                  position: "insideTopRight",
-                  style: {
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: 8,
-                    fill: CHART_COLORS.thresholdHigh,
-                  },
-                }}
-              />
+            {/* ── Figure 2(b) ── */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className="rounded px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider"
+                  style={{ background: "#1e1c2a", color: "#9490a8" }}
+                >
+                  (b)
+                </span>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: "#ddd9ee" }}
+                >
+                  E_est ± σ vs α
+                </span>
+              </div>
 
-              {/* ±σ uncertainty band */}
-              <Area
-                type="monotone"
-                dataKey="upper"
-                stroke="none"
-                fill="rgba(167,139,250,0.12)"
-                legendType="none"
-                activeDot={false}
-                isAnimationActive={false}
-              />
-              <Area
-                type="monotone"
-                dataKey="lower"
-                stroke="none"
-                fill="#181620"
-                legendType="none"
-                activeDot={false}
-                isAnimationActive={false}
-              />
+              <div
+                className="flex flex-wrap items-center gap-3 text-[10px]"
+                style={{ color: "#9490a8" }}
+              >
+                <span className="flex items-center gap-1">
+                  <span style={{ color: CHART_COLORS.theoretical }}>——</span>{" "}
+                  sin²(α)
+                </span>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block w-4 h-2 rounded-sm"
+                    style={{ background: "rgba(167,139,250,0.15)" }}
+                  />
+                  ±σ
+                </span>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ background: CHART_COLORS.accept }}
+                  />
+                  accept
+                </span>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ background: CHART_COLORS.thresholdHigh }}
+                  />
+                  marginal
+                </span>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ background: CHART_COLORS.reject }}
+                  />
+                  reject
+                </span>
+              </div>
 
-              {/* E_theory curve */}
-              <Line
-                type="monotone"
-                dataKey="energy_theory"
-                stroke={CHART_COLORS.theoretical}
-                strokeWidth={1.5}
-                dot={false}
-                strokeDasharray="5 3"
-                isAnimationActive={false}
-                legendType="none"
-              />
+              <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+                <ComposedChart
+                  data={data.chart}
+                  margin={{ top: 8, right: 16, bottom: 4, left: -10 }}
+                >
+                  <CartesianGrid {...gridProps} />
+                  <XAxis
+                    dataKey="alpha"
+                    {...axisProps}
+                    tickFormatter={(v: number) => formatAlpha(v)}
+                    domain={[0, Math.PI / 2]}
+                    type="number"
+                    label={{
+                      value: "α (rad)",
+                      position: "insideBottom",
+                      offset: -2,
+                      style: {
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: 9,
+                        fill: "#6b6780",
+                      },
+                    }}
+                  />
+                  <YAxis
+                    {...axisProps}
+                    domain={[0, 1.05]}
+                    tickFormatter={(v: number) => v.toFixed(1)}
+                    label={{
+                      value: "E",
+                      angle: -90,
+                      position: "insideLeft",
+                      offset: 14,
+                      style: {
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: 9,
+                        fill: "#6b6780",
+                      },
+                    }}
+                  />
+                  <Tooltip content={<SweepTooltip />} />
 
-              {/* E_est scatter with verdict colouring */}
-              <Scatter
-                dataKey="energy_est"
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                shape={(props: any) => <VerdictDot {...props} />}
-                isAnimationActive={false}
-                legendType="none"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+                  <ReferenceLine
+                    y={THRESHOLD_LOW}
+                    stroke={CHART_COLORS.thresholdLow}
+                    strokeDasharray="4 3"
+                    strokeWidth={1}
+                    label={{
+                      value: `< ${THRESHOLD_LOW}`,
+                      position: "insideTopRight",
+                      style: {
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: 8,
+                        fill: CHART_COLORS.thresholdLow,
+                      },
+                    }}
+                  />
+                  <ReferenceLine
+                    y={THRESHOLD_HIGH}
+                    stroke={CHART_COLORS.thresholdHigh}
+                    strokeDasharray="4 3"
+                    strokeWidth={1}
+                    label={{
+                      value: `≥ ${THRESHOLD_HIGH}`,
+                      position: "insideTopRight",
+                      style: {
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: 8,
+                        fill: CHART_COLORS.thresholdHigh,
+                      },
+                    }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="upper"
+                    stroke="none"
+                    fill="rgba(167,139,250,0.12)"
+                    legendType="none"
+                    activeDot={false}
+                    isAnimationActive={false}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="lower"
+                    stroke="none"
+                    fill="#181620"
+                    legendType="none"
+                    activeDot={false}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="energy_theory"
+                    stroke={CHART_COLORS.theoretical}
+                    strokeWidth={1.5}
+                    dot={false}
+                    strokeDasharray="5 3"
+                    isAnimationActive={false}
+                    legendType="none"
+                  />
+                  <Scatter
+                    dataKey="energy_est"
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    shape={(props: any) => <VerdictDot {...props} />}
+                    isAnimationActive={false}
+                    legendType="none"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         )}
       </div>
     </Card>

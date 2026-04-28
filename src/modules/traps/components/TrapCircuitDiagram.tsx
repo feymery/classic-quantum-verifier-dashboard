@@ -1,109 +1,126 @@
 /**
- * TrapCircuitDiagram.tsx — Side-by-side SVG diagrams comparing
- * the honest circuit with the Trap 1 classical shortcut.
+ * TrapCircuitDiagram.tsx — Shared 2-qubit clock-state circuit SVG.
  *
- * Honest:  H(q1) → RY(α/2) → CZ → RY(-α/2) → measure
- * Trap 1:  (nothing)                            → measure
+ * Circuit:
+ *   |0⟩_prover ──── a ──────────────── M
+ *   |0⟩_clock  ──── H ──── CRY(2α) ── M
  *
- * When highlightDiff=true the missing gates pulse red on the trap side.
+ * In trap mode (isTrap=true):
+ *   - Gates turn grey
+ *   - If highlightDiff=true: H and CRY are faded + crossed out (Trap 1)
+ *   - If annotation is provided: shown at the bottom in red
  */
 
-interface Props {
-  alpha: number;
-  showTrap?: boolean;
-  highlightDiff?: boolean;
-}
+// ── SVG layout constants ───────────────────────────────────────────────────────
 
-const W = 340;
-const H_SVG = 88;
-const Y_TOP = 28; // q_clock row
-const Y_BOT = 60; // q_prover row
-const WIRE_START = 32;
-const WIRE_END = W - 8;
-const GATE_R = 11;
+const SVG_W = 680;
+const SVG_H = 110;
+const Y_PROVER = 34;
+const Y_CLOCK = 76;
+const WIRE_L = 72;
+const WIRE_R = SVG_W - 20;
+const X_GATE_A = 104;
+const X_GATE_H = 230;
+const X_GATE_CRY = 400;
+const X_MEAS = SVG_W - 30;
+const GATE_W = 26;
+const GATE_H = 20;
 
-function Wire({ y }: { y: number }) {
-  return (
-    <line
-      x1={WIRE_START}
-      y1={y}
-      x2={WIRE_END}
-      y2={y}
-      stroke="#3d3b4a"
-      strokeWidth={1.5}
-    />
-  );
-}
+const TRAP_COLOR = "#f87171";
 
-function GateBox({
+// ── SVG helpers ────────────────────────────────────────────────────────────────
+
+function SvgGateBox({
   x,
   y,
   label,
+  sub,
   color = "#a78bfa",
   faded = false,
 }: {
   x: number;
   y: number;
   label: string;
+  sub?: string;
   color?: string;
   faded?: boolean;
 }) {
+  const w = sub ? 62 : GATE_W;
   return (
-    <g opacity={faded ? 0.25 : 1}>
+    <g opacity={faded ? 0.22 : 1}>
       <rect
-        x={x - GATE_R}
-        y={y - GATE_R}
-        width={GATE_R * 2}
-        height={GATE_R * 2}
-        rx={4}
+        x={x - w / 2}
+        y={y - GATE_H / 2}
+        width={w}
+        height={GATE_H}
+        rx={3}
         fill="#1e1c2a"
         stroke={color}
         strokeWidth={1.2}
       />
       <text
         x={x}
-        y={y + 4}
+        y={y + (sub ? -1 : 4)}
         textAnchor="middle"
         fill={color}
-        fontSize={8}
+        fontSize={sub ? 7.5 : 9}
         fontFamily="monospace"
       >
         {label}
       </text>
+      {sub && (
+        <text
+          x={x}
+          y={y + 8}
+          textAnchor="middle"
+          fill={color}
+          fontSize={6}
+          fontFamily="monospace"
+          opacity={0.75}
+        >
+          {sub}
+        </text>
+      )}
     </g>
   );
 }
 
-function CtrlDot({ x, y }: { x: number; y: number }) {
-  return <circle cx={x} cy={y} r={3} fill="#6b6780" />;
-}
-
-function Qubit({ y, label }: { y: number; label: string }) {
+function SvgCross({ x, y }: { x: number; y: number }) {
   return (
-    <text
-      x={4}
-      y={y + 4}
-      fontSize={8}
-      fill="#6b6780"
-      fontFamily="monospace"
-      textAnchor="start"
-    >
-      {label}
-    </text>
+    <g>
+      <line
+        x1={x - 9}
+        y1={y - 9}
+        x2={x + 9}
+        y2={y + 9}
+        stroke={TRAP_COLOR}
+        strokeWidth={1.5}
+        opacity={0.75}
+      />
+      <line
+        x1={x + 9}
+        y1={y - 9}
+        x2={x - 9}
+        y2={y + 9}
+        stroke={TRAP_COLOR}
+        strokeWidth={1.5}
+        opacity={0.75}
+      />
+    </g>
   );
 }
 
-function MeasureBox({ x, y }: { x: number; y: number }) {
+function SvgMeasBox({ x, y }: { x: number; y: number }) {
   return (
     <g>
       <rect
-        x={x - GATE_R}
-        y={y - GATE_R}
-        width={GATE_R * 2}
-        height={GATE_R * 2}
-        rx={4}
+        x={x - 12}
+        y={y - 10}
+        width={24}
+        height={20}
+        rx={3}
         fill="#1e1c2a"
-        stroke="#4b4860"
+        stroke="#3d3b4a"
         strokeWidth={1}
       />
       <text
@@ -111,7 +128,7 @@ function MeasureBox({ x, y }: { x: number; y: number }) {
         y={y + 4}
         textAnchor="middle"
         fill="#6b6780"
-        fontSize={7}
+        fontSize={8}
         fontFamily="monospace"
       >
         M
@@ -120,167 +137,129 @@ function MeasureBox({ x, y }: { x: number; y: number }) {
   );
 }
 
-export function TrapCircuitDiagram({
+// ── Exported component ─────────────────────────────────────────────────────────
+
+interface Props {
+  alpha: number;
+  /** Show the trap overlay (grey + optional crosses + annotation). */
+  isTrap?: boolean;
+  /** When true and isTrap=true: fade H/CRY gates and draw red crosses. */
+  highlightDiff?: boolean;
+  /** Text shown at the bottom of the SVG in trap mode. */
+  annotation?: string;
+}
+
+export function TrapCircuitDiagram2Q({
   alpha,
-  showTrap = false,
+  isTrap = false,
   highlightDiff = false,
+  annotation,
 }: Props) {
-  const degs = ((alpha / Math.PI) * 180).toFixed(1);
-  const missingColor = highlightDiff ? "#f87171" : "#3d3b4a";
+  const gateColor = isTrap ? "#6b6780" : "#a78bfa";
+  const cryColor = isTrap ? "#6b6780" : "#6366f1";
+  const fadeTrap = isTrap && highlightDiff;
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
-      {/* ── Honest circuit ── */}
-      <div className="flex-1 space-y-1">
-        <p className=" text-[10px]" style={{ color: "#34d399" }}>
-          honest prover
-        </p>
-        <svg
-          width="100%"
-          viewBox={`0 0 ${W} ${H_SVG}`}
-          style={{ background: "#131217", borderRadius: 8 }}
+    <svg
+      width="100%"
+      viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+      style={{ background: "#1e1c2a", borderRadius: 8 }}
+      role="img"
+      aria-label="2-qubit clock-state circuit"
+    >
+      {/* qubit labels */}
+      <text
+        x={8}
+        y={Y_PROVER + 4}
+        textAnchor="start"
+        fill="#6b6780"
+        fontSize={9}
+        fontFamily="monospace"
+      >
+        |0⟩_prover
+      </text>
+      <text
+        x={8}
+        y={Y_CLOCK + 4}
+        textAnchor="start"
+        fill="#6b6780"
+        fontSize={9}
+        fontFamily="monospace"
+      >
+        |0⟩_clock
+      </text>
+
+      {/* wires */}
+      <line
+        x1={WIRE_L}
+        y1={Y_PROVER}
+        x2={WIRE_R}
+        y2={Y_PROVER}
+        stroke="#3d3b4a"
+        strokeWidth={1.5}
+      />
+      <line
+        x1={WIRE_L}
+        y1={Y_CLOCK}
+        x2={WIRE_R}
+        y2={Y_CLOCK}
+        stroke="#3d3b4a"
+        strokeWidth={1.5}
+      />
+
+      {/* a gate — identity, always present */}
+      <SvgGateBox x={X_GATE_A} y={Y_PROVER} label="a" color="#6b6780" />
+
+      {/* H gate */}
+      <SvgGateBox
+        x={X_GATE_H}
+        y={Y_CLOCK}
+        label="H"
+        color={gateColor}
+        faded={fadeTrap}
+      />
+      {fadeTrap && <SvgCross x={X_GATE_H} y={Y_CLOCK} />}
+
+      {/* CRY gate */}
+      <g opacity={fadeTrap ? 0.22 : 1}>
+        <line
+          x1={X_GATE_CRY}
+          y1={Y_PROVER + GATE_H / 2 + 1}
+          x2={X_GATE_CRY}
+          y2={Y_CLOCK - 5}
+          stroke={cryColor}
+          strokeWidth={1.2}
+        />
+        <circle cx={X_GATE_CRY} cy={Y_CLOCK} r={4} fill={cryColor} />
+      </g>
+      <SvgGateBox
+        x={X_GATE_CRY}
+        y={Y_PROVER}
+        label="CRY"
+        sub={`2α=${(2 * alpha).toFixed(2)}`}
+        color={cryColor}
+        faded={fadeTrap}
+      />
+      {fadeTrap && <SvgCross x={X_GATE_CRY} y={Y_PROVER} />}
+
+      {/* Measurement */}
+      <SvgMeasBox x={X_MEAS} y={Y_PROVER} />
+      <SvgMeasBox x={X_MEAS} y={Y_CLOCK} />
+
+      {/* Annotation */}
+      {isTrap && annotation && (
+        <text
+          x={SVG_W / 2}
+          y={SVG_H - 5}
+          textAnchor="middle"
+          fill={TRAP_COLOR}
+          fontSize={8}
+          fontFamily="monospace"
+          opacity={0.65}
         >
-          <Wire y={Y_TOP} />
-          <Wire y={Y_BOT} />
-          <Qubit y={Y_TOP} label="q_clk" />
-          <Qubit y={Y_BOT} label="q_prv" />
-
-          {/* H on q_clock */}
-          <GateBox x={60} y={Y_TOP} label="H" color="#a78bfa" />
-
-          {/* RY(α/2) */}
-          <GateBox x={110} y={Y_BOT} label={`RY\n+α/2`} color="#60a5fa" />
-
-          {/* CZ */}
-          <line
-            x1={155}
-            y1={Y_TOP}
-            x2={155}
-            y2={Y_BOT}
-            stroke="#6b6780"
-            strokeWidth={1}
-          />
-          <CtrlDot x={155} y={Y_TOP} />
-          <GateBox x={155} y={Y_BOT} label="CZ" color="#60a5fa" />
-
-          {/* RY(-α/2) */}
-          <GateBox x={205} y={Y_BOT} label={`RY\n-α/2`} color="#60a5fa" />
-
-          {/* Measure */}
-          <MeasureBox x={290} y={Y_TOP} />
-          <MeasureBox x={290} y={Y_BOT} />
-
-          {/* Alpha label */}
-          <text
-            x={155}
-            y={H_SVG - 4}
-            textAnchor="middle"
-            fontSize={7}
-            fill="#4b4860"
-            fontFamily="monospace"
-          >
-            α = {degs}°
-          </text>
-        </svg>
-      </div>
-
-      {/* ── Trap 1 circuit ── */}
-      <div className="flex-1 space-y-1">
-        <p
-          className=" text-[10px]"
-          style={{ color: showTrap ? "#f87171" : "#6b6780" }}
-        >
-          {showTrap ? "trap 1 — |00⟩ classical" : "trap 1 (inactive)"}
-        </p>
-        <svg
-          width="100%"
-          viewBox={`0 0 ${W} ${H_SVG}`}
-          style={{
-            background: "#131217",
-            borderRadius: 8,
-            border:
-              showTrap && highlightDiff
-                ? "1px solid rgba(248,113,113,0.3)"
-                : "1px solid transparent",
-          }}
-        >
-          <Wire y={Y_TOP} />
-          <Wire y={Y_BOT} />
-          <Qubit y={Y_TOP} label="q_clk" />
-          <Qubit y={Y_BOT} label="q_prv" />
-
-          {/* Missing gates — faded red crosses */}
-          <GateBox
-            x={60}
-            y={Y_TOP}
-            label="H"
-            color={missingColor}
-            faded={!showTrap}
-          />
-          <GateBox
-            x={110}
-            y={Y_BOT}
-            label="RY"
-            color={missingColor}
-            faded={!showTrap}
-          />
-          <GateBox
-            x={155}
-            y={Y_BOT}
-            label="CZ"
-            color={missingColor}
-            faded={!showTrap}
-          />
-          <GateBox
-            x={205}
-            y={Y_BOT}
-            label="RY"
-            color={missingColor}
-            faded={!showTrap}
-          />
-          {showTrap && highlightDiff && (
-            <>
-              {[60, 110, 155, 205].map((x) => (
-                <g key={x}>
-                  <line
-                    x1={x - GATE_R + 2}
-                    y1={x === 60 ? Y_TOP - GATE_R + 2 : Y_BOT - GATE_R + 2}
-                    x2={x + GATE_R - 2}
-                    y2={x === 60 ? Y_TOP + GATE_R - 2 : Y_BOT + GATE_R - 2}
-                    stroke="#f87171"
-                    strokeWidth={1.2}
-                    opacity={0.6}
-                  />
-                  <line
-                    x1={x + GATE_R - 2}
-                    y1={x === 60 ? Y_TOP - GATE_R + 2 : Y_BOT - GATE_R + 2}
-                    x2={x - GATE_R + 2}
-                    y2={x === 60 ? Y_TOP + GATE_R - 2 : Y_BOT + GATE_R - 2}
-                    stroke="#f87171"
-                    strokeWidth={1.2}
-                    opacity={0.6}
-                  />
-                </g>
-              ))}
-            </>
-          )}
-
-          {/* Measure */}
-          <MeasureBox x={290} y={Y_TOP} />
-          <MeasureBox x={290} y={Y_BOT} />
-
-          <text
-            x={155}
-            y={H_SVG - 4}
-            textAnchor="middle"
-            fontSize={7}
-            fill={showTrap ? "#f87171" : "#4b4860"}
-            fontFamily="monospace"
-          >
-            {showTrap ? "skips all gates → |00⟩" : "α = " + degs + "°"}
-          </text>
-        </svg>
-      </div>
-    </div>
+          {annotation}
+        </text>
+      )}
+    </svg>
   );
 }

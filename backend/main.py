@@ -1,18 +1,32 @@
 from __future__ import annotations
 
+import logging
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.experiment_runner import runExperimentSync, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise, run_adversarial_circuit
-from backend.ibm_client import IBMClient, configure_runtime, get_shared_client
+from backend.ibm_client import configure_runtime, get_shared_client
 from backend.jobs.job_store import job_store
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s  %(name)s  %(message)s",
+)
 
 
 app = FastAPI(title="Quantum Simulation Backend", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _json_safe(value: object) -> object:

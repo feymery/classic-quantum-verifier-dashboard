@@ -61,8 +61,9 @@ def build_measurement_circuit(alpha: float, basis: str = "z") -> QuantumCircuit:
     - "zx" / "z1x2": (k1,k2)=(0,1) — H on q_clock only → extracts Z1X2
     - "x" / "x12"  : (k1,k2)=(1,1) — H on both qubits → extracts X1X2
 
-    Note: (k1,k2)=(1,0) / X1Z2 basis is intentionally absent — the term X1Z2
-    does not appear in the Hamiltonian H (Eq. C.1 of Stricker et al.).
+    Note: (k1,k2)=(1,0) / X1Z2 basis is not used in the energy Hamiltonian
+    (Eq. C.1 of Stricker et al.), but is included here for the expectation-value
+    sweep visualisation (Figure 2a of the paper).
 
     The 2Q extension bases ("x13", "x23") remain available for the 2Q mode,
     but they operate on a different circuit (see build_circuit_2q).
@@ -81,9 +82,12 @@ def build_measurement_circuit(alpha: float, basis: str = "z") -> QuantumCircuit:
         # (k1,k2)=(1,1): H on both qubits to measure X1X2
         qc.h(0)
         qc.h(1)
+    elif basis_name in {"x1z2"}:
+        # (k1,k2)=(1,0): H on q_prover (q0) only to measure X1; q_clock stays in Z
+        qc.h(0)
     else:
         raise ValueError(f"Unsupported measurement basis: {basis!r}. "
-                         f"Valid options: 'z', 'zx'/'z1x2', 'x'/'x12'.")
+                         f"Valid options: 'z', 'zx'/'z1x2', 'x'/'x12', 'x1z2'.")
 
     qc.measure([0, 1], [0, 1])
     return qc

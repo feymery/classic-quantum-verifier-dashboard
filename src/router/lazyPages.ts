@@ -11,16 +11,16 @@ export const VisualizationPage = lazy(async () => {
 });
 
 export const CircuitPage = lazy(async () => {
-  const module = await import("../modules/twoQubit/pages/CircuitPage");
+  const module = await import("../pages/Circuit2QPage");
   return { default: module.CircuitPage };
 });
 
-export const AdversarialPage = lazy(async () => {
-  const module = await import("../modules/adversarial/pages/AdversarialPage");
-  return { default: module.AdversarialPage };
+export const TrapsPage = lazy(async () => {
+  const module = await import("../pages/TrapsPage");
+  return { default: module.TrapsPage };
 });
 
-export const TrapsPage = lazy(async () => {
-  const module = await import("../modules/traps/pages/TrapsPage");
-  return { default: module.TrapsPage };
+export const FundamentalsPage = lazy(async () => {
+  const module = await import("../pages/FundamentalsPage");
+  return { default: module.FundamentalsPage };
 });

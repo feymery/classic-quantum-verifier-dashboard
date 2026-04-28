@@ -21,10 +21,7 @@ export function ParamField({
 }: ParamFieldProps) {
   return (
     <div className="flex items-center gap-2">
-      <label
-        htmlFor={id}
-        className="text-xs uppercase tracking-[0.2em] text-muted select-none"
-      >
+      <label htmlFor={id} className="text-xs select-none text-muted">
         {label}
       </label>
       <input
@@ -38,7 +35,7 @@ export function ParamField({
           const parsed = Number(e.target.value);
           if (!Number.isNaN(parsed)) onChange(parsed);
         }}
-        className="w-24 px-3 py-2 text-sm border rounded-lg outline-none border-border bg-surface text-foreground"
+        className="w-24 px-3 py-1 text-xs border rounded-lg outline-none border-border bg-surface text-foreground"
       />
     </div>
   );

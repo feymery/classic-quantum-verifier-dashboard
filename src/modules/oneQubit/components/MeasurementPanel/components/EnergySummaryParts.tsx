@@ -26,8 +26,8 @@ export function EnergyCell({ label, value, loading, color }: EnergyCellProps) {
       <span className=" text-[10px]" style={{ color: "#6b6780" }}>
         {label}
       </span>
-      <span className="text-base  tabular-nums" style={{ color }}>
-        {loading ? "···" : value !== undefined ? value.toFixed(4) : "—"}
+      <span className="text-base tabular-nums" style={{ color }}>
+        {loading ? "···" : value != null ? value.toFixed(4) : "—"}
       </span>
     </div>
   );
@@ -50,7 +50,7 @@ export function MarginCell({ label, value }: MarginCellProps) {
         }}
       >
         {isPos ? "+" : ""}
-        {value.toFixed(4)}
+        {value != null ? value.toFixed(4) : "—"}
       </span>
     </div>
   );
@@ -70,7 +70,7 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
     );
   }
 
-  if (value === undefined) {
+  if (value == null) {
     return (
       <div
         className="p-2 border rounded"
