@@ -64,7 +64,7 @@ source venv/bin/activate
 ## Running
 
 ```bash
-python3 -m uvicorn backend.main:app --reload --port 8000
+python -m uvicorn backend.main:app --reload --port 8000
 ```
 
 - API base URL: `http://localhost:8000`
