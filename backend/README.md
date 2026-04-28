@@ -34,6 +34,33 @@ python3 -m pip install -r backend/requirements.txt
 
 ---
 
+## Installation virtual environment 
+
+From the backend folder:
+
+```bash
+python -m venv venv
+```
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+On Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+On Mac/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+
 ## Running
 
 ```bash
@@ -65,23 +92,6 @@ The singleton `IBMClient` holds the connection for the lifetime of the server pr
 
 ---
 
-## Module overview
-
-```text
-backend/
-├── main.py                  # FastAPI app — all route definitions
-├── experiment_runner.py     # Orchestrates sync experiments: runExperimentSync, sweep_*, run_adversarial_circuit
-├── energy.py                # Canonical Hamiltonian energy formula (Eq. C.1)
-├── aer_executor.py          # Qiskit Aer execution (generic noise model + QPU-noise variant)
-├── ibm_executor.py          # IBM Runtime SamplerV2 submission and result extraction
-├── ibm_client.py            # IBMClient singleton — manages QiskitRuntimeService connection
-├── circuit_builder.py       # Builds Qiskit circuits for 1Q/2Q and all three measurement bases
-├── measurement_mapper.py    # Maps raw bitstring counts to observable expectation values
-└── jobs/
-    ├── job_store.py         # In-memory job store (pending → running → done/failed)
-    └── job_runner.py        # ThreadPool-based async job execution (separate pools for IBM and Aer)
-```
-
 ### Execution flow
 
 **Synchronous (`backend=aer`):**
@@ -109,16 +119,6 @@ POST /run {backend="ibm"}
 ```
 
 IBM and Aer jobs run in separate thread pools so long-running QPU jobs cannot starve fast Aer jobs.
-
-### Quantum circuit
-
-The 1Q circuit implements the verification protocol from Stricker et al. 2024:
-
-- **State prep:** `H(q_clock)` → `CU(α)` via `RY(α/2) · CZ · RY(-α/2)` on `q_prover`
-- **3 measurement bases:** Z⊗Z (`z`), Z⊗X (`zx`), X⊗X (`x`)
-- **Energy formula (Eq. C.1):** $E = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1Z_2\rangle - 1.5\cos(\alpha)\langle Z_1X_2\rangle - 1.5\sin(\alpha)\langle X_1X_2\rangle$
-
-See [docs/protocol.md](../docs/protocol.md) for the full protocol analysis.
 
 ---
 
