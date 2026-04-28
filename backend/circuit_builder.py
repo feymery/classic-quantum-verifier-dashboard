@@ -64,9 +64,6 @@ def build_measurement_circuit(alpha: float, basis: str = "z") -> QuantumCircuit:
     Note: (k1,k2)=(1,0) / X1Z2 basis is not used in the energy Hamiltonian
     (Eq. C.1 of Stricker et al.), but is included here for the expectation-value
     sweep visualisation (Figure 2a of the paper).
-
-    The 2Q extension bases ("x13", "x23") remain available for the 2Q mode,
-    but they operate on a different circuit (see build_circuit_2q).
     """
     qc = build_circuit(alpha)
 

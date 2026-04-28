@@ -29,8 +29,8 @@ npm run dev
 
 ```bash
 # Terminal 2 — backend
-python3 -m pip install -r backend/requirements.txt
-python3 -m uvicorn backend.main:app --reload --port 8000
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --reload --port 8000
 ```
 
 - Frontend: <http://localhost:5173>
