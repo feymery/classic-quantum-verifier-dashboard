@@ -34,31 +34,19 @@ export function ExperimentControlBar({
             </Text>
           )}
         </div>
-        <RunButton onRun={onRun} isRunning={isRunning} />
+        <Button
+          onClick={onRun}
+          disabled={isRunning}
+          variant="primary"
+          size="lg"
+          loading={isRunning}
+          loadingLabel="Running..."
+          className="rounded-lg run-experiment-btn"
+        >
+          Run experiment
+        </Button>
       </div>
     </Card>
   );
 }
 
-// ── Run button ────────────────────────────────────────────────────────────────
-
-interface RunButtonProps {
-  onRun: () => void;
-  isRunning: boolean;
-}
-
-function RunButton({ onRun, isRunning }: RunButtonProps) {
-  return (
-    <Button
-      onClick={onRun}
-      disabled={isRunning}
-      variant="primary"
-      size="lg"
-      loading={isRunning}
-      loadingLabel="Running..."
-      className="rounded-lg run-experiment-btn"
-    >
-      Run experiment
-    </Button>
-  );
-}
