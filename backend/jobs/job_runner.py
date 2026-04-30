@@ -198,7 +198,7 @@ def run_job_async(job_id: str) -> None:
     alpha = float(job["alpha"])
     shots = int(job["shots"])
     requested_backend = str(job["backend"])
-    run_mode = str((job.get("metadata") or {}).get("mode", "1q")).lower()
+    run_mode = str(job.get("mode", "1q")).lower()
 
     job_store.update_job(job_id, status="running")
 

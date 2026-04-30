@@ -49,6 +49,23 @@ class ApiErrorResponse(BaseModel):
     error: ApiError
 
 
+_THRESHOLD_LOW = 0.4
+_THRESHOLD_HIGH = 0.5
+
+
+def _verifier_decision(energy: float) -> str:
+    """Classify an energy value using the same thresholds as the frontend.
+
+    Returns 'accept', 'boundary', or 'reject' — matching VerifierDecision
+    in src/physics/energy.ts.
+    """
+    if energy < _THRESHOLD_LOW:
+        return "accept"
+    if energy >= _THRESHOLD_HIGH:
+        return "reject"
+    return "boundary"
+
+
 def error_payload(code: str, message: str, details: dict | list | str | None = None) -> dict:
     return ApiErrorResponse(
         error=ApiError(code=code, message=message, details=details)
@@ -340,19 +357,27 @@ def list_jobs(
         mode=mode,
     )
 
-    items = [
-        {
+    def _enrich(j: dict) -> dict:
+        result = j.get("result") or {}
+        meta = j.get("metadata") or {}
+        raw_energy: float | None = result.get("energy") if isinstance(result.get("energy"), (int, float)) else None
+        return {
             "job_id": j["job_id"],
             "status": j["status"],
             "backend": j["backend"],
-            "mode": (j.get("metadata") or {}).get("mode", "1q"),
+            "mode": j["mode"],
             "alpha": j["alpha"],
             "shots": j["shots"],
             "created_at": j["created_at"],
             "updated_at": j["updated_at"],
+            "energy_estimate": raw_energy,
+            "decision": _verifier_decision(raw_energy) if raw_energy is not None else None,
+            "resolved_backend": meta.get("backend_name"),
+            "execution_source": meta.get("execution_backend"),
+            "error": j.get("error"),
         }
-        for j in jobs
-    ]
+
+    items = [_enrich(j) for j in jobs]
 
     next_offset = offset + len(items)
     return {
@@ -371,3 +396,15 @@ def list_jobs(
             "mode": mode,
         },
     }
+
+
+@app.delete("/jobs")
+def delete_jobs() -> dict:
+    """Delete all completed/failed jobs.
+
+    Jobs with status 'pending' or 'running' are preserved so no
+    in-flight execution is interrupted.
+    Returns the number of deleted rows.
+    """
+    deleted = job_store.delete_completed_jobs()
+    return {"deleted": deleted}

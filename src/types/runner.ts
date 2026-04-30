@@ -5,7 +5,6 @@
  */
 
 import type { BackendId } from "../utils/constants";
-import type { ExperimentResult, ExperimentResult2Q } from "./experiment";
 
 // ── Execution state ───────────────────────────────────────────────────────────
 
@@ -19,27 +18,40 @@ export type ExecutionSource =
 
 export type RunMode = "oneQ" | "twoQ";
 
-// ── Run history ───────────────────────────────────────────────────────────────
+// ── Backend job history (source of truth: SQLite via GET /jobs) ──────────────
 
-export interface RunHistoryEntry {
-  id: string;
+/** Job status values as returned by the backend API. */
+export type JobStatus = "pending" | "running" | "done" | "failed";
+
+/** Verifier decision values aligned with _verifier_decision() in backend/main.py. */
+export type VerifierDecision = "accept" | "boundary" | "reject";
+
+/**
+ * Slim representation of a job as returned by GET /jobs.
+ * Does NOT embed the full result payload — those are fetched on demand
+ * via GET /job/{job_id} when the user requests to restore a run.
+ */
+export interface JobHistoryItem {
+  jobId: string;
   createdAt: string;
-  mode: RunMode;
-  status: "complete" | "error";
+  updatedAt: string;
+  /** "1q" | "2q" — matches the backend mode column. */
+  mode: "1q" | "2q";
+  status: JobStatus;
   alpha: number;
   shots: number;
-  requestedBackend: BackendId;
+  /** Backend the job was submitted to ("aer" | "ibm"). */
+  requestedBackend: string;
+  /** Actual backend that ran the job, e.g. "ibm_strasbourg". Null until done. */
   resolvedBackend: string | null;
-  executionSource: ExecutionSource | null;
-  jobId: string | null;
+  /** "aer" | "ibm" — execution path used on the server. Null until done. */
+  executionSource: string | null;
+  /** Estimated energy value. Null for pending/running jobs. */
   energyEstimate: number | null;
-  decision: string | null;
-  comparisonAlphas: number[];
+  /** Verifier classification. Null for pending/running jobs. */
+  decision: VerifierDecision | null;
+  /** Error message for failed jobs. */
   error: string | null;
-  /** Full backend response — stored so past results can be replayed without re-running. */
-  result: ExperimentResult | ExperimentResult2Q | null;
-  /** Comparison curve results associated with this run. */
-  comparisonResults: ExperimentResult[];
 }
 
 // ── Async IBM Runtime jobs ────────────────────────────────────────────────────

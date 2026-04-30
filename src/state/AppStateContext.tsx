@@ -1,17 +1,8 @@
-import { createContext, useCallback, useMemo, type ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
 import { useDashboardState } from "../hooks/useDashboardState";
 import { useExperimentRunner } from "../hooks/useExperimentRunner";
-
-type RunMode = "oneQ" | "twoQ" | "adversarial";
-
-interface AppStateContextValue {
-  dashboard: ReturnType<typeof useDashboardState>;
-  runner: ReturnType<typeof useExperimentRunner>;
-  backendStatus: "idle" | "running" | "error";
-  runForMode: (mode: RunMode) => void;
-}
-
-const AppStateContext = createContext<AppStateContextValue | null>(null);
+import type { RunMode } from "../types/runner";
+import { AppStateContext } from "./AppStateContextDef";
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const dashboard = useDashboardState();
@@ -53,5 +44,3 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     </AppStateContext.Provider>
   );
 }
-
-export { AppStateContext };

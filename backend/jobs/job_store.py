@@ -74,6 +74,7 @@ class JobStore:
             "job_id": row["job_id"],
             "status": row["status"],
             "backend": row["backend"],
+            "mode": row["mode"],
             "alpha": float(row["alpha"]),
             "shots": int(row["shots"]),
             "result": result,
@@ -225,6 +226,21 @@ class JobStore:
             ).fetchall()
 
             return ([self._row_to_dict(row) for row in rows], total)
+
+    def delete_completed_jobs(self) -> int:
+        """Delete all jobs that are not actively in-flight.
+
+        Jobs with status 'pending' or 'running' are preserved so an
+        in-progress execution is never interrupted.
+
+        Returns the number of rows deleted.
+        """
+        with self._lock:
+            cursor = self._conn.execute(
+                "DELETE FROM jobs WHERE status NOT IN ('pending', 'running')"
+            )
+            self._conn.commit()
+            return cursor.rowcount
 
 
 job_store = JobStore()

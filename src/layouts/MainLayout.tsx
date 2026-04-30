@@ -5,24 +5,31 @@ import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
 import { AppNavigation } from "../components/AppNavigation";
 import { RunHistoryDrawer } from "../components/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
+import type { JobHistoryItem } from "../types/runner";
 
 export function MainLayout() {
   const { dashboard, backendStatus, runner } = useAppState();
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const restoreHistoryEntry = (entry: (typeof runner.history)[number]) => {
-    dashboard.setAlpha(entry.alpha);
-    dashboard.setShots(entry.shots);
-    dashboard.setSelectedBackend(entry.requestedBackend);
-    dashboard.setComparisonAlphas(entry.comparisonAlphas);
+  const restoreHistoryEntry = (item: JobHistoryItem) => {
+    dashboard.setAlpha(item.alpha);
+    dashboard.setShots(item.shots);
+    dashboard.setSelectedBackend(
+      item.requestedBackend as Parameters<
+        typeof dashboard.setSelectedBackend
+      >[0],
+    );
   };
 
-  const loadHistoryResult = (entry: (typeof runner.history)[number]) => {
-    dashboard.setAlpha(entry.alpha);
-    dashboard.setShots(entry.shots);
-    dashboard.setSelectedBackend(entry.requestedBackend);
-    dashboard.setComparisonAlphas(entry.comparisonAlphas);
-    runner.restoreResult(entry);
+  const loadHistoryResult = (item: JobHistoryItem) => {
+    dashboard.setAlpha(item.alpha);
+    dashboard.setShots(item.shots);
+    dashboard.setSelectedBackend(
+      item.requestedBackend as Parameters<
+        typeof dashboard.setSelectedBackend
+      >[0],
+    );
+    void runner.restoreResult(item);
   };
 
   return (
@@ -74,7 +81,9 @@ export function MainLayout() {
       <RunHistoryDrawer
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        entries={runner.history}
+        items={runner.historyItems}
+        loading={runner.historyLoading}
+        error={runner.historyError}
         onRestore={restoreHistoryEntry}
         onLoadResult={loadHistoryResult}
         onClear={runner.clearHistory}

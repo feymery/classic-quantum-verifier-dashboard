@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   runExperiment as runExperiment1Q,
   runComparison,
@@ -19,23 +19,18 @@ import type {
   RunnerStatus,
   ExecutionSource,
   RunMode,
-  RunHistoryEntry,
   ActiveAsyncJob,
+  JobHistoryItem,
 } from "../types/runner";
+import { useJobHistory } from "./useJobHistory";
 
-export type {
-  RunnerStatus,
-  ExecutionSource,
-  RunMode,
-  RunHistoryEntry,
-  ActiveAsyncJob,
-};
+export type { RunnerStatus, ExecutionSource, RunMode, ActiveAsyncJob };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const RUN_HISTORY_STORAGE_KEY = "qvp.run-history.v1";
+/** Leftover key from the old localStorage-based history. Cleared on first load. */
+const LEGACY_RUN_HISTORY_KEY = "qvp.run-history.v1";
 const ACTIVE_JOB_STORAGE_KEY = "qvp.active-job.v1";
-const MAX_RUN_HISTORY_ENTRIES = 12;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -57,58 +52,12 @@ interface RunnerState {
   latestBackend: string | null;
   latestExecutionSource: ExecutionSource | null;
   latestMode: RunMode | null;
-  history: RunHistoryEntry[];
   activeAsyncJob: ActiveAsyncJob | null;
 }
 
 type SetState = (updater: (prev: RunnerState) => RunnerState) => void;
 
-// ── Pure helpers ──────────────────────────────────────────────────────────────
-
-function makeEntryId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function makeHistoryEntry(
-  fields: Omit<RunHistoryEntry, "id" | "createdAt">,
-): RunHistoryEntry {
-  return { id: makeEntryId(), createdAt: new Date().toISOString(), ...fields };
-}
-
-function appendHistoryEntry(
-  history: RunHistoryEntry[],
-  entry: RunHistoryEntry,
-): RunHistoryEntry[] {
-  return [entry, ...history].slice(0, MAX_RUN_HISTORY_ENTRIES);
-}
-
 // ── Storage ───────────────────────────────────────────────────────────────────
-
-function loadRunHistory(): RunHistoryEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(RUN_HISTORY_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((entry): entry is RunHistoryEntry => {
-      return (
-        typeof entry === "object" &&
-        entry !== null &&
-        typeof entry.id === "string" &&
-        typeof entry.createdAt === "string" &&
-        typeof entry.mode === "string" &&
-        typeof entry.status === "string" &&
-        typeof entry.alpha === "number" &&
-        typeof entry.shots === "number" &&
-        typeof entry.requestedBackend === "string" &&
-        Array.isArray(entry.comparisonAlphas)
-      );
-    });
-  } catch {
-    return [];
-  }
-}
 
 function loadActiveJob(): ActiveAsyncJob | null {
   if (typeof window === "undefined") return null;
@@ -189,23 +138,6 @@ function commit2QResult(
   meta: Commit2QMeta,
   setState: SetState,
 ) {
-  const entry = makeHistoryEntry({
-    mode: "twoQ",
-    status: "complete",
-    alpha: meta.alpha,
-    shots: meta.shots,
-    requestedBackend: meta.backend,
-    resolvedBackend: twoQResult.backend,
-    executionSource: meta.executionSource,
-    jobId: twoQResult.jobId,
-    energyEstimate: twoQResult.energy.estimated,
-    decision: twoQResult.energy.decision,
-    comparisonAlphas: [],
-    error: null,
-    result: twoQResult,
-    comparisonResults: [],
-  });
-
   setState((prev) => ({
     ...prev,
     status: "complete",
@@ -214,7 +146,6 @@ function commit2QResult(
     latestJobId: twoQResult.jobId,
     latestBackend: twoQResult.backend,
     latestExecutionSource: meta.executionSource,
-    history: appendHistoryEntry(prev.history, entry),
     activeAsyncJob: meta.completedJobId
       ? prev.activeAsyncJob?.jobId === meta.completedJobId
         ? {
@@ -232,7 +163,6 @@ interface Commit1QMeta {
   shots: number;
   backend: BackendId;
   executionSource: ExecutionSource;
-  comparisonAlphas: number[];
   completedJobId?: string;
 }
 
@@ -242,23 +172,6 @@ function commit1QResult(
   meta: Commit1QMeta,
   setState: SetState,
 ) {
-  const entry = makeHistoryEntry({
-    mode: "oneQ",
-    status: "complete",
-    alpha: meta.alpha,
-    shots: meta.shots,
-    requestedBackend: meta.backend,
-    resolvedBackend: oneQResult.backend,
-    executionSource: meta.executionSource,
-    jobId: oneQResult.jobId,
-    energyEstimate: oneQResult.energy.estimated,
-    decision: oneQResult.energy.decision,
-    comparisonAlphas: meta.comparisonAlphas,
-    error: null,
-    result: oneQResult,
-    comparisonResults,
-  });
-
   setState((prev) => ({
     ...prev,
     status: "complete",
@@ -268,7 +181,6 @@ function commit1QResult(
     latestJobId: oneQResult.jobId,
     latestBackend: oneQResult.backend,
     latestExecutionSource: meta.executionSource,
-    history: appendHistoryEntry(prev.history, entry),
     activeAsyncJob: meta.completedJobId
       ? prev.activeAsyncJob?.jobId === meta.completedJobId
         ? {
@@ -294,21 +206,24 @@ export function useExperimentRunner() {
     latestBackend: null,
     latestExecutionSource: null,
     latestMode: null,
-    history: loadRunHistory(),
     activeAsyncJob: loadActiveJob(),
   }));
 
+  const jobHistory = useJobHistory();
+  // Keep refetch stable inside async closures that declare [] deps.
+  const refetchHistoryRef = useRef(jobHistory.refetch);
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    refetchHistoryRef.current = jobHistory.refetch;
+  }, [jobHistory.refetch]);
+
+  // One-time migration: remove the old localStorage-based run history key.
+  useEffect(() => {
     try {
-      window.localStorage.setItem(
-        RUN_HISTORY_STORAGE_KEY,
-        JSON.stringify(state.history),
-      );
+      window.localStorage.removeItem(LEGACY_RUN_HISTORY_KEY);
     } catch {
-      // Ignore storage failures; history remains in-memory.
+      // noop — private mode or storage unavailable
     }
-  }, [state.history]);
+  }, []);
 
   useEffect(() => {
     saveActiveJob(state.activeAsyncJob);
@@ -365,6 +280,7 @@ export function useExperimentRunner() {
               },
               setState,
             );
+            refetchHistoryRef.current();
           })
           .catch((error) => {
             const message =
@@ -373,25 +289,6 @@ export function useExperimentRunner() {
               ...prev,
               status: "error",
               error: message,
-              history: appendHistoryEntry(
-                prev.history,
-                makeHistoryEntry({
-                  mode: "twoQ",
-                  status: "error",
-                  alpha,
-                  shots,
-                  requestedBackend: backend,
-                  resolvedBackend: null,
-                  executionSource: null,
-                  jobId: started.jobId,
-                  energyEstimate: null,
-                  decision: null,
-                  comparisonAlphas: [],
-                  error: message,
-                  result: null,
-                  comparisonResults: [],
-                }),
-              ),
               activeAsyncJob:
                 prev.activeAsyncJob?.jobId === started.jobId
                   ? { ...prev.activeAsyncJob, status: "failed", message }
@@ -406,6 +303,7 @@ export function useExperimentRunner() {
         { alpha, shots, backend, executionSource: "api" },
         setState,
       );
+      refetchHistoryRef.current();
     },
     [],
   );
@@ -460,11 +358,11 @@ export function useExperimentRunner() {
                 shots,
                 backend,
                 executionSource: "api",
-                comparisonAlphas,
                 completedJobId: started.jobId,
               },
               setState,
             );
+            refetchHistoryRef.current();
           })
           .catch((error) => {
             const message =
@@ -473,25 +371,6 @@ export function useExperimentRunner() {
               ...prev,
               status: "error",
               error: message,
-              history: appendHistoryEntry(
-                prev.history,
-                makeHistoryEntry({
-                  mode: "oneQ",
-                  status: "error",
-                  alpha,
-                  shots,
-                  requestedBackend: backend,
-                  resolvedBackend: null,
-                  executionSource: null,
-                  jobId: started.jobId,
-                  energyEstimate: null,
-                  decision: null,
-                  comparisonAlphas,
-                  error: message,
-                  result: null,
-                  comparisonResults: [],
-                }),
-              ),
               activeAsyncJob:
                 prev.activeAsyncJob?.jobId === started.jobId
                   ? { ...prev.activeAsyncJob, status: "failed", message }
@@ -508,9 +387,10 @@ export function useExperimentRunner() {
       commit1QResult(
         started.result,
         comparisonResults,
-        { alpha, shots, backend, executionSource: "api", comparisonAlphas },
+        { alpha, shots, backend, executionSource: "api" },
         setState,
       );
+      refetchHistoryRef.current();
     },
     [],
   );
@@ -571,6 +451,7 @@ export function useExperimentRunner() {
             { alpha, shots, backend, executionSource },
             setState,
           );
+          refetchHistoryRef.current();
           return;
         }
 
@@ -591,9 +472,10 @@ export function useExperimentRunner() {
         commit1QResult(
           oneQResult,
           comparisonResults,
-          { alpha, shots, backend, executionSource, comparisonAlphas },
+          { alpha, shots, backend, executionSource },
           setState,
         );
+        refetchHistoryRef.current();
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Experiment run failed";
@@ -601,25 +483,6 @@ export function useExperimentRunner() {
           ...prev,
           status: "error",
           error: message,
-          history: appendHistoryEntry(
-            prev.history,
-            makeHistoryEntry({
-              mode,
-              status: "error",
-              alpha,
-              shots,
-              requestedBackend: backend,
-              resolvedBackend: null,
-              executionSource: null,
-              jobId: null,
-              energyEstimate: null,
-              decision: null,
-              comparisonAlphas,
-              error: message,
-              result: null,
-              comparisonResults: [],
-            }),
-          ),
           activeAsyncJob: null,
         }));
       }
@@ -632,14 +495,7 @@ export function useExperimentRunner() {
   // Re-attaches poll handlers for a job interrupted by a page refresh.
   // No re-submission needed — the job is still in the backend SQLite DB.
   const resumeJob = useCallback((job: ActiveAsyncJob) => {
-    const {
-      jobId,
-      mode,
-      alpha,
-      shots,
-      requestedBackend: backend,
-      comparisonAlphas,
-    } = job;
+    const { jobId, mode, alpha, shots, requestedBackend: backend } = job;
 
     setState((prev) => ({
       ...prev,
@@ -673,6 +529,7 @@ export function useExperimentRunner() {
             },
             setState,
           );
+          refetchHistoryRef.current();
         })
         .catch((error) => {
           const message =
@@ -704,11 +561,11 @@ export function useExperimentRunner() {
             shots,
             backend,
             executionSource: "api",
-            comparisonAlphas,
             completedJobId: jobId,
           },
           setState,
         );
+        refetchHistoryRef.current();
       })
       .catch((error) => {
         const message =
@@ -737,39 +594,52 @@ export function useExperimentRunner() {
 
   // ── Remaining callbacks ───────────────────────────────────────────────────────
 
-  const clearHistory = useCallback(() => {
-    setState((prev) => ({ ...prev, history: [] }));
-  }, []);
+  const restoreResult = useCallback(async (item: JobHistoryItem) => {
+    if (item.status !== "done") return;
 
-  const restoreResult = useCallback((entry: RunHistoryEntry) => {
-    if (!entry.result) return;
+    setState((prev) => ({ ...prev, status: "running", error: null }));
 
-    if (entry.mode === "twoQ") {
-      setState((prev) => ({
-        ...prev,
-        status: "complete",
-        error: null,
-        twoQResult: entry.result as ExperimentResult2Q,
-        oneQResult: null,
-        comparisonResults: [],
-        latestJobId: entry.jobId,
-        latestBackend: entry.resolvedBackend,
-        latestExecutionSource: entry.executionSource,
-        latestMode: "twoQ",
-      }));
-    } else {
-      setState((prev) => ({
-        ...prev,
-        status: "complete",
-        error: null,
-        oneQResult: entry.result as ExperimentResult,
-        twoQResult: null,
-        comparisonResults: entry.comparisonResults ?? [],
-        latestJobId: entry.jobId,
-        latestBackend: entry.resolvedBackend,
-        latestExecutionSource: entry.executionSource,
-        latestMode: "oneQ",
-      }));
+    try {
+      const input = {
+        alpha: item.alpha,
+        shots: item.shots,
+        backend: (item.requestedBackend as BackendId) ?? "aer",
+      };
+
+      if (item.mode === "2q") {
+        const twoQResult = await pollBackendExperiment2Q(item.jobId, input);
+        if (!twoQResult) throw new Error("Could not decode 2Q result");
+        setState((prev) => ({
+          ...prev,
+          status: "complete",
+          error: null,
+          twoQResult,
+          oneQResult: null,
+          comparisonResults: [],
+          latestJobId: item.jobId,
+          latestBackend: item.resolvedBackend,
+          latestExecutionSource: item.executionSource as ExecutionSource | null,
+          latestMode: "twoQ",
+        }));
+      } else {
+        const oneQResult = await pollBackendExperiment1Q(item.jobId, input);
+        setState((prev) => ({
+          ...prev,
+          status: "complete",
+          error: null,
+          oneQResult,
+          twoQResult: null,
+          comparisonResults: [],
+          latestJobId: item.jobId,
+          latestBackend: item.resolvedBackend,
+          latestExecutionSource: item.executionSource as ExecutionSource | null,
+          latestMode: "oneQ",
+        }));
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load result";
+      setState((prev) => ({ ...prev, status: "error", error: message }));
     }
   }, []);
 
@@ -801,9 +671,17 @@ export function useExperimentRunner() {
     isRunning: state.status === "running",
     runExperiment,
     resumeJob,
-    clearHistory,
     restoreResult,
     dismissActiveAsyncJob,
     retryActiveAsyncJob,
+    // Job history sourced from backend SQLite via useJobHistory
+    historyItems: jobHistory.items,
+    historyLoading: jobHistory.loading,
+    historyError: jobHistory.error,
+    historyHasMore: jobHistory.hasMore,
+    historyTotal: jobHistory.total,
+    loadMoreHistory: jobHistory.loadMore,
+    clearHistory: jobHistory.clearHistory,
+    refetchHistory: jobHistory.refetch,
   };
 }

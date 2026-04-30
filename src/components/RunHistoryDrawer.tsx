@@ -1,19 +1,23 @@
-import type { RunHistoryEntry } from "../types/runner";
+import type { JobHistoryItem } from "../types/runner";
 import { RunHistoryPanel } from "./RunHistoryPanel";
 
 interface RunHistoryDrawerProps {
   open: boolean;
   onClose: () => void;
-  entries: RunHistoryEntry[];
-  onRestore: (entry: RunHistoryEntry) => void;
-  onLoadResult: (entry: RunHistoryEntry) => void;
+  items: JobHistoryItem[];
+  loading: boolean;
+  error: string | null;
+  onRestore: (item: JobHistoryItem) => void;
+  onLoadResult: (item: JobHistoryItem) => void;
   onClear: () => void;
 }
 
 export function RunHistoryDrawer({
   open,
   onClose,
-  entries,
+  items,
+  loading,
+  error,
   onRestore,
   onLoadResult,
   onClear,
@@ -52,13 +56,15 @@ export function RunHistoryDrawer({
 
         <div className="flex-1 px-6 py-4">
           <RunHistoryPanel
-            entries={entries}
-            onRestore={(entry) => {
-              onRestore(entry);
+            items={items}
+            loading={loading}
+            error={error}
+            onRestore={(item) => {
+              onRestore(item);
               onClose();
             }}
-            onLoadResult={(entry) => {
-              onLoadResult(entry);
+            onLoadResult={(item) => {
+              onLoadResult(item);
               onClose();
             }}
             onClear={onClear}
