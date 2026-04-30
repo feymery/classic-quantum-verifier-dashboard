@@ -3,18 +3,12 @@ import {
   runExperiment as runExperiment1Q,
   runComparison,
 } from "../modules/oneQubit/services/quantumApi";
-import { runExperiment2Q } from "../modules/twoQubit/services/simulate2Q";
 import {
   pollBackendExperiment1Q,
   startBackendExperiment1Q,
 } from "../modules/oneQubit/services/backendExperiment1Q";
-import {
-  pollBackendExperiment2Q,
-  runBackendExperiment2Q,
-  startBackendExperiment2Q,
-} from "../modules/twoQubit/services/backendExperiment2Q";
 import { isLocalBackend, type BackendId } from "../utils/constants";
-import type { ExperimentResult, ExperimentResult2Q } from "../types/experiment";
+import type { ExperimentResult } from "../types/experiment";
 import type {
   RunnerStatus,
   ExecutionSource,
@@ -46,7 +40,6 @@ interface RunnerState {
   status: RunnerStatus;
   error: string | null;
   oneQResult: ExperimentResult | null;
-  twoQResult: ExperimentResult2Q | null;
   comparisonResults: ExperimentResult[];
   latestJobId: string | null;
   latestBackend: string | null;
@@ -124,40 +117,6 @@ function makeStatusChangeHandler(jobId: string, setState: SetState) {
 
 // ── Result commit helpers ─────────────────────────────────────────────────────
 
-interface Commit2QMeta {
-  alpha: number;
-  shots: number;
-  backend: BackendId;
-  executionSource: ExecutionSource;
-  /** Present for async jobs: marks activeAsyncJob as done instead of nulling it. */
-  completedJobId?: string;
-}
-
-function commit2QResult(
-  twoQResult: ExperimentResult2Q,
-  meta: Commit2QMeta,
-  setState: SetState,
-) {
-  setState((prev) => ({
-    ...prev,
-    status: "complete",
-    error: null,
-    twoQResult,
-    latestJobId: twoQResult.jobId,
-    latestBackend: twoQResult.backend,
-    latestExecutionSource: meta.executionSource,
-    activeAsyncJob: meta.completedJobId
-      ? prev.activeAsyncJob?.jobId === meta.completedJobId
-        ? {
-            ...prev.activeAsyncJob,
-            status: "done",
-            message: `Completed on ${twoQResult.backend}.`,
-          }
-        : prev.activeAsyncJob
-      : null,
-  }));
-}
-
 interface Commit1QMeta {
   alpha: number;
   shots: number;
@@ -200,7 +159,6 @@ export function useExperimentRunner() {
     status: "idle",
     error: null,
     oneQResult: null,
-    twoQResult: null,
     comparisonResults: [],
     latestJobId: null,
     latestBackend: null,
@@ -228,85 +186,6 @@ export function useExperimentRunner() {
   useEffect(() => {
     saveActiveJob(state.activeAsyncJob);
   }, [state.activeAsyncJob]);
-
-  // ── IBM 2Q ──────────────────────────────────────────────────────────────────
-
-  const runIbm2Q = useCallback(
-    async (
-      alpha: number,
-      shots: number,
-      backend: BackendId,
-      comparisonAlphas: number[],
-      startedAt: string,
-    ) => {
-      const started = await startBackendExperiment2Q({ alpha, shots, backend });
-      if (!started) throw new Error("IBM 2Q submission unavailable");
-
-      if (started.kind === "queued") {
-        setState((prev) => ({
-          ...prev,
-          latestJobId: started.jobId,
-          latestBackend: "ibm",
-          latestExecutionSource: "api",
-          activeAsyncJob: {
-            jobId: started.jobId,
-            mode: "twoQ",
-            status: "queued",
-            requestedBackend: backend,
-            alpha,
-            shots,
-            comparisonAlphas,
-            startedAt,
-            message: "IBM job submitted. Polling in background.",
-          },
-        }));
-
-        void pollBackendExperiment2Q(
-          started.jobId,
-          { alpha, shots, backend },
-          makeStatusChangeHandler(started.jobId, setState),
-        )
-          .then((twoQResult) => {
-            if (!twoQResult)
-              throw new Error("IBM 2Q result could not be decoded");
-            commit2QResult(
-              twoQResult,
-              {
-                alpha,
-                shots,
-                backend,
-                executionSource: "api",
-                completedJobId: started.jobId,
-              },
-              setState,
-            );
-            refetchHistoryRef.current();
-          })
-          .catch((error) => {
-            const message =
-              error instanceof Error ? error.message : "IBM job failed";
-            setState((prev) => ({
-              ...prev,
-              status: "error",
-              error: message,
-              activeAsyncJob:
-                prev.activeAsyncJob?.jobId === started.jobId
-                  ? { ...prev.activeAsyncJob, status: "failed", message }
-                  : prev.activeAsyncJob,
-            }));
-          });
-        return;
-      }
-
-      commit2QResult(
-        started.result,
-        { alpha, shots, backend, executionSource: "api" },
-        setState,
-      );
-      refetchHistoryRef.current();
-    },
-    [],
-  );
 
   // ── IBM 1Q ──────────────────────────────────────────────────────────────────
 
@@ -412,46 +291,7 @@ export function useExperimentRunner() {
       try {
         if (backend === "ibm_runtime") {
           const startedAt = new Date().toISOString();
-          if (mode === "twoQ") {
-            await runIbm2Q(alpha, shots, backend, comparisonAlphas, startedAt);
-          } else {
-            await runIbm1Q(alpha, shots, backend, comparisonAlphas, startedAt);
-          }
-          return;
-        }
-
-        if (mode === "twoQ") {
-          let twoQResult: ExperimentResult2Q;
-          let executionSource: ExecutionSource = "local-2q";
-
-          if (isLocalBackend(backend)) {
-            twoQResult = await runExperiment2Q({ alpha, shots, backend });
-          } else {
-            try {
-              const backendResult = await runBackendExperiment2Q({
-                alpha,
-                shots,
-                backend,
-              });
-              if (backendResult) {
-                twoQResult = backendResult;
-                executionSource = "api";
-              } else {
-                twoQResult = await runExperiment2Q({ alpha, shots, backend });
-                executionSource = "fallback-local";
-              }
-            } catch {
-              twoQResult = await runExperiment2Q({ alpha, shots, backend });
-              executionSource = "fallback-local";
-            }
-          }
-
-          commit2QResult(
-            twoQResult,
-            { alpha, shots, backend, executionSource },
-            setState,
-          );
-          refetchHistoryRef.current();
+          await runIbm1Q(alpha, shots, backend, comparisonAlphas, startedAt);
           return;
         }
 
@@ -487,7 +327,7 @@ export function useExperimentRunner() {
         }));
       }
     },
-    [runIbm2Q, runIbm1Q],
+    [runIbm1Q],
   );
 
   // ── resumeJob ─────────────────────────────────────────────────────────────────
@@ -495,7 +335,7 @@ export function useExperimentRunner() {
   // Re-attaches poll handlers for a job interrupted by a page refresh.
   // No re-submission needed — the job is still in the backend SQLite DB.
   const resumeJob = useCallback((job: ActiveAsyncJob) => {
-    const { jobId, mode, alpha, shots, requestedBackend: backend } = job;
+    const { jobId, alpha, shots, requestedBackend: backend } = job;
 
     setState((prev) => ({
       ...prev,
@@ -508,44 +348,6 @@ export function useExperimentRunner() {
     }));
 
     const onStatusChange = makeStatusChangeHandler(jobId, setState);
-
-    if (mode === "twoQ") {
-      void pollBackendExperiment2Q(
-        jobId,
-        { alpha, shots, backend },
-        onStatusChange,
-      )
-        .then((twoQResult) => {
-          if (!twoQResult)
-            throw new Error("IBM 2Q result could not be decoded");
-          commit2QResult(
-            twoQResult,
-            {
-              alpha,
-              shots,
-              backend,
-              executionSource: "api",
-              completedJobId: jobId,
-            },
-            setState,
-          );
-          refetchHistoryRef.current();
-        })
-        .catch((error) => {
-          const message =
-            error instanceof Error ? error.message : "IBM job failed";
-          setState((prev) => ({
-            ...prev,
-            status: "error",
-            error: message,
-            activeAsyncJob:
-              prev.activeAsyncJob?.jobId === jobId
-                ? { ...prev.activeAsyncJob, status: "failed", message }
-                : prev.activeAsyncJob,
-          }));
-        });
-      return;
-    }
 
     void pollBackendExperiment1Q(
       jobId,
@@ -606,36 +408,18 @@ export function useExperimentRunner() {
         backend: (item.requestedBackend as BackendId) ?? "aer",
       };
 
-      if (item.mode === "2q") {
-        const twoQResult = await pollBackendExperiment2Q(item.jobId, input);
-        if (!twoQResult) throw new Error("Could not decode 2Q result");
-        setState((prev) => ({
-          ...prev,
-          status: "complete",
-          error: null,
-          twoQResult,
-          oneQResult: null,
-          comparisonResults: [],
-          latestJobId: item.jobId,
-          latestBackend: item.resolvedBackend,
-          latestExecutionSource: item.executionSource as ExecutionSource | null,
-          latestMode: "twoQ",
-        }));
-      } else {
-        const oneQResult = await pollBackendExperiment1Q(item.jobId, input);
-        setState((prev) => ({
-          ...prev,
-          status: "complete",
-          error: null,
-          oneQResult,
-          twoQResult: null,
-          comparisonResults: [],
-          latestJobId: item.jobId,
-          latestBackend: item.resolvedBackend,
-          latestExecutionSource: item.executionSource as ExecutionSource | null,
-          latestMode: "oneQ",
-        }));
-      }
+      const oneQResult = await pollBackendExperiment1Q(item.jobId, input);
+      setState((prev) => ({
+        ...prev,
+        status: "complete",
+        error: null,
+        oneQResult,
+        comparisonResults: [],
+        latestJobId: item.jobId,
+        latestBackend: item.resolvedBackend,
+        latestExecutionSource: item.executionSource as ExecutionSource | null,
+        latestMode: "oneQ",
+      }));
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to load result";

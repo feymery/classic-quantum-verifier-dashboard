@@ -8,7 +8,6 @@ function sourceLabel(source: string | null): string {
   if (source === "api") return "api";
   if (source === "fallback-local") return "fallback-local";
   if (source === "local-mock") return "local-mock";
-  if (source === "local-2q") return "local-2q";
   return "unknown";
 }
 

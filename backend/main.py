@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.experiment_runner import runExperimentSync, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise, run_adversarial_circuit
+from backend.experiment_runner import runExperimentSync, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise
 from backend.ibm_client import configure_runtime, get_shared_client
 from backend.jobs.job_store import job_store
 
@@ -205,35 +205,13 @@ def sweep_noise_endpoint(payload: SweepNoiseRequest) -> dict:
     }
 
 
-class AdversarialCircuitRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
-    alpha: float = Field(..., ge=0.0, le=1.5707963267948966)
-    alpha_fake: float = Field(..., ge=0.0, le=1.5707963267948966)
-    shots: int = Field(default=1024, ge=1, le=1_000_000)
-
-
-@app.post("/adversarial/circuit")
-def adversarial_circuit_endpoint(payload: AdversarialCircuitRequest) -> dict:
-    """Run honest (α) and adversarial (α_fake) circuits and compare distributions.
-
-    Returns per-bitstring counts + probabilities for both circuits,
-    plus summary metrics: TVD, KL divergence, and energy delta (Phase 3).
-    """
-    return run_adversarial_circuit(
-        alpha=payload.alpha,
-        alpha_fake=payload.alpha_fake,
-        shots=payload.shots,
-    )
-
-
 class RunRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     alpha: float = Field(..., ge=0.0, le=1.5707963267948966)
     shots: int = Field(..., ge=1, le=1_000_000)
     backend: Literal["aer", "ibm"] = "aer"
-    mode: Literal["1q", "2q"] = "1q"
+    mode: Literal["1q"] = "1q"
 
 
 class ConfigureIbmRequest(BaseModel):
@@ -347,7 +325,7 @@ def list_jobs(
     offset: int = Query(default=0, ge=0),
     status: Literal["pending", "running", "done", "failed"] | None = Query(default=None),
     backend: Literal["aer", "ibm"] | None = Query(default=None),
-    mode: Literal["1q", "2q"] | None = Query(default=None),
+    mode: Literal["1q"] | None = Query(default=None),
 ) -> dict:
     jobs, total = job_store.list_jobs(
         limit=limit,

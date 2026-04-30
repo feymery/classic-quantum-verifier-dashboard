@@ -25,7 +25,8 @@ import {
 import { TrapCard } from "./TrapCard";
 import { EnergyGauge } from "./EnergyGauge";
 import { ProbBars } from "./ProbBars";
-import { TrapCircuitDiagram2Q } from "./TrapCircuitDiagram";
+import { TrapCircuitDiagram1Q } from "./TrapCircuitDiagram";
+import { honestCounts } from "../physics/traps";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -74,15 +75,6 @@ function trapEnergyBreakdown(
   const H_in = claimStep === "t0" ? 0 : 0.25;
   const H_prop = 2 * 0.75 * (1 - Math.cos(2 * alpha) / 2);
   return { H_out, H_in, H_prop, total: H_out + H_in + H_prop };
-}
-
-function honestCounts2Q(alpha: number, shots: number): Record<string, number> {
-  return {
-    "00": Math.round(((1 + Math.cos(alpha)) / 4) * shots),
-    "01": Math.round(((1 - Math.cos(alpha)) / 4) * shots),
-    "10": Math.round(((1 - Math.cos(alpha)) / 4) * shots),
-    "11": Math.round(((1 + Math.cos(alpha)) / 4) * shots),
-  };
 }
 
 function trapCounts2Q(
@@ -387,7 +379,7 @@ export default function FinalStateTrap() {
   );
 
   const honestCts = useMemo(
-    () => honestCounts2Q(alpha, DEFAULT_SHOTS),
+    () => honestCounts(alpha, DEFAULT_SHOTS),
     [alpha],
   );
 
@@ -422,7 +414,7 @@ export default function FinalStateTrap() {
 
   return (
     <TrapCard
-      id="Trap 2 — 2Q"
+      id="Trap 2 — Final State Only"
       title="Final State Only"
       description="The dishonest prover knows U(α) and submits only the final time step |ψ_2⟩⊗|2⟩ instead of the full clock history superposition |η(α)⟩. H_out is satisfied when claimStep = t2, but H_prop always detects the missing transitions."
       borderColor={isTrap ? "#3a1e1e" : "#1a2a3a"}
@@ -504,7 +496,7 @@ export default function FinalStateTrap() {
       {/* ── circuit diagram ── */}
       <div>
         <SectionLabel>circuit — 2-qubit clock state</SectionLabel>
-        <TrapCircuitDiagram2Q
+        <TrapCircuitDiagram1Q
           alpha={alpha}
           isTrap={isTrap}
           highlightDiff

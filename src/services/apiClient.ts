@@ -85,7 +85,7 @@ interface RawJobItem {
   job_id: string;
   created_at: string;
   updated_at: string;
-  mode: "1q" | "2q";
+  mode: "1q";
   status: "pending" | "running" | "done" | "failed";
   alpha: number;
   shots: number;

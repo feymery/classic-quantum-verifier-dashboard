@@ -109,54 +109,6 @@ def _expectation_z1x2_from_zx_counts(counts: dict[str, int], shots: int) -> floa
     return z1x2_sum / safe_shots
 
 
-def _expectation_pair_from_x_counts(
-    counts: dict[str, int],
-    shots: int,
-    pair: tuple[int, int],
-) -> float:
-    safe_shots = max(1, int(shots))
-    total = 0.0
-
-    for state, count in counts.items():
-        q0, q1, q2 = _decode_qiskit_bitstring(state)
-        bits = [q0, q1, q2]
-        a = _bit_to_eigen(bits[pair[0]])
-        b = _bit_to_eigen(bits[pair[1]])
-        total += (a * b) * count
-
-    return total / safe_shots
-
-
-def _expectations_2q_from_z_counts(counts: dict[str, int], shots: int) -> dict[str, float]:
-    safe_shots = max(1, int(shots))
-
-    sums = {
-        "Z1": 0.0,
-        "Z2": 0.0,
-        "Z3": 0.0,
-        "Z1Z2": 0.0,
-        "Z1Z3": 0.0,
-        "Z2Z3": 0.0,
-        "Z1Z2Z3": 0.0,
-    }
-
-    for state, count in counts.items():
-        q0, q1, q2 = _decode_qiskit_bitstring(state)
-        z1 = _bit_to_eigen(q0)
-        z2 = _bit_to_eigen(q1)
-        z3 = _bit_to_eigen(q2)
-
-        sums["Z1"] += z1 * count
-        sums["Z2"] += z2 * count
-        sums["Z3"] += z3 * count
-        sums["Z1Z2"] += (z1 * z2) * count
-        sums["Z1Z3"] += (z1 * z3) * count
-        sums["Z2Z3"] += (z2 * z3) * count
-        sums["Z1Z2Z3"] += (z1 * z2 * z3) * count
-
-    return {k: v / safe_shots for k, v in sums.items()}
-
-
 def map_measurements(
     counts_z: dict[str, int],
     counts_zx: dict[str, int],
@@ -179,28 +131,6 @@ def map_measurements(
         "Z1Z2": obs_z["Z1Z2"],
         "Z1X2": z1x2,
         "X1X2": x1x2,
-    }
-
-    return MeasurementMapping(
-        observables=observables,
-        probabilities=counts_to_probabilities(counts_z, shots),
-    )
-
-
-def map_measurements_2q(
-    counts_z: dict[str, int],
-    counts_x12: dict[str, int],
-    counts_x13: dict[str, int],
-    counts_x23: dict[str, int],
-    shots: int,
-) -> MeasurementMapping:
-    obs_z = _expectations_2q_from_z_counts(counts_z, shots)
-
-    observables = {
-        **obs_z,
-        "X1X2": _expectation_pair_from_x_counts(counts_x12, shots, (0, 1)),
-        "X1X3": _expectation_pair_from_x_counts(counts_x13, shots, (0, 2)),
-        "X2X3": _expectation_pair_from_x_counts(counts_x23, shots, (1, 2)),
     }
 
     return MeasurementMapping(

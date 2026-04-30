@@ -26,16 +26,6 @@ def sample_1q_params():
 
 
 @pytest.fixture
-def sample_2q_params():
-    """Standard 2Q experiment parameters"""
-    return {
-        "alpha": 0.45,
-        "shots": 2048,
-        "backend": "aer",
-    }
-
-
-@pytest.fixture
 def expected_result_keys():
     """Expected keys in sync execution result"""
     return {

@@ -1,6 +1,6 @@
 /**
  * ClassicalStateTrap.tsx
- * "Trap 1 — 2Q: Classical State Instead of Superposition"
+ * "Trap 1 — Classical State Instead of Superposition"
  *
  * The dishonest prover skips the entire quantum circuit and submits a single
  * classical basis state |ab⟩ instead of the 2-qubit clock history
@@ -15,8 +15,8 @@ import { useMemo, useState } from "react";
 import { TrapCard } from "./TrapCard";
 import { EnergyGauge } from "./EnergyGauge";
 import { ProbBars } from "./ProbBars";
-import { TrapCircuitDiagram2Q } from "./TrapCircuitDiagram";
-
+import { TrapCircuitDiagram1Q } from "./TrapCircuitDiagram";
+import { honestCounts } from "../physics/traps";
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type TrapState2Q = "00" | "01" | "10" | "11";
@@ -65,15 +65,6 @@ function trapEnergyBreakdown(
     H_in: H_in_penalty,
     H_prop,
     total: H_out + H_in_penalty + H_prop,
-  };
-}
-
-function honestCounts2Q(alpha: number, shots: number): Record<string, number> {
-  return {
-    "00": Math.round(((1 + Math.cos(alpha)) / 4) * shots),
-    "01": Math.round(((1 - Math.cos(alpha)) / 4) * shots),
-    "10": Math.round(((1 - Math.cos(alpha)) / 4) * shots),
-    "11": Math.round(((1 + Math.cos(alpha)) / 4) * shots),
   };
 }
 
@@ -145,10 +136,10 @@ function ZBasisTable({
   alpha: number;
 }) {
   const hProbs: Record<TrapState2Q, number> = {
-    "00": (1 + Math.cos(alpha)) / 4,
-    "01": (1 - Math.cos(alpha)) / 4,
-    "10": (1 - Math.cos(alpha)) / 4,
-    "11": (1 + Math.cos(alpha)) / 4,
+    "00": 0.5,
+    "01": 0,
+    "10": 0.5 * Math.pow(Math.cos(alpha), 2),
+    "11": 0.5 * Math.pow(Math.sin(alpha), 2),
   };
   const amberTooltip =
     "This outcome appears in the honest distribution — Z-basis alone cannot tell honest from trap. Only H_prop reveals the deception.";
@@ -241,7 +232,7 @@ export default function ClassicalStateTrap() {
   );
 
   const honestCts = useMemo(
-    () => honestCounts2Q(alpha, DEFAULT_SHOTS),
+    () => honestCounts(alpha, DEFAULT_SHOTS),
     [alpha],
   );
 
@@ -274,7 +265,7 @@ export default function ClassicalStateTrap() {
 
   return (
     <TrapCard
-      id="Trap 1 — 2Q"
+      id="Trap 1 — Classical State"
       title="Classical State Instead of Superposition"
       description="The dishonest prover skips the entire quantum circuit and submits a single classical basis state |ab⟩ instead of the 2-qubit clock history superposition |η(α)⟩. The Hamiltonian H_prop always detects the missing temporal coherence."
       borderColor={isTrap ? "#3a1e1e" : "#1a2a3a"}
@@ -366,7 +357,7 @@ export default function ClassicalStateTrap() {
             </button>
           )}
         </div>
-        <TrapCircuitDiagram2Q
+        <TrapCircuitDiagram1Q
           alpha={alpha}
           isTrap={isTrap}
           highlightDiff={showDiff}

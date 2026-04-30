@@ -10,13 +10,9 @@ import type { BackendId } from "../utils/constants";
 
 export type RunnerStatus = "idle" | "running" | "complete" | "error";
 
-export type ExecutionSource =
-  | "api"
-  | "fallback-local"
-  | "local-mock"
-  | "local-2q";
+export type ExecutionSource = "api" | "fallback-local" | "local-mock";
 
-export type RunMode = "oneQ" | "twoQ";
+export type RunMode = "oneQ";
 
 // ── Backend job history (source of truth: SQLite via GET /jobs) ──────────────
 
@@ -35,8 +31,8 @@ export interface JobHistoryItem {
   jobId: string;
   createdAt: string;
   updatedAt: string;
-  /** "1q" | "2q" — matches the backend mode column. */
-  mode: "1q" | "2q";
+  /** "1q" — matches the backend mode column. */
+  mode: "1q";
   status: JobStatus;
   alpha: number;
   shots: number;

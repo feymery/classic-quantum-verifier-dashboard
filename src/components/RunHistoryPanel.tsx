@@ -19,8 +19,8 @@ function formatSource(source: JobHistoryItem["executionSource"]): string {
   return "unknown";
 }
 
-function formatMode(mode: JobHistoryItem["mode"]): string {
-  return mode === "2q" ? "2Q" : "1Q";
+function formatMode(_mode: JobHistoryItem["mode"]): string {
+  return "1Q";
 }
 
 function formatTimestamp(value: string): string {

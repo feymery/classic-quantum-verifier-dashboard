@@ -64,9 +64,6 @@ def build_measurement_circuit(alpha: float, basis: str = "z") -> QuantumCircuit:
     Note: (k1,k2)=(1,0) / X1Z2 basis is not used in the energy Hamiltonian
     (Eq. C.1 of Stricker et al.), but is included here for the expectation-value
     sweep visualisation (Figure 2a of the paper).
-
-    The 2Q extension bases ("x13", "x23") remain available for the 2Q mode,
-    but they operate on a different circuit (see build_circuit_2q).
     """
     qc = build_circuit(alpha)
 
@@ -90,72 +87,4 @@ def build_measurement_circuit(alpha: float, basis: str = "z") -> QuantumCircuit:
                          f"Valid options: 'z', 'zx'/'z1x2', 'x'/'x12', 'x1z2'.")
 
     qc.measure([0, 1], [0, 1])
-    return qc
-
-
-# ── 2Q extension ──────────────────────────────────────────────────────────────
-# The 2Q mode is an extension (not part of the original paper) that adds a
-# third work qubit entangled via CNOT with the first work qubit, producing:
-#   |ψ⟩ = (1/√2)(|000⟩ + cos(α)|100⟩ + sin(α)|111⟩)
-#
-# Register layout:
-#   q0 = q_clock   (clock qubit, same role as q1 in 1Q)
-#   q1 = q_work1   (first work qubit, same role as q0 in 1Q)
-#   q2 = q_work2   (second work qubit, entangled with q1 via CNOT)
-
-
-def build_circuit_2q(alpha: float) -> QuantumCircuit:
-    """Build the 3-qubit 2Q extension circuit.
-
-    Uses the same correct CU(α) decomposition as the 1Q circuit:
-        CU(α) = RY(α/2) · CZ · RY(-α/2)  on q_work1, controlled by q_clock
-    followed by CNOT(q_work1 → q_work2) to entangle the two work qubits.
-    """
-    theta = _clamp_alpha(alpha)
-
-    qc = QuantumCircuit(3, 3)
-
-    # H on q_clock (q0)
-    qc.h(0)
-
-    # CU(α): control=q0 (clock), target=q1 (work1)
-    qc.ry(theta / 2, 1)
-    qc.cz(0, 1)
-    qc.ry(-theta / 2, 1)
-
-    # CNOT q1 → q2 to entangle work qubits
-    qc.cx(1, 2)
-
-    return qc
-
-
-def build_measurement_circuit_2q(alpha: float, basis: str = "z") -> QuantumCircuit:
-    """Return a measured 2Q circuit for the selected basis.
-
-    Supported bases:
-    - "z"   : Z-basis on all three qubits
-    - "x12" : H on q0 and q1 → measures X1X2
-    - "x13" : H on q0 and q2 → measures X1X3
-    - "x23" : H on q1 and q2 → measures X2X3
-    """
-    qc = build_circuit_2q(alpha)
-
-    basis_name = basis.lower()
-
-    if basis_name == "z":
-        pass
-    elif basis_name == "x12":
-        qc.h(0)
-        qc.h(1)
-    elif basis_name == "x13":
-        qc.h(0)
-        qc.h(2)
-    elif basis_name == "x23":
-        qc.h(1)
-        qc.h(2)
-    else:
-        raise ValueError(f"Unsupported 2Q measurement basis: {basis!r}. "
-                         f"Valid options: 'z', 'x12', 'x13', 'x23'.")
-
-    qc.measure([0, 1, 2], [0, 1, 2])
     return qc

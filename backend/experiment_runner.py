@@ -3,11 +3,11 @@ from __future__ import annotations
 import logging
 
 from backend import aer_executor, ibm_executor
-from backend.circuit_builder import build_measurement_circuit, build_measurement_circuit_2q
+from backend.circuit_builder import build_measurement_circuit
 from backend.energy import compute_energy as _compute_energy
 from backend.ibm_client import IBMClient, get_shared_client
 from backend.jobs.job_runner import submit_job
-from backend.measurement_mapper import map_measurements, map_measurements_2q, extract_x1z2
+from backend.measurement_mapper import map_measurements, extract_x1z2
 
 
 logger = logging.getLogger(__name__)
@@ -242,86 +242,6 @@ def sweep_noise(
     return results
 
 
-def run_adversarial_circuit(
-    alpha: float,
-    alpha_fake: float,
-    shots: int = 1024,
-) -> dict:
-    """Run honest and adversarial circuits and compare bitstring distributions.
-
-    The adversarial prover uses ``alpha_fake`` instead of the true ``alpha``.
-    Returns per-bitstring counts/probabilities for both, plus summary metrics:
-    - tvd: total variation distance  ½ Σ |p_honest - p_fake|
-    - kl_honest_to_fake: KL(honest || fake) in nats
-    - energy_honest / energy_fake: Hamiltonian energy for both
-    - verdict_honest / verdict_fake: verifier decision for both
-    """
-    import math
-
-    def _run_all(a: float) -> tuple[dict[str, float], float, float, str]:
-        counts_z, counts_zx, counts_x, _backend, _t = _run_with_aer(a, shots)
-        mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
-        energy = _compute_energy(a, mapped.observables)
-        energy_error = _compute_energy_error(a, mapped.observables, shots)
-        return mapped.probabilities, counts_z, energy, energy_error
-
-    probs_honest, counts_honest, e_honest, e_err_honest = _run_all(alpha)
-    probs_fake,   counts_fake,   e_fake,   e_err_fake   = _run_all(alpha_fake)
-
-    # Gather union of all bitstrings
-    all_states = sorted(set(probs_honest) | set(probs_fake))
-
-    # Total variation distance
-    tvd = 0.5 * sum(
-        abs(probs_honest.get(s, 0.0) - probs_fake.get(s, 0.0))
-        for s in all_states
-    )
-
-    # KL divergence KL(p_honest || p_fake) in nats, with eps guard
-    eps = 1e-9
-    kl = sum(
-        ph * math.log((ph + eps) / (probs_fake.get(s, 0.0) + eps))
-        for s, ph in probs_honest.items()
-        if ph > 0
-    )
-
-    return {
-        "alpha": round(float(alpha), 6),
-        "alpha_fake": round(float(alpha_fake), 6),
-        "shots": int(shots),
-        "honest": {
-            "counts": {str(k): int(v) for k, v in counts_honest.items()},
-            "probabilities": {str(k): round(float(v), 6) for k, v in probs_honest.items()},
-            "energy": round(e_honest, 6),
-            "energy_error": round(e_err_honest, 6),
-            "verdict": _verdict(e_honest, e_err_honest),
-        },
-        "adversarial": {
-            "counts": {str(k): int(v) for k, v in counts_fake.items()},
-            "probabilities": {str(k): round(float(v), 6) for k, v in probs_fake.items()},
-            "energy": round(e_fake, 6),
-            "energy_error": round(e_err_fake, 6),
-            "verdict": _verdict(e_fake, e_err_fake),
-        },
-        "metrics": {
-            "tvd": round(tvd, 6),
-            "kl_honest_to_fake": round(kl, 6),
-            "delta_energy": round(abs(e_fake - e_honest), 6),
-        },
-    }
-
-
-def _compute_energy_2q(alpha: float, observables: dict[str, float]) -> float:
-    """2Q frontend-compatible estimate: average of primary and cross-check."""
-    import math
-
-    c2a = math.cos(2.0 * alpha)
-    s2a = math.sin(2.0 * alpha)
-    primary = 0.5 - 0.5 * c2a * observables["Z1Z2"] - 0.5 * s2a * observables["X1X2"]
-    cross = 0.5 - 0.5 * c2a * observables["Z1Z3"] - 0.5 * s2a * observables["X1X3"]
-    return (primary + cross) / 2.0
-
-
 def _run_with_aer(
     alpha: float, shots: int
 ) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float]:
@@ -340,37 +260,6 @@ def _run_with_aer(
     return z_result.counts, zx_result.counts, x_result.counts, "aer", execution_time
 
 
-def _run_with_aer_2q(
-    alpha: float,
-    shots: int,
-) -> tuple[dict[str, int], dict[str, int], dict[str, int], dict[str, int], str, float]:
-    z_circuit   = build_measurement_circuit_2q(alpha, basis="z")
-    x12_circuit = build_measurement_circuit_2q(alpha, basis="x12")
-    x13_circuit = build_measurement_circuit_2q(alpha, basis="x13")
-    x23_circuit = build_measurement_circuit_2q(alpha, basis="x23")
-
-    z_result = aer_executor.run_circuit(z_circuit, shots)
-    x12_result = aer_executor.run_circuit(x12_circuit, shots)
-    x13_result = aer_executor.run_circuit(x13_circuit, shots)
-    x23_result = aer_executor.run_circuit(x23_circuit, shots)
-
-    execution_time = (
-        z_result.metadata.execution_time_ms
-        + x12_result.metadata.execution_time_ms
-        + x13_result.metadata.execution_time_ms
-        + x23_result.metadata.execution_time_ms
-    )
-
-    return (
-        z_result.counts,
-        x12_result.counts,
-        x13_result.counts,
-        x23_result.counts,
-        "aer",
-        execution_time,
-    )
-
-
 def _run_with_ibm(
     alpha: float, shots: int
 ) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float]:
@@ -385,76 +274,36 @@ def _run_with_ibm(
     return z_result.counts, zx_result.counts, x_result.counts, "ibm", execution_time
 
 
-def _run_with_ibm_2q(
-    alpha: float,
-    shots: int,
-) -> tuple[dict[str, int], dict[str, int], dict[str, int], dict[str, int], str, float]:
-    z_circuit   = build_measurement_circuit_2q(alpha, basis="z")
-    x12_circuit = build_measurement_circuit_2q(alpha, basis="x12")
-    x13_circuit = build_measurement_circuit_2q(alpha, basis="x13")
-    x23_circuit = build_measurement_circuit_2q(alpha, basis="x23")
-    client = get_shared_client()
-
-    results = ibm_executor.run_circuits_batch(
-        [z_circuit, x12_circuit, x13_circuit, x23_circuit], shots, client
-    )
-    z_result, x12_result, x13_result, x23_result = results
-    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
-    return (
-        z_result.counts,
-        x12_result.counts,
-        x13_result.counts,
-        x23_result.counts,
-        "ibm",
-        execution_time,
-    )
-
-
 def runExperimentSync(alpha: float, shots: int, backend: str = "aer", mode: str = "1q") -> dict:
     """Synchronous execution path."""
+    import math
+
     backend_requested = (backend or "aer").strip().lower()
-    run_mode = (mode or "1q").strip().lower()
 
-    energy_error: float | None = None
-    energy_theory: float | None = None
-    lambda_min: float | None = None
-    verdict: str | None = None
-
-    if run_mode == "2q":
-        if backend_requested == "ibm":
-                counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_ibm_2q(alpha, shots)
-        else:
-            counts_z, counts_x12, counts_x13, counts_x23, backend_used, execution_time = _run_with_aer_2q(alpha, shots)
-
-        mapped = map_measurements_2q(counts_z, counts_x12, counts_x13, counts_x23, shots)
-        energy = _compute_energy_2q(alpha, mapped.observables)
+    if backend_requested == "ibm":
+            counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_ibm(
+                alpha,
+                shots,
+            )
     else:
-        import math
+        counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_aer(alpha, shots)
 
-        if backend_requested == "ibm":
-                counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_ibm(
-                    alpha,
-                    shots,
-                )
-        else:
-            counts_z, counts_zx, counts_x, backend_used, execution_time = _run_with_aer(alpha, shots)
-
-        mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
-        energy = _compute_energy(alpha, mapped.observables)
-        energy_error = _compute_energy_error(alpha, mapped.observables, shots)
-        verdict = _verdict(energy, energy_error)
-        energy_theory = math.sin(float(alpha)) ** 2
-        lambda_min = _compute_lambda_min(float(alpha))
+    mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
+    energy = _compute_energy(alpha, mapped.observables)
+    energy_error = _compute_energy_error(alpha, mapped.observables, shots)
+    verdict = _verdict(energy, energy_error)
+    energy_theory = math.sin(float(alpha)) ** 2
+    lambda_min = _compute_lambda_min(float(alpha))
 
     return {
         "alpha": float(alpha),
         "observables": mapped.observables,
         "noisyObservables": mapped.observables,
         "energy": energy,
-        "energy_error": energy_error if run_mode != "2q" else None,
-        "energy_theory": energy_theory if run_mode != "2q" else None,
-        "lambda_min": lambda_min if run_mode != "2q" else None,
-        "verdict": verdict if run_mode != "2q" else None,
+        "energy_error": energy_error,
+        "energy_theory": energy_theory,
+        "lambda_min": lambda_min,
+        "verdict": verdict,
         "counts": counts_z,
         "probabilities": mapped.probabilities,
         "backendInfo": {
