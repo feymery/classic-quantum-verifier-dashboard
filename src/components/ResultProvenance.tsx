@@ -11,19 +11,11 @@ interface ResultProvenanceProps {
 
 function sourceLabel(source: ExecutionSource | null): string {
   if (source === "api") return "backend API";
-  if (source === "fallback-local") return "local fallback";
-  if (source === "local-mock") return "local mock";
   return "unknown";
 }
 
 function sourceDescription(source: ExecutionSource | null): string {
   if (source === "api") return "Result produced by the FastAPI backend.";
-  if (source === "fallback-local") {
-    return "Backend path was requested, then resolved locally after fallback.";
-  }
-  if (source === "local-mock") {
-    return "Result generated entirely in the frontend mock simulator.";
-  }
   return "Execution origin is unavailable for this result.";
 }
 
@@ -31,7 +23,6 @@ function sourceVariant(
   source: ExecutionSource | null,
 ): "success" | "warning" | "neutral" {
   if (source === "api") return "success";
-  if (source === "fallback-local") return "warning";
   return "neutral";
 }
 

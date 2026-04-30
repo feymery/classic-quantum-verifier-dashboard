@@ -8,7 +8,7 @@ import { useIbmCredentials } from "./useIbmCredentials";
 export function useDashboardState() {
   const [alpha, setAlpha] = useState<number>(Math.PI / 4);
   const [shots, setShots] = useState<number>(1024);
-  const [selectedBackend, setSelectedBackend] = useState<BackendId>("mock");
+  const [selectedBackend, setSelectedBackend] = useState<BackendId>("aer");
   const {
     ibmToken,
     ibmTokenSet,

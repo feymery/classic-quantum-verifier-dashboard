@@ -7,7 +7,7 @@ import {
   pollBackendExperiment1Q,
   startBackendExperiment1Q,
 } from "../modules/oneQubit/services/backendExperiment1Q";
-import { isLocalBackend, type BackendId } from "../utils/constants";
+import type { BackendId } from "../utils/constants";
 import type { ExperimentResult } from "../types/experiment";
 import type {
   RunnerStatus,
@@ -198,7 +198,6 @@ export function useExperimentRunner() {
       startedAt: string,
     ) => {
       const started = await startBackendExperiment1Q({ alpha, shots, backend });
-      if (!started) throw new Error("IBM 1Q submission unavailable");
 
       if (started.kind === "queued") {
         setState((prev) => ({
@@ -295,14 +294,8 @@ export function useExperimentRunner() {
           return;
         }
 
-        // oneQ — quantumApi routes internally: mock → local, aer/ibm_runtime → backend+fallback
         const oneQResult = await runExperiment1Q({ alpha, shots, backend });
-        const isMock = isLocalBackend(backend);
-        const executionSource: ExecutionSource = isMock
-          ? "local-mock"
-          : oneQResult.jobId.startsWith("mock-")
-            ? "fallback-local"
-            : "api";
+        const executionSource: ExecutionSource = "api";
 
         const comparisonResults =
           comparisonAlphas.length > 0

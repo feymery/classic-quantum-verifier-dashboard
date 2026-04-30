@@ -85,8 +85,7 @@ function toExperimentResult(
   return {
     jobId,
     status: "complete",
-    backend:
-      finalResult.backendInfo?.type || mapBackendId(input.backend) || "aer",
+    backend: finalResult.backendInfo?.type || mapBackendId(input.backend),
     counts: collapseCountsTo2Bit(finalResult.counts),
     expectationValues,
     energy,
@@ -128,9 +127,8 @@ export async function startBackendExperiment1Q(input: {
   alpha: number;
   shots: number;
   backend: BackendId;
-}): Promise<BackendExperimentStart1Q | null> {
+}): Promise<BackendExperimentStart1Q> {
   const mappedBackend = mapBackendId(input.backend);
-  if (!mappedBackend) return null;
 
   const payload = {
     alpha: input.alpha,

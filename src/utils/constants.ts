@@ -46,7 +46,7 @@ export const KEY_ALPHA_VALUES = KEY_ALPHAS.map((k) => k.value);
 
 // ── Backend options ──────────────────────────────────────────────────────────
 
-export type BackendId = "mock" | "aer" | "ibm_runtime";
+export type BackendId = "aer" | "ibm_runtime";
 
 export interface Backend {
   id: BackendId;
@@ -56,12 +56,6 @@ export interface Backend {
 }
 
 export const BACKENDS: Backend[] = [
-  {
-    id: "mock",
-    label: "Mock (dev)",
-    dotColor: "#445566",
-    requiresToken: false,
-  },
   {
     id: "aer",
     label: "Aer Simulator",
@@ -77,30 +71,19 @@ export const BACKENDS: Backend[] = [
 ];
 
 // ── Backend name mapping (frontend → API) ────────────────────────────────────
-// "mock" is local-only and never reaches the FastAPI backend.
 // "aer" maps to the synchronous Aer executor.
 // "ibm_runtime" maps to the async IBM Runtime executor.
 
 export type ApiBackendId = "aer" | "ibm";
 
-/**
- * Maps a frontend BackendId to the value expected by POST /run.
- * Returns null for ids that should be handled locally (no HTTP call).
- */
-export function mapBackendId(backend: BackendId): ApiBackendId | null {
+/** Maps a frontend BackendId to the value expected by POST /run. */
+export function mapBackendId(backend: BackendId): ApiBackendId {
   switch (backend) {
     case "aer":
       return "aer";
     case "ibm_runtime":
       return "ibm";
-    case "mock":
-      return null;
   }
-}
-
-/** Returns true if the backend should be executed locally without an API call. */
-export function isLocalBackend(backend: BackendId): boolean {
-  return mapBackendId(backend) === null;
 }
 
 // ── Thresholds ───────────────────────────────────────────────────────────────

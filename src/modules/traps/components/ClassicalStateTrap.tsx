@@ -231,10 +231,7 @@ export default function ClassicalStateTrap() {
     [trapState, alpha],
   );
 
-  const honestCts = useMemo(
-    () => honestCounts(alpha, DEFAULT_SHOTS),
-    [alpha],
-  );
+  const honestCts = useMemo(() => honestCounts(alpha, DEFAULT_SHOTS), [alpha]);
 
   const trapCts: Record<string, number> = useMemo(
     () => ({ [trapState]: DEFAULT_SHOTS }),

@@ -10,7 +10,7 @@ import type { BackendId } from "../utils/constants";
 
 export type RunnerStatus = "idle" | "running" | "complete" | "error";
 
-export type ExecutionSource = "api" | "fallback-local" | "local-mock";
+export type ExecutionSource = "api";
 
 export type RunMode = "oneQ";
 

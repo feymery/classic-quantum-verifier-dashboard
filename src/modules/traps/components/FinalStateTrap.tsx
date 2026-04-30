@@ -378,10 +378,7 @@ export default function FinalStateTrap() {
     [claimStep, alpha],
   );
 
-  const honestCts = useMemo(
-    () => honestCounts(alpha, DEFAULT_SHOTS),
-    [alpha],
-  );
+  const honestCts = useMemo(() => honestCounts(alpha, DEFAULT_SHOTS), [alpha]);
 
   const trapCts = useMemo(
     () => trapCounts2Q(claimStep, alpha, DEFAULT_SHOTS),

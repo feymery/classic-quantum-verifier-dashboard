@@ -4,13 +4,6 @@ import { ExperimentControlBar } from "../components/ExperimentControlBar";
 import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
 import { useAppState } from "../state/useAppState";
 
-function sourceLabel(source: string | null): string {
-  if (source === "api") return "api";
-  if (source === "fallback-local") return "fallback-local";
-  if (source === "local-mock") return "local-mock";
-  return "unknown";
-}
-
 export function ExperimentPage() {
   const { dashboard, runner, runForMode } = useAppState();
 
@@ -25,7 +18,7 @@ export function ExperimentPage() {
             : runner.isRunning
               ? "Running selected experiment..."
               : runner.latestJobId
-                ? `${runner.latestJobId} · ${runner.latestBackend ?? dashboard.selectedBackend} · ${sourceLabel(runner.latestExecutionSource)}`
+                ? `${runner.latestJobId} · ${runner.latestBackend ?? dashboard.selectedBackend}`
                 : "One click = one experiment"
         }
       />
