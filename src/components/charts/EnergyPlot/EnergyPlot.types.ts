@@ -10,7 +10,4 @@ export interface EnergyPlotPoint {
 export interface EnergyPlotSharedProps {
   alpha: number;
   result: ExperimentResult | null;
-  comparisonAlphas: number[];
-  comparisonResults: ExperimentResult[];
-  comparisonLoading: boolean;
 }

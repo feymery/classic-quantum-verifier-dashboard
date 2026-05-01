@@ -11,7 +11,7 @@ export * from "./physics/hamiltonian";
 export * from "./physics/measurements";
 
 // Services
-export { runExperiment, runComparison } from "./services/quantumApi";
+export { runExperiment } from "./services/quantumApi";
 export type { ExperimentConfig, ExperimentResult } from "./services/quantumApi";
 
 // Components

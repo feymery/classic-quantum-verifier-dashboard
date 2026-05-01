@@ -4,57 +4,29 @@ import { Button } from "../../../ui/Button";
 
 interface AlphaPresetsProps {
   alpha: number;
-  compareMode: boolean;
-  comparisonAlphas: number[];
   onSelect: (v: number) => void;
-  onAddToComparison: (v: number) => void;
 }
 
-export function AlphaPresets({
-  alpha,
-  compareMode,
-  comparisonAlphas,
-  onSelect,
-  onAddToComparison,
-}: AlphaPresetsProps) {
+export function AlphaPresets({ alpha, onSelect }: AlphaPresetsProps) {
   const keyValues = KEY_ALPHAS.map((k) => k.value);
   const snappedIdx = nearestKeyIndex(alpha, keyValues);
 
   return (
     <div className="grid grid-cols-2 gap-1.5">
       {KEY_ALPHAS.map((ka, i) => {
-        const isActive = snappedIdx === i && !compareMode;
-        const isInComparison = comparisonAlphas.some(
-          (a) => Math.abs(a - ka.value) < 0.001,
-        );
+        const isActive = snappedIdx === i;
         const e = energy(ka.value);
-
-        const handleClick = () => {
-          if (compareMode) {
-            onAddToComparison(ka.value);
-          } else {
-            onSelect(ka.value);
-          }
-        };
 
         return (
           <Button
             key={ka.label}
-            onClick={handleClick}
+            onClick={() => onSelect(ka.value)}
             variant="secondary"
             size="sm"
             className="group relative flex h-auto flex-col gap-0.5 rounded border px-2.5 py-2 text-left font-normal transition-all duration-150"
             style={{
-              background: isActive
-                ? `${ka.color}18`
-                : isInComparison
-                  ? `${ka.color}10`
-                  : "#181620",
-              borderColor: isActive
-                ? ka.color
-                : isInComparison
-                  ? `${ka.color}66`
-                  : "#2d2b3a",
+              background: isActive ? `${ka.color}18` : "#181620",
+              borderColor: isActive ? ka.color : "#2d2b3a",
               boxShadow: isActive ? `0 0 12px ${ka.color}22` : "none",
             }}
           >
@@ -66,12 +38,6 @@ export function AlphaPresets({
               >
                 {ka.label}
               </span>
-              {isInComparison && (
-                <span
-                  className="w-1.5 h-1.5 rounded-lg"
-                  style={{ background: ka.color }}
-                />
-              )}
             </div>
 
             {/* Desc + energy */}
@@ -89,16 +55,6 @@ export function AlphaPresets({
                 {e.toFixed(2)}
               </span>
             </div>
-
-            {/* Compare mode badge */}
-            {compareMode && !isInComparison && (
-              <div
-                className="absolute inset-0 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100  text-[10px]"
-                style={{ background: `${ka.color}22`, color: ka.color }}
-              >
-                + add to compare
-              </div>
-            )}
           </Button>
         );
       })}

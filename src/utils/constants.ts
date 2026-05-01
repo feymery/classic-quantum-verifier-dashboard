@@ -97,12 +97,3 @@ export function mapBackendId(backend: BackendId): ApiBackendId {
 
 export const THRESHOLD_LOW = 0.4;
 export const THRESHOLD_HIGH = 0.5;
-
-// ── Comparison palette (for multi-alpha plots) ───────────────────────────────
-
-export const COMPARISON_COLORS = [
-  "#a78bfa",
-  "#d8b4fe",
-  "#f59e0b",
-  "#34d399",
-] as const;

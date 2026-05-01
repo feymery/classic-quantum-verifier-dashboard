@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  runExperiment as runExperiment1Q,
-  runComparison,
-} from "../modules/oneQubit/services/quantumApi";
+import { runExperiment as runExperiment1Q } from "../modules/oneQubit/services/quantumApi";
 import {
   pollBackendExperiment1Q,
   startBackendExperiment1Q,
@@ -30,14 +27,12 @@ export interface RunRequest {
   alpha: number;
   shots: number;
   backend: BackendId;
-  comparisonAlphas: number[];
 }
 
 interface RunnerState {
   status: RunnerStatus;
   error: string | null;
   oneQResult: ExperimentResult | null;
-  comparisonResults: ExperimentResult[];
   latestBackend: string | null;
   latestExecutionSource: ExecutionSource | null;
 }
@@ -55,7 +50,6 @@ interface Commit1QMeta {
 
 function commit1QResult(
   oneQResult: ExperimentResult,
-  comparisonResults: ExperimentResult[],
   meta: Commit1QMeta,
   setState: SetState,
 ) {
@@ -64,7 +58,6 @@ function commit1QResult(
     status: "complete",
     error: null,
     oneQResult,
-    comparisonResults,
     latestBackend: oneQResult.backend,
     latestExecutionSource: meta.executionSource,
   }));
@@ -77,7 +70,6 @@ export function useExperimentRunner() {
     status: "idle",
     error: null,
     oneQResult: null,
-    comparisonResults: [],
     latestBackend: null,
     latestExecutionSource: null,
   }));
@@ -108,12 +100,7 @@ export function useExperimentRunner() {
   // ── IBM 1Q ────────────────────────────────────────────────────────────────────────────────────────
 
   const runIbm1Q = useCallback(
-    async (
-      alpha: number,
-      shots: number,
-      backend: BackendId,
-      comparisonAlphas: number[],
-    ) => {
+    async (alpha: number, shots: number, backend: BackendId) => {
       const started = await startBackendExperiment1Q({ alpha, shots, backend });
 
       if (started.kind === "queued") {
@@ -125,13 +112,8 @@ export function useExperimentRunner() {
 
         void pollBackendExperiment1Q(started.jobId, { alpha, shots, backend })
           .then(async (oneQResult) => {
-            const comparisonResults =
-              comparisonAlphas.length > 0
-                ? await runComparison(comparisonAlphas, shots, backend)
-                : [];
             commit1QResult(
               oneQResult,
-              comparisonResults,
               { alpha, shots, backend, executionSource: "api" },
               setState,
             );
@@ -163,13 +145,8 @@ export function useExperimentRunner() {
         return;
       }
 
-      const comparisonResults =
-        comparisonAlphas.length > 0
-          ? await runComparison(comparisonAlphas, shots, backend)
-          : [];
       commit1QResult(
         started.result,
-        comparisonResults,
         { alpha, shots, backend, executionSource: "api" },
         setState,
       );
@@ -183,7 +160,7 @@ export function useExperimentRunner() {
 
   const runExperiment = useCallback(
     async (request: RunRequest) => {
-      const { alpha, shots, backend, comparisonAlphas } = request;
+      const { alpha, shots, backend } = request;
 
       setState((prev) => ({
         ...prev,
@@ -194,21 +171,15 @@ export function useExperimentRunner() {
 
       try {
         if (backend === "ibm_runtime") {
-          await runIbm1Q(alpha, shots, backend, comparisonAlphas);
+          await runIbm1Q(alpha, shots, backend);
           return;
         }
 
         const oneQResult = await runExperiment1Q({ alpha, shots, backend });
         const executionSource: ExecutionSource = "api";
 
-        const comparisonResults =
-          comparisonAlphas.length > 0
-            ? await runComparison(comparisonAlphas, shots, backend)
-            : [];
-
         commit1QResult(
           oneQResult,
-          comparisonResults,
           { alpha, shots, backend, executionSource },
           setState,
         );
@@ -248,7 +219,6 @@ export function useExperimentRunner() {
         status: "complete",
         error: null,
         oneQResult,
-        comparisonResults: [],
         latestBackend: item.resolvedBackend,
         latestExecutionSource: item.executionSource as ExecutionSource | null,
       }));

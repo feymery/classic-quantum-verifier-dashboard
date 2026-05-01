@@ -11,10 +11,6 @@ export function VisualizationPage() {
         alpha={dashboard.alpha}
         shots={dashboard.shots}
         result={runner.oneQResult}
-        comparisonAlphas={dashboard.comparisonAlphas}
-        comparisonResults={runner.comparisonResults}
-        comparisonLoading={runner.status === "running"}
-        executionSource={runner.latestExecutionSource}
       />
 
       <AlphaSweepChart shots={dashboard.shots} nPoints={30} />

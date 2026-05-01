@@ -23,12 +23,6 @@ export const CHART_COLORS = {
   axis: "var(--color-subtle)",
   tooltip: "var(--color-surface)",
   tooltipBorder: "var(--color-border)",
-  comparison: [
-    "var(--color-accent)",
-    "var(--color-accent-dim)",
-    "var(--color-warning)",
-    "var(--color-success)",
-  ] as const,
 } as const;
 
 export const CHART_FONT = {

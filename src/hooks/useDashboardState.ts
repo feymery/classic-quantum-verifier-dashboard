@@ -22,7 +22,6 @@ export function useDashboardState() {
   } = useIbmCredentials();
   const [noiseLambda, setNoiseLambda] = useState<number>(0.05);
   const [alphaFake, setAlphaFake] = useState<number>(1.1);
-  const [comparisonAlphas, setComparisonAlphas] = useState<number[]>([]);
   const [showToken, setShowToken] = useState<boolean>(false);
 
   const theoreticalEnergy = useMemo(() => energyFromAlpha(alpha), [alpha]);
@@ -66,7 +65,6 @@ export function useDashboardState() {
     ibmBackendName,
     noiseLambda,
     alphaFake,
-    comparisonAlphas,
     showToken,
     energy: theoreticalEnergy,
     formattedTheoreticalEnergy,
@@ -80,7 +78,6 @@ export function useDashboardState() {
     setIbmBackendName,
     setNoiseLambda,
     setAlphaFake,
-    setComparisonAlphas,
     setShowToken,
     clearIbmCredentials,
     confirmToken,

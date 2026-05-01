@@ -19,7 +19,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       alpha: dashboard.alpha,
       shots: dashboard.shots,
       backend: dashboard.selectedBackend,
-      comparisonAlphas: dashboard.comparisonAlphas,
     });
   }, [dashboard, runner]);
 

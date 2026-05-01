@@ -22,6 +22,5 @@ export interface DashboardState {
   ibmBackendName: string;
   noiseLambda: number;
   alphaFake: number;
-  comparisonAlphas: number[];
   showToken: boolean;
 }

@@ -10,12 +10,7 @@ export function ExperimentPage() {
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-3 md:flex-row">
-        <AlphaControl
-          alpha={dashboard.alpha}
-          setAlpha={dashboard.setAlpha}
-          comparisonAlphas={dashboard.comparisonAlphas}
-          setComparisonAlphas={dashboard.setComparisonAlphas}
-        />
+        <AlphaControl alpha={dashboard.alpha} setAlpha={dashboard.setAlpha} />
 
         <EnergyPanel
           title="Instant Energy"

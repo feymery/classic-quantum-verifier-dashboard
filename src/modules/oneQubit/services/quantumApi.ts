@@ -11,7 +11,6 @@ import type {
   ExperimentResult,
 } from "../../../types/experiment";
 import { runBackendExperiment1Q } from "./backendExperiment1Q";
-import type { BackendId } from "../../../utils/constants";
 
 export type { ExperimentConfig, ExperimentResult };
 
@@ -20,15 +19,4 @@ export async function runExperiment(
   config: ExperimentConfig,
 ): Promise<ExperimentResult> {
   return runBackendExperiment1Q(config);
-}
-
-/** Run multiple alphas in parallel for comparison mode. */
-export async function runComparison(
-  alphas: number[],
-  shots: number,
-  backend: BackendId,
-): Promise<ExperimentResult[]> {
-  return Promise.all(
-    alphas.map((alpha) => runExperiment({ alpha, shots, backend })),
-  );
 }
