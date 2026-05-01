@@ -85,7 +85,6 @@ interface RawJobItem {
   job_id: string;
   created_at: string;
   updated_at: string;
-  mode: "1q";
   status: "pending" | "running" | "done" | "failed";
   alpha: number;
   shots: number;
@@ -114,7 +113,6 @@ function rawToJobHistoryItem(raw: RawJobItem): JobHistoryItem {
     jobId: raw.job_id,
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
-    mode: raw.mode,
     status: raw.status,
     alpha: raw.alpha,
     shots: raw.shots,
@@ -144,4 +142,39 @@ export async function deleteAllJobs(): Promise<{ deleted: number }> {
   return fetchJson<{ deleted: number }>(`${API_BASE}/jobs`, {
     method: "DELETE",
   });
+}
+
+/** Shape returned by GET /job/{job_id}. */
+interface SingleJobResponse {
+  job_id: string;
+  status: "pending" | "running" | "done" | "failed";
+  result?: { energy?: number } | null;
+  metadata?: { error?: string | null } | null;
+}
+
+export interface SingleJobStatus {
+  status: JobHistoryItem["status"];
+  energyEstimate: number | null;
+  decision: JobHistoryItem["decision"];
+  error: string | null;
+}
+
+function energyToDecision(energy: number): JobHistoryItem["decision"] {
+  if (energy < 0.4) return "accept";
+  if (energy >= 0.5) return "reject";
+  return "boundary";
+}
+
+export async function fetchSingleJobStatus(
+  jobId: string,
+): Promise<SingleJobStatus> {
+  const raw = await fetchJson<SingleJobResponse>(`${API_BASE}/job/${jobId}`);
+  const energy =
+    typeof raw.result?.energy === "number" ? raw.result.energy : null;
+  return {
+    status: raw.status,
+    energyEstimate: energy,
+    decision: energy !== null ? energyToDecision(energy) : null,
+    error: raw.metadata?.error ?? null,
+  };
 }

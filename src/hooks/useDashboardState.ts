@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState, type ChangeEvent } from "react";
-import { BACKENDS, type BackendId } from "../utils/constants";
+import { BACKENDS, PROTOCOL_ALPHA, type BackendId } from "../utils/constants";
 import { energyFromAlpha } from "../utils/physics";
 import { formatEnergy } from "../utils/physics";
 import { fetchJson } from "../services/apiClient";
 import { useIbmCredentials } from "./useIbmCredentials";
 
 export function useDashboardState() {
-  const [alpha, setAlpha] = useState<number>(Math.PI / 4);
+  const [alpha, setAlpha] = useState<number>(PROTOCOL_ALPHA);
   const [shots, setShots] = useState<number>(1024);
   const [selectedBackend, setSelectedBackend] = useState<BackendId>("aer");
   const {

@@ -18,11 +18,6 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _job_mode(metadata: dict[str, Any] | None) -> Literal["1q", "2q"]:
-    mode = str((metadata or {}).get("mode", "1q")).lower()
-    return "2q" if mode == "2q" else "1q"
-
-
 class JobStore:
     def __init__(self, db_path: str | None = None) -> None:
         resolved = (db_path or os.getenv("JOB_STORE_DB_PATH") or "backend/jobs/job_store.sqlite").strip()
@@ -94,7 +89,6 @@ class JobStore:
         job_id = str(uuid4())
         created_at = _now_iso()
         payload_metadata = metadata or {}
-        mode = _job_mode(payload_metadata)
 
         with self._lock:
             self._conn.execute(
@@ -108,7 +102,7 @@ class JobStore:
                     job_id,
                     "pending",
                     backend,
-                    mode,
+                    "1q",
                     float(alpha),
                     int(shots),
                     None,
@@ -142,8 +136,6 @@ class JobStore:
         if metadata is not None:
             updates.append("metadata_json = ?")
             params.append(json.dumps(metadata))
-            updates.append("mode = ?")
-            params.append(_job_mode(metadata))
         if error is not None:
             updates.append("error = ?")
             params.append(error)
@@ -187,7 +179,6 @@ class JobStore:
         offset: int = 0,
         status: JobStatus | None = None,
         backend: JobBackend | None = None,
-        mode: Literal["1q", "2q"] | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         safe_limit = max(1, int(limit))
         safe_offset = max(0, int(offset))
@@ -200,9 +191,6 @@ class JobStore:
         if backend is not None:
             where_parts.append("backend = ?")
             where_params.append(backend)
-        if mode is not None:
-            where_parts.append("mode = ?")
-            where_params.append(mode)
 
         where_clause = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
 
@@ -227,18 +215,14 @@ class JobStore:
 
             return ([self._row_to_dict(row) for row in rows], total)
 
-    def delete_completed_jobs(self) -> int:
-        """Delete all jobs that are not actively in-flight.
+    def delete_all_jobs(self) -> int:
+        """Delete every job record regardless of status.
 
-        Jobs with status 'pending' or 'running' are preserved so an
-        in-progress execution is never interrupted.
-
+        Called when the user explicitly requests to clear the full history.
         Returns the number of rows deleted.
         """
         with self._lock:
-            cursor = self._conn.execute(
-                "DELETE FROM jobs WHERE status NOT IN ('pending', 'running')"
-            )
+            cursor = self._conn.execute("DELETE FROM jobs")
             self._conn.commit()
             return cursor.rowcount
 

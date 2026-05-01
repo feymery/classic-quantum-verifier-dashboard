@@ -5,6 +5,7 @@ import { fetchJson } from "../../../services/apiClient";
 import { mapBackendId, type BackendId } from "../../../utils/constants";
 
 interface BackendRunResult {
+  job_id?: string;
   alpha: number;
   observables: {
     Z1: number;
@@ -137,7 +138,6 @@ export async function startBackendExperiment1Q(input: {
     alpha: input.alpha,
     shots: input.shots,
     backend: mappedBackend,
-    mode: "1q",
   };
 
   const runResponse = await fetchJson<BackendRunResult | BackendQueued>(
@@ -149,13 +149,21 @@ export async function startBackendExperiment1Q(input: {
     },
   );
 
-  if ("job_id" in runResponse) {
-    return { kind: "queued", jobId: runResponse.job_id };
+  if (
+    "status" in runResponse &&
+    (runResponse as BackendQueued).status === "queued"
+  ) {
+    return { kind: "queued", jobId: (runResponse as BackendQueued).job_id };
   }
 
+  const syncResult = runResponse as BackendRunResult;
   return {
     kind: "complete",
-    result: toExperimentResult(runResponse, input, `api-${Date.now()}`),
+    result: toExperimentResult(
+      syncResult,
+      input,
+      syncResult.job_id ?? `api-${Date.now()}`,
+    ),
   };
 }
 

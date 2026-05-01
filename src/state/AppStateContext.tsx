@@ -1,7 +1,6 @@
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useDashboardState } from "../hooks/useDashboardState";
 import { useExperimentRunner } from "../hooks/useExperimentRunner";
-import type { RunMode } from "../types/runner";
 import { AppStateContext } from "./AppStateContextDef";
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -15,27 +14,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         ? "error"
         : "idle";
 
-  const runForMode = useCallback(
-    (mode: RunMode) => {
-      runner.runExperiment({
-        mode,
-        alpha: dashboard.alpha,
-        shots: dashboard.shots,
-        backend: dashboard.selectedBackend,
-        comparisonAlphas: dashboard.comparisonAlphas,
-      });
-    },
-    [dashboard, runner],
-  );
+  const runFor1Q = useCallback(() => {
+    runner.runExperiment({
+      alpha: dashboard.alpha,
+      shots: dashboard.shots,
+      backend: dashboard.selectedBackend,
+      comparisonAlphas: dashboard.comparisonAlphas,
+    });
+  }, [dashboard, runner]);
 
   const value = useMemo(
     () => ({
       dashboard,
       runner,
       backendStatus,
-      runForMode,
+      runFor1Q,
     }),
-    [backendStatus, dashboard, runForMode, runner],
+    [backendStatus, dashboard, runFor1Q, runner],
   );
 
   return (

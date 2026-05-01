@@ -4,15 +4,11 @@
  * and async job tracking. Consumed by useExperimentRunner and UI components.
  */
 
-import type { BackendId } from "../utils/constants";
-
 // ── Execution state ───────────────────────────────────────────────────────────
 
 export type RunnerStatus = "idle" | "running" | "complete" | "error";
 
 export type ExecutionSource = "api";
-
-export type RunMode = "oneQ";
 
 // ── Backend job history (source of truth: SQLite via GET /jobs) ──────────────
 
@@ -31,8 +27,6 @@ export interface JobHistoryItem {
   jobId: string;
   createdAt: string;
   updatedAt: string;
-  /** "1q" — matches the backend mode column. */
-  mode: "1q";
   status: JobStatus;
   alpha: number;
   shots: number;
@@ -48,18 +42,4 @@ export interface JobHistoryItem {
   decision: VerifierDecision | null;
   /** Error message for failed jobs. */
   error: string | null;
-}
-
-// ── Async IBM Runtime jobs ────────────────────────────────────────────────────
-
-export interface ActiveAsyncJob {
-  jobId: string;
-  mode: RunMode;
-  status: "queued" | "running" | "done" | "failed";
-  requestedBackend: BackendId;
-  alpha: number;
-  shots: number;
-  comparisonAlphas: number[];
-  startedAt: string;
-  message: string | null;
 }

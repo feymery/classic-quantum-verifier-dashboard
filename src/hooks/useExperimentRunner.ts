@@ -12,24 +12,20 @@ import type { ExperimentResult } from "../types/experiment";
 import type {
   RunnerStatus,
   ExecutionSource,
-  RunMode,
-  ActiveAsyncJob,
   JobHistoryItem,
 } from "../types/runner";
 import { useJobHistory } from "./useJobHistory";
 
-export type { RunnerStatus, ExecutionSource, RunMode, ActiveAsyncJob };
+export type { RunnerStatus, ExecutionSource };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 /** Leftover key from the old localStorage-based history. Cleared on first load. */
 const LEGACY_RUN_HISTORY_KEY = "qvp.run-history.v1";
-const ACTIVE_JOB_STORAGE_KEY = "qvp.active-job.v1";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface RunRequest {
-  mode: RunMode;
   alpha: number;
   shots: number;
   backend: BackendId;
@@ -44,76 +40,9 @@ interface RunnerState {
   latestJobId: string | null;
   latestBackend: string | null;
   latestExecutionSource: ExecutionSource | null;
-  latestMode: RunMode | null;
-  activeAsyncJob: ActiveAsyncJob | null;
 }
 
 type SetState = (updater: (prev: RunnerState) => RunnerState) => void;
-
-// ── Storage ───────────────────────────────────────────────────────────────────
-
-function loadActiveJob(): ActiveAsyncJob | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(ACTIVE_JOB_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    if (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      "jobId" in parsed &&
-      "mode" in parsed &&
-      "status" in parsed &&
-      "alpha" in parsed &&
-      "shots" in parsed &&
-      "requestedBackend" in parsed
-    ) {
-      return parsed as ActiveAsyncJob;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function saveActiveJob(job: ActiveAsyncJob | null): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (job) {
-      window.localStorage.setItem(ACTIVE_JOB_STORAGE_KEY, JSON.stringify(job));
-    } else {
-      window.localStorage.removeItem(ACTIVE_JOB_STORAGE_KEY);
-    }
-  } catch {
-    // noop
-  }
-}
-
-// ── IBM polling status handler ────────────────────────────────────────────────
-
-function makeStatusChangeHandler(jobId: string, setState: SetState) {
-  return (status: { status: string }) => {
-    setState((prev) => {
-      if (prev.activeAsyncJob?.jobId !== jobId) return prev;
-      return {
-        ...prev,
-        activeAsyncJob: {
-          ...prev.activeAsyncJob,
-          status:
-            status.status === "pending"
-              ? "queued"
-              : status.status === "running"
-                ? "running"
-                : prev.activeAsyncJob.status,
-          message:
-            status.status === "running"
-              ? "IBM job is running on the backend."
-              : prev.activeAsyncJob.message,
-        },
-      };
-    });
-  };
-}
 
 // ── Result commit helpers ─────────────────────────────────────────────────────
 
@@ -122,7 +51,6 @@ interface Commit1QMeta {
   shots: number;
   backend: BackendId;
   executionSource: ExecutionSource;
-  completedJobId?: string;
 }
 
 function commit1QResult(
@@ -140,15 +68,6 @@ function commit1QResult(
     latestJobId: oneQResult.jobId,
     latestBackend: oneQResult.backend,
     latestExecutionSource: meta.executionSource,
-    activeAsyncJob: meta.completedJobId
-      ? prev.activeAsyncJob?.jobId === meta.completedJobId
-        ? {
-            ...prev.activeAsyncJob,
-            status: "done",
-            message: `Completed on ${oneQResult.backend}.`,
-          }
-        : prev.activeAsyncJob
-      : null,
   }));
 }
 
@@ -163,8 +82,6 @@ export function useExperimentRunner() {
     latestJobId: null,
     latestBackend: null,
     latestExecutionSource: null,
-    latestMode: null,
-    activeAsyncJob: loadActiveJob(),
   }));
 
   const jobHistory = useJobHistory();
@@ -183,11 +100,7 @@ export function useExperimentRunner() {
     }
   }, []);
 
-  useEffect(() => {
-    saveActiveJob(state.activeAsyncJob);
-  }, [state.activeAsyncJob]);
-
-  // ── IBM 1Q ──────────────────────────────────────────────────────────────────
+  // ── IBM 1Q ────────────────────────────────────────────────────────────────────────────────────────
 
   const runIbm1Q = useCallback(
     async (
@@ -195,7 +108,6 @@ export function useExperimentRunner() {
       shots: number,
       backend: BackendId,
       comparisonAlphas: number[],
-      startedAt: string,
     ) => {
       const started = await startBackendExperiment1Q({ alpha, shots, backend });
 
@@ -205,24 +117,9 @@ export function useExperimentRunner() {
           latestJobId: started.jobId,
           latestBackend: "ibm",
           latestExecutionSource: "api",
-          activeAsyncJob: {
-            jobId: started.jobId,
-            mode: "oneQ",
-            status: "queued",
-            requestedBackend: backend,
-            alpha,
-            shots,
-            comparisonAlphas,
-            startedAt,
-            message: "IBM job submitted. Polling in background.",
-          },
         }));
 
-        void pollBackendExperiment1Q(
-          started.jobId,
-          { alpha, shots, backend },
-          makeStatusChangeHandler(started.jobId, setState),
-        )
+        void pollBackendExperiment1Q(started.jobId, { alpha, shots, backend })
           .then(async (oneQResult) => {
             const comparisonResults =
               comparisonAlphas.length > 0
@@ -231,13 +128,7 @@ export function useExperimentRunner() {
             commit1QResult(
               oneQResult,
               comparisonResults,
-              {
-                alpha,
-                shots,
-                backend,
-                executionSource: "api",
-                completedJobId: started.jobId,
-              },
+              { alpha, shots, backend, executionSource: "api" },
               setState,
             );
             refetchHistoryRef.current();
@@ -245,14 +136,18 @@ export function useExperimentRunner() {
           .catch((error) => {
             const message =
               error instanceof Error ? error.message : "IBM job failed";
+            // Polling timeout means the IBM job is still pending on the backend.
+            // Don't surface an error — return to idle so the history panel
+            // (which shows the real backend status) is the source of truth.
+            if (message.includes("Timed out")) {
+              refetchHistoryRef.current();
+              setState((prev) => ({ ...prev, status: "idle", error: null }));
+              return;
+            }
             setState((prev) => ({
               ...prev,
               status: "error",
               error: message,
-              activeAsyncJob:
-                prev.activeAsyncJob?.jobId === started.jobId
-                  ? { ...prev.activeAsyncJob, status: "failed", message }
-                  : prev.activeAsyncJob,
             }));
           });
         return;
@@ -277,20 +172,18 @@ export function useExperimentRunner() {
 
   const runExperiment = useCallback(
     async (request: RunRequest) => {
-      const { mode, alpha, shots, backend, comparisonAlphas } = request;
+      const { alpha, shots, backend, comparisonAlphas } = request;
 
       setState((prev) => ({
         ...prev,
         status: "running",
         error: null,
         latestExecutionSource: null,
-        latestMode: mode,
       }));
 
       try {
         if (backend === "ibm_runtime") {
-          const startedAt = new Date().toISOString();
-          await runIbm1Q(alpha, shots, backend, comparisonAlphas, startedAt);
+          await runIbm1Q(alpha, shots, backend, comparisonAlphas);
           return;
         }
 
@@ -316,76 +209,11 @@ export function useExperimentRunner() {
           ...prev,
           status: "error",
           error: message,
-          activeAsyncJob: null,
         }));
       }
     },
     [runIbm1Q],
   );
-
-  // ── resumeJob ─────────────────────────────────────────────────────────────────
-
-  // Re-attaches poll handlers for a job interrupted by a page refresh.
-  // No re-submission needed — the job is still in the backend SQLite DB.
-  const resumeJob = useCallback((job: ActiveAsyncJob) => {
-    const { jobId, alpha, shots, requestedBackend: backend } = job;
-
-    setState((prev) => ({
-      ...prev,
-      status: "running",
-      activeAsyncJob: {
-        ...job,
-        status: "queued",
-        message: "Resuming — checking job status…",
-      },
-    }));
-
-    const onStatusChange = makeStatusChangeHandler(jobId, setState);
-
-    void pollBackendExperiment1Q(
-      jobId,
-      { alpha, shots, backend },
-      onStatusChange,
-    )
-      .then((oneQResult) => {
-        commit1QResult(
-          oneQResult,
-          [],
-          {
-            alpha,
-            shots,
-            backend,
-            executionSource: "api",
-            completedJobId: jobId,
-          },
-          setState,
-        );
-        refetchHistoryRef.current();
-      })
-      .catch((error) => {
-        const message =
-          error instanceof Error ? error.message : "IBM job failed";
-        setState((prev) => ({
-          ...prev,
-          status: "error",
-          error: message,
-          activeAsyncJob:
-            prev.activeAsyncJob?.jobId === jobId
-              ? { ...prev.activeAsyncJob, status: "failed", message }
-              : prev.activeAsyncJob,
-        }));
-      });
-  }, []);
-
-  // Auto-resume on mount: if the page was refreshed while a job was in-flight,
-  // re-attach poll handlers.
-  useEffect(() => {
-    const stored = loadActiveJob();
-    if (stored && (stored.status === "queued" || stored.status === "running")) {
-      resumeJob(stored);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally mount-only
 
   // ── Remaining callbacks ───────────────────────────────────────────────────────
 
@@ -411,7 +239,6 @@ export function useExperimentRunner() {
         latestJobId: item.jobId,
         latestBackend: item.resolvedBackend,
         latestExecutionSource: item.executionSource as ExecutionSource | null,
-        latestMode: "oneQ",
       }));
     } catch (err) {
       const message =
@@ -420,37 +247,11 @@ export function useExperimentRunner() {
     }
   }, []);
 
-  const dismissActiveAsyncJob = useCallback(() => {
-    setState((prev) => ({ ...prev, activeAsyncJob: null }));
-  }, []);
-
-  const retryActiveAsyncJob = useCallback(() => {
-    setState((prev) => {
-      if (!prev.activeAsyncJob || prev.activeAsyncJob.status === "running")
-        return prev;
-      return { ...prev, activeAsyncJob: null };
-    });
-
-    const snapshot = state.activeAsyncJob;
-    if (!snapshot || snapshot.status === "running") return;
-
-    void runExperiment({
-      mode: snapshot.mode,
-      alpha: snapshot.alpha,
-      shots: snapshot.shots,
-      backend: snapshot.requestedBackend,
-      comparisonAlphas: snapshot.comparisonAlphas,
-    });
-  }, [runExperiment, state.activeAsyncJob]);
-
   return {
     ...state,
     isRunning: state.status === "running",
     runExperiment,
-    resumeJob,
     restoreResult,
-    dismissActiveAsyncJob,
-    retryActiveAsyncJob,
     // Job history sourced from backend SQLite via useJobHistory
     historyItems: jobHistory.items,
     historyLoading: jobHistory.loading,
@@ -460,5 +261,6 @@ export function useExperimentRunner() {
     loadMoreHistory: jobHistory.loadMore,
     clearHistory: jobHistory.clearHistory,
     refetchHistory: jobHistory.refetch,
+    syncJob: jobHistory.syncJob,
   };
 }

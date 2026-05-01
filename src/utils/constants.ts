@@ -44,6 +44,9 @@ export const KEY_ALPHAS: KeyAlpha[] = [
 
 export const KEY_ALPHA_VALUES = KEY_ALPHAS.map((k) => k.value);
 
+/** Protocol baseline α★ from Stricker et al. — sin²(α★) ≈ 0.024, reliably accepted. */
+export const PROTOCOL_ALPHA = 0.1 * (Math.PI / 2);
+
 // ── Backend options ──────────────────────────────────────────────────────────
 
 export type BackendId = "aer" | "aer_qpu" | "ibm_runtime";

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AsyncJobBanner } from "../components/AsyncJobBanner";
 import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
 import { AppNavigation } from "../components/AppNavigation";
-import { RunHistoryDrawer } from "../components/RunHistoryDrawer";
+import { RunHistoryDrawer } from "../components/History/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
 import type { JobHistoryItem } from "../types/runner";
 
@@ -33,11 +32,8 @@ export function MainLayout() {
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#131217", color: "#ddd9ee" }}
-    >
-      <div className="px-6 py-6 mx-auto max-w-330">
+    <div className="min-h-screen p-6">
+      <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
           backend={dashboard.backend}
@@ -61,21 +57,10 @@ export function MainLayout() {
           latestJobId={runner.latestJobId ?? null}
           onOpenHistory={() => setHistoryOpen(true)}
         />
-
-        <AppNavigation />
-
-        <AsyncJobBanner
-          job={runner.activeAsyncJob}
-          onDismiss={runner.dismissActiveAsyncJob}
-          onRetry={runner.retryActiveAsyncJob}
-          onResume={() => {
-            if (runner.activeAsyncJob) runner.resumeJob(runner.activeAsyncJob);
-          }}
-        />
-
-        <main className="my-8">
+        <div className="flex-1 px-2 py-6">
+          <AppNavigation />
           <Outlet />
-        </main>
+        </div>
       </div>
 
       <RunHistoryDrawer
@@ -87,6 +72,7 @@ export function MainLayout() {
         onRestore={restoreHistoryEntry}
         onLoadResult={loadHistoryResult}
         onClear={runner.clearHistory}
+        onSync={(item) => void runner.syncJob(item.jobId)}
       />
     </div>
   );

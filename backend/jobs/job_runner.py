@@ -92,7 +92,6 @@ def run_job_async(job_id: str) -> None:
 
         result = _compose_result(alpha, shots, counts_z, counts_zx, counts_x, backend_used, execution_time)
 
-        metadata["mode"] = "1q"
         job_store.update_job(
             job_id,
             status="done",
@@ -110,13 +109,13 @@ def run_job_async(job_id: str) -> None:
         )
 
 
-def submit_job(alpha: float, shots: int, backend: str = "ibm", mode: str = "1q") -> str:
+def submit_job(alpha: float, shots: int, backend: str = "ibm") -> str:
     backend_name = "ibm" if (backend or "ibm").strip().lower() == "ibm" else "aer"
     job_id = job_store.create_job(
         alpha=alpha,
         shots=shots,
         backend=backend_name,
-        metadata={"mode": "1q"},
+        metadata={},
     )
     executor = _IBM_EXECUTOR if backend_name == "ibm" else _AER_EXECUTOR
     executor.submit(run_job_async, job_id)

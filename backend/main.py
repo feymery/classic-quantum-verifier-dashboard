@@ -211,7 +211,6 @@ class RunRequest(BaseModel):
     alpha: float = Field(..., ge=0.0, le=1.5707963267948966)
     shots: int = Field(..., ge=1, le=1_000_000)
     backend: Literal["aer", "aer_qpu", "ibm"] = "aer"
-    mode: Literal["1q"] = "1q"
 
 
 class ConfigureIbmRequest(BaseModel):
@@ -285,14 +284,12 @@ def run_endpoint(payload: RunRequest) -> dict:
             alpha=payload.alpha,
             shots=payload.shots,
             backend="ibm",
-            mode=payload.mode,
         )
 
     return runExperimentSync(
         alpha=payload.alpha,
         shots=payload.shots,
         backend=payload.backend,
-        mode=payload.mode,
     )
 
 
@@ -327,14 +324,12 @@ def list_jobs(
     offset: int = Query(default=0, ge=0),
     status: Literal["pending", "running", "done", "failed"] | None = Query(default=None),
     backend: Literal["aer", "ibm"] | None = Query(default=None),
-    mode: Literal["1q"] | None = Query(default=None),
 ) -> dict:
     jobs, total = job_store.list_jobs(
         limit=limit,
         offset=offset,
         status=status,
         backend=backend,
-        mode=mode,
     )
 
     def _enrich(j: dict) -> dict:
@@ -345,7 +340,6 @@ def list_jobs(
             "job_id": j["job_id"],
             "status": j["status"],
             "backend": j["backend"],
-            "mode": j["mode"],
             "alpha": j["alpha"],
             "shots": j["shots"],
             "created_at": j["created_at"],
@@ -373,18 +367,15 @@ def list_jobs(
         "filters": {
             "status": status,
             "backend": backend,
-            "mode": mode,
-        },
+        }
     }
 
 
 @app.delete("/jobs")
 def delete_jobs() -> dict:
-    """Delete all completed/failed jobs.
+    """Delete all job records (user-triggered history clear).
 
-    Jobs with status 'pending' or 'running' are preserved so no
-    in-flight execution is interrupted.
     Returns the number of deleted rows.
     """
-    deleted = job_store.delete_completed_jobs()
+    deleted = job_store.delete_all_jobs()
     return {"deleted": deleted}

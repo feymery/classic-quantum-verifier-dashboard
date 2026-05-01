@@ -1,8 +1,8 @@
-import type { JobHistoryItem } from "../types/runner";
-import { Badge } from "../ui/Badge";
-import { Button } from "../ui/Button";
-import { Card } from "../ui/Card";
-import { Text } from "../ui/Text";
+import type { JobHistoryItem } from "../../types/runner";
+import { Badge } from "../../ui/Badge";
+import { Button } from "../../ui/Button";
+import { Card } from "../../ui/Card";
+import { Text } from "../../ui/Text";
 
 interface RunHistoryPanelProps {
   items: JobHistoryItem[];
@@ -11,16 +11,7 @@ interface RunHistoryPanelProps {
   onRestore: (item: JobHistoryItem) => void;
   onLoadResult: (item: JobHistoryItem) => void;
   onClear: () => void;
-}
-
-function formatSource(source: JobHistoryItem["executionSource"]): string {
-  if (source === "aer") return "aer";
-  if (source === "ibm") return "ibm";
-  return "unknown";
-}
-
-function formatMode(_mode: JobHistoryItem["mode"]): string {
-  return "1Q";
+  onSync: (item: JobHistoryItem) => void;
 }
 
 function formatTimestamp(value: string): string {
@@ -50,34 +41,10 @@ export function RunHistoryPanel({
   error,
   onRestore,
   onLoadResult,
-  onClear,
+  onSync,
 }: RunHistoryPanelProps) {
   return (
     <Card className="rounded-lg" padded="md">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Text variant="caption" className="uppercase tracking-[0.24em]">
-            Run History
-          </Text>
-          <Text variant="body" className="mt-2 font-semibold">
-            Persistent experiment history
-          </Text>
-          <Text variant="caption" color="muted" className="mt-1">
-            Recent runs survive reloads and keep enough context to restore the
-            input state.
-          </Text>
-        </div>
-
-        <Button
-          onClick={onClear}
-          variant="ghost"
-          size="sm"
-          disabled={items.length === 0}
-        >
-          Clear history
-        </Button>
-      </div>
-
       {error !== null && (
         <Text variant="caption" color="error" className="block mt-4">
           {error}
@@ -93,8 +60,8 @@ export function RunHistoryPanel({
       {!loading && error === null && items.length === 0 ? (
         <div className="px-4 py-5 mt-4 border rounded-lg border-border bg-surface">
           <Text variant="caption" color="muted">
-            No runs recorded yet. Execute 1Q or 2Q once and the timeline will
-            appear here. Results are stored on the server.
+            No runs recorded yet. Execute an experiment once and the timeline
+            will appear here. Results are stored on the server.
           </Text>
         </div>
       ) : (
@@ -106,14 +73,8 @@ export function RunHistoryPanel({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge
-                    variant={item.status === "failed" ? "error" : "quantum"}
-                  >
-                    {formatMode(item.mode)}
-                  </Badge>
-                  <Badge variant="neutral">{item.requestedBackend}</Badge>
                   <Badge variant="neutral">
-                    {formatSource(item.executionSource)}
+                    {item.executionSource ?? "unknown"}
                   </Badge>
                   <Badge variant={decisionVariant(item.decision)}>
                     {item.status === "failed"
@@ -135,6 +96,16 @@ export function RunHistoryPanel({
                       Load results
                     </Button>
                   )}
+                  {(item.status === "pending" || item.status === "running") &&
+                    item.requestedBackend.includes("ibm") && (
+                      <Button
+                        onClick={() => onSync(item)}
+                        variant="secondary"
+                        size="sm"
+                      >
+                        Sync
+                      </Button>
+                    )}
                   <Button
                     onClick={() => onRestore(item)}
                     variant="secondary"
@@ -145,7 +116,7 @@ export function RunHistoryPanel({
                 </div>
               </div>
 
-              <div className="grid gap-3 mt-3 md:grid-cols-5">
+              <div className="grid gap-3 mt-3 md:grid-cols-4">
                 <div>
                   <Text variant="caption" color="muted">
                     alpha
@@ -172,24 +143,15 @@ export function RunHistoryPanel({
                       : item.energyEstimate.toFixed(4)}
                   </Text>
                 </div>
-                <div>
-                  <Text variant="caption" color="muted">
-                    job id
-                  </Text>
-                  <Text variant="body" className="mt-1 font-semibold">
-                    {item.jobId}
-                  </Text>
-                </div>
-                <div>
-                  <Text variant="caption" color="muted">
-                    result backend
-                  </Text>
-                  <Text variant="body" className="mt-1 font-semibold">
-                    {item.resolvedBackend ?? "n/a"}
-                  </Text>
-                </div>
               </div>
-
+              <div className="mt-3">
+                <Text variant="caption" color="muted">
+                  job id
+                </Text>
+                <Text variant="body" className="mt-1 font-semibold">
+                  {item.jobId}
+                </Text>
+              </div>
               {item.error && (
                 <Text variant="caption" color="error" className="block mt-3">
                   {item.error}

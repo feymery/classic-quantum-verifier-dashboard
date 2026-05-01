@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchJobHistory, deleteAllJobs } from "../services/apiClient";
+import {
+  fetchJobHistory,
+  fetchSingleJobStatus,
+  deleteAllJobs,
+} from "../services/apiClient";
 import type { JobHistoryItem } from "../types/runner";
 
 const DEFAULT_LIMIT = 20;
@@ -24,6 +28,8 @@ export interface UseJobHistoryReturn {
   loadMore: () => void;
   /** Delete all completed/failed jobs on the backend and refresh. */
   clearHistory: () => Promise<void>;
+  /** Poll GET /job/{jobId} once and patch that item's status in the list. */
+  syncJob: (jobId: string) => Promise<void>;
 }
 
 export function useJobHistory(): UseJobHistoryReturn {
@@ -91,6 +97,28 @@ export function useJobHistory(): UseJobHistoryReturn {
     }
   }, []);
 
+  const syncJob = useCallback(async (jobId: string) => {
+    try {
+      const patch = await fetchSingleJobStatus(jobId);
+      setState((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          item.jobId === jobId
+            ? {
+                ...item,
+                status: patch.status,
+                energyEstimate: patch.energyEstimate,
+                decision: patch.decision,
+                error: patch.error,
+              }
+            : item,
+        ),
+      }));
+    } catch {
+      // noop — sync is best-effort
+    }
+  }, []);
+
   return {
     items: state.items,
     total: state.total,
@@ -100,5 +128,6 @@ export function useJobHistory(): UseJobHistoryReturn {
     refetch,
     loadMore,
     clearHistory,
+    syncJob,
   };
 }
