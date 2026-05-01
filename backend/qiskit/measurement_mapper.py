@@ -13,17 +13,17 @@ def _bit_to_eigen(bit: str) -> int:
     return 1 if bit == "0" else -1
 
 
-def _decode_qiskit_bitstring(bitstring: str) -> tuple[str, str, str]:
-    """Decode counts key into (q0, q1, q2).
+def _decode_qiskit_bitstring(bitstring: str) -> tuple[str, str]:
+    """Decode a 2-bit counts key into (q_prover_bit, q_clock_bit).
 
-    Qiskit count strings are returned in classical-register order c2c1c0.
-    With measure([0,1,2],[0,1,2]), reversing yields q0,q1,q2.
+    Qiskit bitstrings are big-endian: for register meas[1]meas[0] the
+    string 'ab' has a=meas[1] (q_clock) and b=meas[0] (q_prover).
+    zfill(2) handles keys with leading zeros stripped by Qiskit.
     """
-    s = bitstring.replace(" ", "")
-    if len(s) < 3:
-        s = s.rjust(3, "0")
-    q0, q1, q2 = tuple(reversed(s[:3]))
-    return q0, q1, q2
+    s = bitstring.replace(" ", "").zfill(2)
+    q_prover = s[1]   # meas[0] — rightmost / LSB
+    q_clock  = s[0]   # meas[1] — leftmost  / MSB
+    return q_prover, q_clock
 
 
 def counts_to_probabilities(counts: dict[str, int], shots: int) -> dict[str, float]:
@@ -38,9 +38,9 @@ def _expectations_from_z_counts(counts: dict[str, int], shots: int) -> dict[str,
     z1z2_sum = 0.0
 
     for state, count in counts.items():
-        q0, q1, _ = _decode_qiskit_bitstring(state)
-        z1 = _bit_to_eigen(q0)
-        z2 = _bit_to_eigen(q1)
+        q0, q1 = _decode_qiskit_bitstring(state)
+        z1 = _bit_to_eigen(q0)  # Z1 = Z_prover = Z_{q0}
+        z2 = _bit_to_eigen(q1)  # Z2 = Z_clock  = Z_{q1}
 
         z1_sum += z1 * count
         z2_sum += z2 * count
@@ -58,9 +58,9 @@ def _expectation_x1x2_from_x_counts(counts: dict[str, int], shots: int) -> float
     x1x2_sum = 0.0
 
     for state, count in counts.items():
-        q0, q1, _ = _decode_qiskit_bitstring(state)
-        x1 = _bit_to_eigen(q0)
-        x2 = _bit_to_eigen(q1)
+        q0, q1 = _decode_qiskit_bitstring(state)
+        x1 = _bit_to_eigen(q0)  # X1 = X_prover = X_{q0}
+        x2 = _bit_to_eigen(q1)  # X2 = X_clock  = X_{q1}
         x1x2_sum += (x1 * x2) * count
 
     return x1x2_sum / safe_shots
@@ -81,9 +81,9 @@ def extract_x1z2(counts: dict[str, int], shots: int) -> float:
     x1z2_sum = 0.0
 
     for state, count in counts.items():
-        q0, q1, _ = _decode_qiskit_bitstring(state)
-        x1 = _bit_to_eigen(q0)   # H was applied → Z measurement = X eigenvalue
-        z2 = _bit_to_eigen(q1)   # direct Z measurement
+        q0, q1 = _decode_qiskit_bitstring(state)
+        x1 = _bit_to_eigen(q0)   # H was applied to q_prover (q0) → Z measurement = X eigenvalue
+        z2 = _bit_to_eigen(q1)   # direct Z measurement on q_clock (q1)
         x1z2_sum += (x1 * z2) * count
 
     return x1z2_sum / safe_shots
@@ -101,9 +101,9 @@ def _expectation_z1x2_from_zx_counts(counts: dict[str, int], shots: int) -> floa
     z1x2_sum = 0.0
 
     for state, count in counts.items():
-        q0, q1, _ = _decode_qiskit_bitstring(state)
-        z1 = _bit_to_eigen(q0)
-        x2 = _bit_to_eigen(q1)
+        q0, q1 = _decode_qiskit_bitstring(state)
+        z1 = _bit_to_eigen(q0)   # direct Z measurement on q_prover (q0)
+        x2 = _bit_to_eigen(q1)   # H was applied to q_clock (q1) → Z measurement = X eigenvalue
         z1x2_sum += (z1 * x2) * count
 
     return z1x2_sum / safe_shots

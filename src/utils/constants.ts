@@ -46,7 +46,7 @@ export const KEY_ALPHA_VALUES = KEY_ALPHAS.map((k) => k.value);
 
 // ── Backend options ──────────────────────────────────────────────────────────
 
-export type BackendId = "aer" | "ibm_runtime";
+export type BackendId = "aer" | "aer_qpu" | "ibm_runtime";
 
 export interface Backend {
   id: BackendId;
@@ -63,6 +63,12 @@ export const BACKENDS: Backend[] = [
     requiresToken: false,
   },
   {
+    id: "aer_qpu",
+    label: "Aer + QPU Noise",
+    dotColor: "#f59e0b",
+    requiresToken: true,
+  },
+  {
     id: "ibm_runtime",
     label: "IBM Quantum",
     dotColor: "#9a91ad",
@@ -74,13 +80,15 @@ export const BACKENDS: Backend[] = [
 // "aer" maps to the synchronous Aer executor.
 // "ibm_runtime" maps to the async IBM Runtime executor.
 
-export type ApiBackendId = "aer" | "ibm";
+export type ApiBackendId = "aer" | "aer_qpu" | "ibm";
 
 /** Maps a frontend BackendId to the value expected by POST /run. */
 export function mapBackendId(backend: BackendId): ApiBackendId {
   switch (backend) {
     case "aer":
       return "aer";
+    case "aer_qpu":
+      return "aer_qpu";
     case "ibm_runtime":
       return "ibm";
   }

@@ -3,11 +3,11 @@ from __future__ import annotations
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-from backend import aer_executor, ibm_executor
-from backend.circuit_builder import build_measurement_circuit
+from backend.qiskit.circuit_builder import build_measurement_circuit
 from backend.energy import compute_energy as _compute_energy
-from backend.ibm_client import IBMClient, get_shared_client
-from backend.measurement_mapper import map_measurements
+from backend.qiskit.executor import run_circuits, make_qpu_backend
+from backend.qiskit.ibm.ibm_client import get_shared_client
+from backend.qiskit.measurement_mapper import map_measurements
 from backend.jobs.job_store import job_store
 
 
@@ -18,45 +18,21 @@ _IBM_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="quantum-ib
 _AER_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="quantum-aer")
 
 
-def _run_aer(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
+def _run_three_basis(
+    alpha: float, shots: int, backend: object
+) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
     z_circuit  = build_measurement_circuit(alpha, basis="z")
     zx_circuit = build_measurement_circuit(alpha, basis="zx")
     x_circuit  = build_measurement_circuit(alpha, basis="x")
-
-    z_result  = aer_executor.run_circuit(z_circuit, shots)
-    zx_result = aer_executor.run_circuit(zx_circuit, shots)
-    x_result  = aer_executor.run_circuit(x_circuit, shots)
-
-    execution_time = (
-        z_result.metadata.execution_time_ms
-        + zx_result.metadata.execution_time_ms
-        + x_result.metadata.execution_time_ms
-    )
+    z_res, zx_res, x_res = run_circuits([z_circuit, zx_circuit, x_circuit], shots, backend)
+    total_ms = sum(r.metadata["execution_time_ms"] for r in (z_res, zx_res, x_res))
+    backend_name: str = z_res.metadata.get("backend_name", "aer")
     meta = {
-        "execution_backend": "aer",
-        "backend_name": "aer",
+        "execution_backend": backend_name,
+        "backend_name": backend_name,
+        "job_id": z_res.metadata.get("job_id", ""),
     }
-    return z_result.counts, zx_result.counts, x_result.counts, "aer", execution_time, meta
-
-
-def _run_ibm(alpha: float, shots: int) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
-    z_circuit  = build_measurement_circuit(alpha, basis="z")
-    zx_circuit = build_measurement_circuit(alpha, basis="zx")
-    x_circuit  = build_measurement_circuit(alpha, basis="x")
-    client = get_shared_client()
-
-    # Single IBM job for all 3 basis circuits — avoids 3 separate queue waits.
-    z_result, zx_result, x_result = ibm_executor.run_circuits_batch(
-        [z_circuit, zx_circuit, x_circuit], shots, client
-    )
-
-    execution_time = float(z_result.metadata.get("execution_time_ms", 0.0))
-    meta = {
-        "execution_backend": "ibm",
-        "backend_name": str(z_result.metadata.get("backend_name", "ibm")),
-        "ibm_job_id": str(z_result.metadata.get("job_id", "")),
-    }
-    return z_result.counts, zx_result.counts, x_result.counts, "ibm", execution_time, meta
+    return z_res.counts, zx_res.counts, x_res.counts, backend_name, total_ms, meta
 
 
 def _compose_result(
@@ -99,10 +75,20 @@ def run_job_async(job_id: str) -> None:
 
     try:
         if requested_backend == "ibm":
-                counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_ibm(alpha, shots)
+            client = get_shared_client()
+            if not client.connect().available:
+                raise RuntimeError(client.connect().reason or "IBM Runtime unavailable")
+            backend = client.get_backend()
         else:
-            counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_aer(alpha, shots)
-            metadata["requested_backend"] = requested_backend
+            # Use QPU-calibrated Aer when credentials available, ideal otherwise
+            client = get_shared_client()
+            ibm_backend = client.get_backend() if client.connect().available else None
+            backend = make_qpu_backend(ibm_backend) if ibm_backend is not None else None
+
+        counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_three_basis(
+            alpha, shots, backend
+        )
+        metadata["requested_backend"] = requested_backend
 
         result = _compose_result(alpha, shots, counts_z, counts_zx, counts_x, backend_used, execution_time)
 

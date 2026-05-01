@@ -73,10 +73,13 @@ function toExperimentResult(
   jobId: string,
 ): ExperimentResult {
   const expectationValues: SampledExpectations = {
-    Z1: finalResult.observables.Z1,
-    Z2: finalResult.observables.Z2,
+    // Backend Z2 (clock) → Frontend Z1 (clock), Backend Z1 (prover) → Frontend Z2 (work)
+    Z1: finalResult.observables.Z2,
+    Z2: finalResult.observables.Z1,
     Z1Z2: finalResult.observables.Z1Z2,
+    // Z1X2 y X1Z2 son el mismo operador físico (Z_{q0}⊗X_{q1} = X_{q1}⊗Z_{q0})
     Z1X2: finalResult.observables.Z1X2 ?? 0,
+    X1Z2: finalResult.observables.Z1X2 ?? 0,
     X1X2: finalResult.observables.X1X2,
   };
 

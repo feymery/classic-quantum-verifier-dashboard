@@ -9,8 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.experiment_runner import runExperimentSync, submitExperimentJob, sweep_alpha, sweep_shots, sweep_noise
-from backend.ibm_client import configure_runtime, get_shared_client
+from backend.experiment_runner import runExperimentSync, submitExperimentJob
+from backend.sweeps import sweep_alpha, sweep_shots, sweep_noise
+from backend.qiskit.ibm.ibm_client import configure_runtime, get_shared_client
 from backend.jobs.job_store import job_store
 
 logging.basicConfig(
@@ -166,8 +167,7 @@ def sweep_shots_endpoint(payload: SweepShotsRequest) -> dict:
     """Run the same α at increasing shot counts to show convergence."""
     points = sweep_shots(
         alpha=payload.alpha,
-        shots_list=payload.shots_list,
-        backend=payload.backend,
+        shots_list=payload.shots_list
     )
     return {
         "points": points,
@@ -210,7 +210,7 @@ class RunRequest(BaseModel):
 
     alpha: float = Field(..., ge=0.0, le=1.5707963267948966)
     shots: int = Field(..., ge=1, le=1_000_000)
-    backend: Literal["aer", "ibm"] = "aer"
+    backend: Literal["aer", "aer_qpu", "ibm"] = "aer"
     mode: Literal["1q"] = "1q"
 
 
@@ -259,6 +259,7 @@ def get_status() -> dict:
         "execution_mode": "sync + async",
         "backends": {
             "aer": "active",
+            "aer_qpu": ibm_state,
             "ibm": ibm_state,
         },
         "job_system": "active",
@@ -271,6 +272,7 @@ def get_backends() -> list[dict]:
     ibm_available = get_shared_client().availability.available
     return [
         {"name": "aer", "available": True},
+        {"name": "aer_qpu", "available": ibm_available},
         {"name": "ibm", "available": ibm_available},
     ]
 
@@ -289,7 +291,7 @@ def run_endpoint(payload: RunRequest) -> dict:
     return runExperimentSync(
         alpha=payload.alpha,
         shots=payload.shots,
-        backend="aer",
+        backend=payload.backend,
         mode=payload.mode,
     )
 
