@@ -19,7 +19,7 @@ export const IntroPanel = ({
         <p className="text-sm leading-relaxed text-muted">
           Interactive companion to{" "}
           <span className="font-medium text-foreground">
-            Stricker et al. (2022)
+            Stricker et al. (2024)
           </span>
           , which demonstrates a classical-verifier protocol for certifying
           quantum state preparation on a real device.
