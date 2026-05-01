@@ -11,23 +11,11 @@ interface ResultProvenanceProps {
 
 function sourceLabel(source: ExecutionSource | null): string {
   if (source === "api") return "backend API";
-  if (source === "fallback-local") return "local fallback";
-  if (source === "local-mock") return "local mock";
-  if (source === "local-2q") return "local 2Q";
   return "unknown";
 }
 
 function sourceDescription(source: ExecutionSource | null): string {
   if (source === "api") return "Result produced by the FastAPI backend.";
-  if (source === "fallback-local") {
-    return "Backend path was requested, then resolved locally after fallback.";
-  }
-  if (source === "local-mock") {
-    return "Result generated entirely in the frontend mock simulator.";
-  }
-  if (source === "local-2q") {
-    return "2Q result generated entirely in the frontend simulator.";
-  }
   return "Execution origin is unavailable for this result.";
 }
 
@@ -35,7 +23,6 @@ function sourceVariant(
   source: ExecutionSource | null,
 ): "success" | "warning" | "neutral" {
   if (source === "api") return "success";
-  if (source === "fallback-local") return "warning";
   return "neutral";
 }
 
@@ -62,11 +49,11 @@ export function ResultProvenance({
           <Badge variant="neutral">shots: {shotsExecuted}</Badge>
         )}
       </div>
-      <Text variant="caption" color="muted" className="mt-2 block">
+      <Text variant="caption" color="muted" className="block mt-2">
         {sourceDescription(executionSource)}
       </Text>
       {jobId && (
-        <Text variant="caption" color="muted" className="mt-1 block">
+        <Text variant="caption" color="muted" className="block mt-1">
           job id: {jobId}
         </Text>
       )}

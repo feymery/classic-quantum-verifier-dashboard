@@ -69,14 +69,21 @@ The singleton `IBMClient` holds the connection for the lifetime of the server pr
 
 ```text
 backend/
-├── main.py                  # FastAPI app — all route definitions
-├── experiment_runner.py     # Orchestrates sync experiments: runExperimentSync, sweep_*, run_adversarial_circuit
-├── energy.py                # Canonical Hamiltonian energy formula (Eq. C.1)
-├── aer_executor.py          # Qiskit Aer execution (generic noise model + QPU-noise variant)
-├── ibm_executor.py          # IBM Runtime SamplerV2 submission and result extraction
-├── ibm_client.py            # IBMClient singleton — manages QiskitRuntimeService connection
-├── circuit_builder.py       # Builds Qiskit circuits for 1Q/2Q and all three measurement bases
-├── measurement_mapper.py    # Maps raw bitstring counts to observable expectation values
+├── main.py                  # FastAPI app, CORS, logging config
+├── errors.py                # Error envelope and exception handlers
+├── math/
+│   ├── energy.py            # Canonical Hamiltonian energy formula (Eq. C.1)
+│   ├── measurement_mapper.py# Maps raw bitstring counts to observable expectation values
+│   ├── sweeps.py            # sweep_alpha, sweep_shots, sweep_noise orchestration
+│   └── verifier.py          # Verifier decision thresholds
+├── qiskit/
+│   ├── circuit_builder.py   # Builds Qiskit circuits for all three measurement bases
+│   └── executor.py          # Qiskit Aer execution (generic noise model + QPU-noise variant)
+├── routers/
+│   ├── ibm.py               # /status, /backends, /configure/ibm
+│   ├── ibm_client.py        # IBMClient singleton — manages QiskitRuntimeService connection
+│   ├── run.py               # /run, /job/{id}, /jobs, DELETE /jobs
+│   └── sweep.py             # /sweep/alpha, /sweep/shots, /sweep/noise
 └── jobs/
     ├── job_store.py         # In-memory job store (pending → running → done/failed)
     └── job_runner.py        # ThreadPool-based async job execution (separate pools for IBM and Aer)
@@ -136,10 +143,10 @@ Quick list:
 | `POST` | `/run` | Run experiment — returns result (Aer) or job ID (IBM) |
 | `GET` | `/job/{id}` | Get job status and result |
 | `GET` | `/jobs` | List jobs with optional filters |
+| `DELETE` | `/jobs` | Clear all job history |
 | `POST` | `/sweep/alpha` | Sweep α ∈ [0, π/2] at fixed shots |
 | `POST` | `/sweep/shots` | Sweep shot counts at fixed α |
 | `POST` | `/sweep/noise` | Sweep depolarizing noise λ at fixed α |
-| `POST` | `/adversarial/circuit` | Compare honest vs adversarial circuit distributions |
 
 ---
 

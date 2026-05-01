@@ -18,25 +18,16 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _job_mode(metadata: dict[str, Any] | None) -> Literal["1q", "2q"]:
-    mode = str((metadata or {}).get("mode", "1q")).lower()
-    return "2q" if mode == "2q" else "1q"
-
-
 class JobStore:
     def __init__(self, db_path: str | None = None) -> None:
         resolved = (db_path or os.getenv("JOB_STORE_DB_PATH") or "backend/jobs/job_store.sqlite").strip()
         self._db_path = resolved
         self._lock = RLock()
-        self._conn = self._open_connection(resolved)
+        if resolved != ":memory:":
+            Path(resolved).parent.mkdir(parents=True, exist_ok=True)
+        self._conn = sqlite3.connect(resolved, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
         self._init_schema()
-
-    def _open_connection(self, db_path: str) -> sqlite3.Connection:
-        if db_path != ":memory:":
-            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
 
     def _init_schema(self) -> None:
         with self._lock:
@@ -46,7 +37,6 @@ class JobStore:
                     job_id TEXT PRIMARY KEY,
                     status TEXT NOT NULL,
                     backend TEXT NOT NULL,
-                    mode TEXT NOT NULL,
                     alpha REAL NOT NULL,
                     shots INTEGER NOT NULL,
                     result_json TEXT,
@@ -61,7 +51,7 @@ class JobStore:
                 "CREATE INDEX IF NOT EXISTS idx_jobs_updated_at ON jobs(updated_at DESC)"
             )
             self._conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend_mode ON jobs(status, backend, mode)"
+                "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend ON jobs(status, backend)"
             )
             self._conn.commit()
 
@@ -74,6 +64,7 @@ class JobStore:
             "job_id": row["job_id"],
             "status": row["status"],
             "backend": row["backend"],
+            "mode": row["mode"],
             "alpha": float(row["alpha"]),
             "shots": int(row["shots"]),
             "result": result,
@@ -93,7 +84,6 @@ class JobStore:
         job_id = str(uuid4())
         created_at = _now_iso()
         payload_metadata = metadata or {}
-        mode = _job_mode(payload_metadata)
 
         with self._lock:
             self._conn.execute(
@@ -107,7 +97,7 @@ class JobStore:
                     job_id,
                     "pending",
                     backend,
-                    mode,
+                    "1q",
                     float(alpha),
                     int(shots),
                     None,
@@ -141,8 +131,6 @@ class JobStore:
         if metadata is not None:
             updates.append("metadata_json = ?")
             params.append(json.dumps(metadata))
-            updates.append("mode = ?")
-            params.append(_job_mode(metadata))
         if error is not None:
             updates.append("error = ?")
             params.append(error)
@@ -186,10 +174,9 @@ class JobStore:
         offset: int = 0,
         status: JobStatus | None = None,
         backend: JobBackend | None = None,
-        mode: Literal["1q", "2q"] | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        safe_limit = max(1, int(limit))
-        safe_offset = max(0, int(offset))
+        safe_limit = max(1, limit)
+        safe_offset = max(0, offset)
 
         where_parts: list[str] = []
         where_params: list[Any] = []
@@ -199,9 +186,6 @@ class JobStore:
         if backend is not None:
             where_parts.append("backend = ?")
             where_params.append(backend)
-        if mode is not None:
-            where_parts.append("mode = ?")
-            where_params.append(mode)
 
         where_clause = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
 
@@ -218,13 +202,24 @@ class JobStore:
                 SELECT *
                 FROM jobs
                 {where_clause}
-                ORDER BY datetime(created_at) DESC
+                ORDER BY created_at DESC
                 LIMIT ? OFFSET ?
                 """,
                 [*where_params, safe_limit, safe_offset],
             ).fetchall()
 
             return ([self._row_to_dict(row) for row in rows], total)
+
+    def delete_all_jobs(self) -> int:
+        """Delete every job record regardless of status.
+
+        Called when the user explicitly requests to clear the full history.
+        Returns the number of rows deleted.
+        """
+        with self._lock:
+            cursor = self._conn.execute("DELETE FROM jobs")
+            self._conn.commit()
+            return cursor.rowcount
 
 
 job_store = JobStore()

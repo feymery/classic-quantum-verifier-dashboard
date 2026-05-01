@@ -1,39 +1,41 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AsyncJobBanner } from "../components/AsyncJobBanner";
 import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
 import { AppNavigation } from "../components/AppNavigation";
-import { RunHistoryDrawer } from "../components/RunHistoryDrawer";
+import { RunHistoryDrawer } from "../components/History/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
+import type { JobHistoryItem } from "../types/runner";
 
 export function MainLayout() {
   const { dashboard, backendStatus, runner } = useAppState();
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const restoreHistoryEntry = (entry: (typeof runner.history)[number]) => {
-    dashboard.setAlpha(entry.alpha);
-    dashboard.setShots(entry.shots);
-    dashboard.setSelectedBackend(entry.requestedBackend);
-    dashboard.setComparisonAlphas(entry.comparisonAlphas);
+  const restoreHistoryEntry = (item: JobHistoryItem) => {
+    dashboard.setAlpha(item.alpha);
+    dashboard.setShots(item.shots);
+    dashboard.setSelectedBackend(
+      item.requestedBackend as Parameters<
+        typeof dashboard.setSelectedBackend
+      >[0],
+    );
   };
 
-  const loadHistoryResult = (entry: (typeof runner.history)[number]) => {
-    dashboard.setAlpha(entry.alpha);
-    dashboard.setShots(entry.shots);
-    dashboard.setSelectedBackend(entry.requestedBackend);
-    dashboard.setComparisonAlphas(entry.comparisonAlphas);
-    runner.restoreResult(entry);
+  const loadHistoryResult = (item: JobHistoryItem) => {
+    dashboard.setAlpha(item.alpha);
+    dashboard.setShots(item.shots);
+    dashboard.setSelectedBackend(
+      item.requestedBackend as Parameters<
+        typeof dashboard.setSelectedBackend
+      >[0],
+    );
+    void runner.restoreResult(item);
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#131217", color: "#ddd9ee" }}
-    >
-      <div className="px-6 py-6 mx-auto max-w-330">
+    <div className="min-h-screen p-6">
+      <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
-          backend={dashboard.backend}
           backendStatus={backendStatus}
           ibmToken={dashboard.ibmToken}
           ibmTokenSet={dashboard.ibmTokenSet}
@@ -50,34 +52,24 @@ export function MainLayout() {
           onConfirmToken={dashboard.confirmToken}
           onAlphaChange={dashboard.setAlpha}
           onShotsChange={dashboard.setShots}
-          energy={dashboard.formattedEnergy}
-          latestJobId={runner.latestJobId ?? null}
           onOpenHistory={() => setHistoryOpen(true)}
         />
-
-        <AppNavigation />
-
-        <AsyncJobBanner
-          job={runner.activeAsyncJob}
-          onDismiss={runner.dismissActiveAsyncJob}
-          onRetry={runner.retryActiveAsyncJob}
-          onResume={() => {
-            if (runner.activeAsyncJob) runner.resumeJob(runner.activeAsyncJob);
-          }}
-        />
-
-        <main className="my-8">
+        <div className="flex-1 px-2 py-6">
+          <AppNavigation />
           <Outlet />
-        </main>
+        </div>
       </div>
 
       <RunHistoryDrawer
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        entries={runner.history}
+        items={runner.historyItems}
+        loading={runner.historyLoading}
+        error={runner.historyError}
         onRestore={restoreHistoryEntry}
         onLoadResult={loadHistoryResult}
         onClear={runner.clearHistory}
+        onSync={(item) => void runner.syncJob(item.jobId)}
       />
     </div>
   );

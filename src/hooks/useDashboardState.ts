@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState, type ChangeEvent } from "react";
-import { BACKENDS, type BackendId } from "../utils/constants";
+import { BACKENDS, PROTOCOL_ALPHA, type BackendId } from "../utils/constants";
 import { energyFromAlpha } from "../utils/physics";
 import { formatEnergy } from "../utils/physics";
 import { fetchJson } from "../services/apiClient";
 import { useIbmCredentials } from "./useIbmCredentials";
 
 export function useDashboardState() {
-  const [alpha, setAlpha] = useState<number>(Math.PI / 4);
+  const [alpha, setAlpha] = useState<number>(PROTOCOL_ALPHA);
   const [shots, setShots] = useState<number>(1024);
-  const [selectedBackend, setSelectedBackend] = useState<BackendId>("mock");
+  const [selectedBackend, setSelectedBackend] = useState<BackendId>("aer");
   const {
     ibmToken,
     ibmTokenSet,
@@ -25,8 +25,8 @@ export function useDashboardState() {
   const [comparisonAlphas, setComparisonAlphas] = useState<number[]>([]);
   const [showToken, setShowToken] = useState<boolean>(false);
 
-  const energy = useMemo(() => energyFromAlpha(alpha), [alpha]);
-  const formattedEnergy = formatEnergy(energy);
+  const theoreticalEnergy = useMemo(() => energyFromAlpha(alpha), [alpha]);
+  const formattedTheoreticalEnergy = formatEnergy(theoreticalEnergy);
   const backend = useMemo(
     () =>
       BACKENDS.find((option) => option.id === selectedBackend) ?? BACKENDS[0],
@@ -68,8 +68,8 @@ export function useDashboardState() {
     alphaFake,
     comparisonAlphas,
     showToken,
-    energy,
-    formattedEnergy,
+    energy: theoreticalEnergy,
+    formattedTheoreticalEnergy,
     backend,
     setAlpha,
     setShots,

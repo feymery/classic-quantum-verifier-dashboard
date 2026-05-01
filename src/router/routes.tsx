@@ -4,7 +4,6 @@ import { MainLayout } from "../layouts/MainLayout";
 import {
   ExperimentPage,
   VisualizationPage,
-  CircuitPage,
   TrapsPage,
   FundamentalsPage,
 } from "./lazyPages";
@@ -39,7 +38,6 @@ export const appRouter = createBrowserRouter([
       { path: "fundamentals", element: withPageLoader(<FundamentalsPage />) },
       { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
       { path: "visualization", element: withPageLoader(<VisualizationPage />) },
-      { path: "2Qcircuit", element: withPageLoader(<CircuitPage />) },
       { path: "traps", element: withPageLoader(<TrapsPage />) },
     ],
   },

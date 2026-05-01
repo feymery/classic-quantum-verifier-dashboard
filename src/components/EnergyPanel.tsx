@@ -11,7 +11,7 @@ interface EnergyPanelProps {
   title: string;
   description: string;
   energy: string;
-  energyError?: number | null;
+  energyTheoretical?: string;
   verdict?: string | null;
 }
 
@@ -19,7 +19,7 @@ export function EnergyPanel({
   title,
   description,
   energy,
-  energyError,
+  energyTheoretical,
   verdict,
 }: EnergyPanelProps) {
   const verdictColor = verdict
@@ -29,15 +29,13 @@ export function EnergyPanel({
   return (
     <Panel step="step E" title={title} description={description}>
       <div className="space-y-2">
-        <p className="text-4xl font-semibold text-accent">
-          {energy}
-          {energyError != null && (
-            <span className="ml-2 text-base font-normal text-muted">
-              ± {energyError.toFixed(4)}
-            </span>
-          )}
-        </p>
+        <p className="text-4xl font-semibold text-accent">{energy}</p>
         <p className="text-sm text-subtle">energy estimate</p>
+        {energyTheoretical != null && (
+          <p className="text-xs text-muted">
+            theoretical (sin²α): {energyTheoretical}
+          </p>
+        )}
         {verdict && (
           <p
             className=" text-xs font-medium uppercase tracking-wider"

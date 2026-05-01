@@ -44,8 +44,8 @@ python3 -m uvicorn backend.main:app --reload --port 8000
 | Layer | Technology | Notes |
 | --- | --- | --- |
 | Frontend UI | React 19 + TypeScript + Tailwind v4 | Modular pages, production build verified |
-| Charts | Recharts | Energy, histogram, sweep, adversarial plots |
-| Backend API | FastAPI + Pydantic v2 | 9 endpoints, full OpenAPI schema at `/docs` |
+| Charts | Recharts | Energy, histogram, sweep, noise plots |
+| Backend API | FastAPI + Pydantic v2 | 10 endpoints, full OpenAPI schema at `/docs` |
 | Quantum execution | Qiskit Aer + IBM Runtime | Aer stable; IBM optional via async job queue |
 | Job system | ThreadPool + SQLite | Persistent job metadata with status transitions |
 
@@ -59,8 +59,7 @@ python3 -m uvicorn backend.main:app --reload --port 8000
 │   ├── components/          # Shared and feature components (charts, panels)
 │   ├── modules/             # Domain modules
 │   │   ├── oneQubit/        # 1Q physics, services, components, pages
-│   │   ├── twoQubit/        # 2Q physics, services, components, pages
-│   │   ├── adversarial/     # Adversarial analysis module
+
 │   │   └── traps/           # Trap-based verification module
 │   ├── pages/               # Routed page components
 │   ├── physics/             # Shared physics: energy, noise

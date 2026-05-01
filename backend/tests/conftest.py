@@ -3,9 +3,10 @@ from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
 
-# Add backend module to path
-backend_path = Path(__file__).parent.parent
-sys.path.insert(0, str(backend_path))
+# Add project root to path so 'backend' package is importable
+# (using backend/ directly would shadow the installed 'qiskit' package)
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from backend.main import app
 
@@ -21,16 +22,6 @@ def sample_1q_params():
     return {
         "alpha": 0.5,
         "shots": 1024,
-        "backend": "aer",
-    }
-
-
-@pytest.fixture
-def sample_2q_params():
-    """Standard 2Q experiment parameters"""
-    return {
-        "alpha": 0.45,
-        "shots": 2048,
         "backend": "aer",
     }
 
