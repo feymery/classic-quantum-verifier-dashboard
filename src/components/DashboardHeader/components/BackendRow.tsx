@@ -9,6 +9,12 @@ export interface BackendRowProps {
   onOpenHistory: () => void;
 }
 
+const statusColors: Record<BackendStatus, string> = {
+  idle: "bg-success",
+  error: "bg-error",
+  running: "bg-warning",
+};
+
 export function BackendRow({
   selectedBackend,
   backendStatus,
@@ -34,7 +40,9 @@ export function BackendRow({
           variant="neutral"
           className="flex items-center gap-2 p-1 text-sm font-normal rounded-lg"
         >
-          <span className="h-1.5 w-1.5 rounded-lg bg-success" />
+          <span
+            className={`h-1.5 w-1.5 rounded-lg ${statusColors[backendStatus]}`}
+          />
           {backendStatus}
         </Badge>
       </div>
