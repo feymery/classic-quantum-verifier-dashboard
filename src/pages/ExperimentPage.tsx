@@ -36,7 +36,6 @@ export function ExperimentPage() {
         result={runner.oneQResult}
         status={runner.status}
         error={runner.error}
-        executionSource={runner.latestExecutionSource}
       />
     </div>
   );

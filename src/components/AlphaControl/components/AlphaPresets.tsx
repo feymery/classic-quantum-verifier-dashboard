@@ -41,7 +41,7 @@ export function AlphaPresets({ alpha, onSelect }: AlphaPresetsProps) {
             </div>
 
             {/* Desc + energy */}
-            <div className="flex items-center justify-between mt-0.5">
+            <div className="flex items-center justify-between mt-0.5 gap-1">
               <span
                 className="text-[10px] leading-none"
                 style={{ color: "#6b6780" }}

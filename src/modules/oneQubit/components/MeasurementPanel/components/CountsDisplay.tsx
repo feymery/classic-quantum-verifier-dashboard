@@ -20,10 +20,10 @@ export function CountsDisplay({ counts, shots, loading }: CountsDisplayProps) {
     <div className="space-y-1.5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
+        <span className="text-[10px] text-subtle">
           computational basis counts
         </span>
-        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
+        <span className="text-[10px] text-subtle">
           little-endian · {shots} shots
         </span>
       </div>
@@ -50,10 +50,7 @@ export function CountsDisplay({ counts, shots, loading }: CountsDisplayProps) {
               </span>
 
               {/* Bar track */}
-              <div
-                className="flex-1 h-3 rounded-sm"
-                style={{ background: "#2d2b3a" }}
-              >
+              <div className="flex-1 h-3 rounded-sm bg-border">
                 {!loading && counts && (
                   <div
                     className="h-full transition-all duration-500 rounded-sm"
@@ -70,9 +67,7 @@ export function CountsDisplay({ counts, shots, loading }: CountsDisplayProps) {
               {/* Count + frequency */}
               <div className="flex items-center gap-1.5 w-24 justify-end shrink-0">
                 {loading ? (
-                  <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-                    ···
-                  </span>
+                  <span className="text-[10px] text-subtle">···</span>
                 ) : (
                   <>
                     <span
@@ -81,10 +76,7 @@ export function CountsDisplay({ counts, shots, loading }: CountsDisplayProps) {
                     >
                       {count}
                     </span>
-                    <span
-                      className=" text-[10px] tabular-nums"
-                      style={{ color: "#6b6780" }}
-                    >
+                    <span className="text-[10px] tabular-nums text-subtle">
                       ({(freq * 100).toFixed(1)}%)
                     </span>
                   </>
@@ -96,10 +88,7 @@ export function CountsDisplay({ counts, shots, loading }: CountsDisplayProps) {
       </div>
 
       {/* Legend note */}
-      <p
-        className=" text-[9px] leading-relaxed pt-1"
-        style={{ color: "#6b6780" }}
-      >
+      <p className="text-[9px] leading-relaxed pt-1 text-subtle">
         qubit 0 = clock (left digit) · qubit 1 = work (right digit)
       </p>
     </div>
