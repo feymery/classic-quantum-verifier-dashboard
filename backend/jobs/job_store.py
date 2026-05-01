@@ -23,15 +23,11 @@ class JobStore:
         resolved = (db_path or os.getenv("JOB_STORE_DB_PATH") or "backend/jobs/job_store.sqlite").strip()
         self._db_path = resolved
         self._lock = RLock()
-        self._conn = self._open_connection(resolved)
+        if resolved != ":memory:":
+            Path(resolved).parent.mkdir(parents=True, exist_ok=True)
+        self._conn = sqlite3.connect(resolved, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
         self._init_schema()
-
-    def _open_connection(self, db_path: str) -> sqlite3.Connection:
-        if db_path != ":memory:":
-            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
 
     def _init_schema(self) -> None:
         with self._lock:
@@ -41,7 +37,6 @@ class JobStore:
                     job_id TEXT PRIMARY KEY,
                     status TEXT NOT NULL,
                     backend TEXT NOT NULL,
-                    mode TEXT NOT NULL,
                     alpha REAL NOT NULL,
                     shots INTEGER NOT NULL,
                     result_json TEXT,
@@ -56,7 +51,7 @@ class JobStore:
                 "CREATE INDEX IF NOT EXISTS idx_jobs_updated_at ON jobs(updated_at DESC)"
             )
             self._conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend_mode ON jobs(status, backend, mode)"
+                "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend ON jobs(status, backend)"
             )
             self._conn.commit()
 
@@ -180,8 +175,8 @@ class JobStore:
         status: JobStatus | None = None,
         backend: JobBackend | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        safe_limit = max(1, int(limit))
-        safe_offset = max(0, int(offset))
+        safe_limit = max(1, limit)
+        safe_offset = max(0, offset)
 
         where_parts: list[str] = []
         where_params: list[Any] = []
@@ -207,7 +202,7 @@ class JobStore:
                 SELECT *
                 FROM jobs
                 {where_clause}
-                ORDER BY datetime(created_at) DESC
+                ORDER BY created_at DESC
                 LIMIT ? OFFSET ?
                 """,
                 [*where_params, safe_limit, safe_offset],

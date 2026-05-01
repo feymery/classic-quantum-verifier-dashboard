@@ -4,11 +4,17 @@ import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
 import { AppNavigation } from "../components/AppNavigation";
 import { RunHistoryDrawer } from "../components/History/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
+import { formatEnergy } from "../utils/physics";
 import type { JobHistoryItem } from "../types/runner";
 
 export function MainLayout() {
   const { dashboard, backendStatus, runner } = useAppState();
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  const displayEnergy =
+    runner.oneQResult?.energy.estimated != null
+      ? formatEnergy(runner.oneQResult.energy.estimated)
+      : dashboard.formattedTheoreticalEnergy;
 
   const restoreHistoryEntry = (item: JobHistoryItem) => {
     dashboard.setAlpha(item.alpha);
@@ -52,7 +58,7 @@ export function MainLayout() {
           onConfirmToken={dashboard.confirmToken}
           onAlphaChange={dashboard.setAlpha}
           onShotsChange={dashboard.setShots}
-          energy={dashboard.formattedEnergy}
+          energy={displayEnergy}
           latestJobId={runner.latestJobId ?? null}
           onOpenHistory={() => setHistoryOpen(true)}
         />

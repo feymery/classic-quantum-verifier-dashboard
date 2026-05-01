@@ -25,12 +25,12 @@ export function RunExperiment({
       >
         Run experiment
       </Button>
-      <div className="flex flex-row gap-3 mt-2">
+      <div className="flex flex-col gap-3 mt-2">
         <Text variant="caption" color="accent">
-          E = {energy}
+          energy: {energy}
         </Text>
         <Text variant="caption" color="muted">
-          last job = {latestJobId ?? "--"}
+          last job: {latestJobId ?? "--"}
         </Text>
       </div>
     </div>

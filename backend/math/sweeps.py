@@ -5,10 +5,10 @@ import math
 
 from backend.jobs.job_runner import _get_backend_for_aer
 from backend.qiskit.circuit_builder import build_measurement_circuit
-from backend.energy import compute_energy as _compute_energy
+from backend.math.energy import compute_energy as _compute_energy
 from backend.qiskit.executor import make_depolarizing_backend, run_circuits
-from backend.qiskit.measurement_mapper import map_measurements, extract_x1z2
-from backend.verifier import compute_energy_error, verdict, compute_lambda_min
+from backend.math.measurement_mapper import map_measurements, extract_x1z2
+from backend.math.verifier import compute_energy_error, verdict, compute_lambda_min
 
 logger = logging.getLogger(__name__)
 

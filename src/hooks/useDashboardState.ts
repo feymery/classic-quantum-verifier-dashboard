@@ -25,8 +25,8 @@ export function useDashboardState() {
   const [comparisonAlphas, setComparisonAlphas] = useState<number[]>([]);
   const [showToken, setShowToken] = useState<boolean>(false);
 
-  const energy = useMemo(() => energyFromAlpha(alpha), [alpha]);
-  const formattedEnergy = formatEnergy(energy);
+  const theoreticalEnergy = useMemo(() => energyFromAlpha(alpha), [alpha]);
+  const formattedTheoreticalEnergy = formatEnergy(theoreticalEnergy);
   const backend = useMemo(
     () =>
       BACKENDS.find((option) => option.id === selectedBackend) ?? BACKENDS[0],
@@ -68,8 +68,8 @@ export function useDashboardState() {
     alphaFake,
     comparisonAlphas,
     showToken,
-    energy,
-    formattedEnergy,
+    energy: theoreticalEnergy,
+    formattedTheoreticalEnergy,
     backend,
     setAlpha,
     setShots,

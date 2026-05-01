@@ -2,6 +2,7 @@ import { AlphaControl } from "../components/AlphaControl/AlphaControl";
 import { EnergyPanel } from "../components/EnergyPanel";
 import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
 import { useAppState } from "../state/useAppState";
+import { formatEnergy } from "../utils/physics";
 
 export function ExperimentPage() {
   const { dashboard, runner } = useAppState();
@@ -18,11 +19,15 @@ export function ExperimentPage() {
       <EnergyPanel
         title="Instant Energy"
         description="Current protocol energy for the selected α value."
-        energy={dashboard.formattedEnergy}
-        energyError={
+        energy={
           runner.oneQResult?.energy.estimated != null
-            ? undefined // σ_E comes from backend result if available
-            : null
+            ? formatEnergy(runner.oneQResult.energy.estimated)
+            : dashboard.formattedTheoreticalEnergy
+        }
+        energyTheoretical={
+          runner.oneQResult != null
+            ? dashboard.formattedTheoreticalEnergy
+            : undefined
         }
         verdict={runner.oneQResult?.energy.decision ?? null}
       />

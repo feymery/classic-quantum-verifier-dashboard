@@ -5,12 +5,12 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 
 from backend.qiskit.circuit_builder import build_measurement_circuit
-from backend.energy import compute_energy as _compute_energy
+from backend.math.energy import compute_energy as _compute_energy
 from backend.qiskit.executor import run_circuits, make_qpu_backend
-from backend.qiskit.ibm.ibm_client import get_shared_client
-from backend.qiskit.measurement_mapper import map_measurements
+from backend.routers.ibm_client import get_shared_client
+from backend.math.measurement_mapper import map_measurements
 from backend.jobs.job_store import job_store
-from backend.verifier import compute_energy_error, verdict, compute_lambda_min
+from backend.math.verifier import compute_energy_error, verdict, compute_lambda_min
 
 
 logger = logging.getLogger(__name__)
