@@ -54,7 +54,6 @@ export type BackendId = "aer" | "aer_qpu" | "ibm_runtime";
 export interface Backend {
   id: BackendId;
   label: string;
-  dotColor: string;
   requiresToken: boolean;
 }
 
@@ -62,19 +61,16 @@ export const BACKENDS: Backend[] = [
   {
     id: "aer",
     label: "Aer Simulator",
-    dotColor: "#34d399",
     requiresToken: false,
   },
   {
     id: "aer_qpu",
     label: "Aer + QPU Noise",
-    dotColor: "#f59e0b",
     requiresToken: true,
   },
   {
     id: "ibm_runtime",
     label: "IBM Quantum",
-    dotColor: "#9a91ad",
     requiresToken: true,
   },
 ];

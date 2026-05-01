@@ -1,4 +1,4 @@
-import type { BackendId, Backend } from "../../utils/constants";
+import type { BackendId } from "../../utils/constants";
 import type { BackendStatus } from "../../types/dashboard";
 import { Card } from "../../ui/Card";
 import { BackendRow, HeaderStrip, IbmTokenSection } from "./components";
@@ -9,7 +9,6 @@ import { IntroPanel } from "./components/IntroPanel";
 export interface DashboardHeaderProps {
   // identity
   selectedBackend: BackendId;
-  backend: Backend;
   backendStatus: BackendStatus;
   // parameters
   alpha: number;
@@ -38,7 +37,6 @@ export interface DashboardHeaderProps {
 export function DashboardHeader(props: DashboardHeaderProps) {
   const {
     selectedBackend,
-    backend,
     backendStatus,
     alpha,
     shots,
@@ -71,7 +69,6 @@ export function DashboardHeader(props: DashboardHeaderProps) {
           <div className="flex flex-col gap-4">
             <BackendRow
               selectedBackend={selectedBackend}
-              backend={backend}
               backendStatus={backendStatus}
               onBackendChange={onBackendChange}
               onOpenHistory={onOpenHistory}

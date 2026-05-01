@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from concurrent.futures import ThreadPoolExecutor
 
 from backend.qiskit.circuit_builder import build_measurement_circuit
@@ -9,6 +10,7 @@ from backend.qiskit.executor import run_circuits, make_qpu_backend
 from backend.qiskit.ibm.ibm_client import get_shared_client
 from backend.qiskit.measurement_mapper import map_measurements
 from backend.jobs.job_store import job_store
+from backend.verifier import compute_energy_error, verdict, compute_lambda_min
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,18 @@ logger = logging.getLogger(__name__)
 _IBM_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="quantum-ibm")
 _AER_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="quantum-aer")
 
+
+def _get_backend_for_aer(backend_requested: str) -> object:
+    """Return the best available Aer backend.
+
+    aer_qpu: AerSimulator.from_backend(qpu) when IBM credentials are active.
+    aer:     always None — executor falls back to the ideal simulator.
+    """
+    if backend_requested != "aer_qpu":
+        return None
+    client = get_shared_client()
+    ibm_backend = client.get_backend() if client.connect().available else None
+    return make_qpu_backend(ibm_backend) if ibm_backend is not None else None
 
 def _run_three_basis(
     alpha: float, shots: int, backend: object
@@ -46,12 +60,20 @@ def _compose_result(
 ) -> dict:
     mapped = map_measurements(counts_z, counts_zx, counts_x, shots)
     energy = _compute_energy(alpha, mapped.observables)
+    energy_err = compute_energy_error(alpha, mapped.observables, shots)
+    energy_theory = math.sin(float(alpha)) ** 2
+    lmin = compute_lambda_min(float(alpha))
+    verd = verdict(energy, energy_err)
 
     return {
         "alpha": float(alpha),
         "observables": mapped.observables,
         "noisyObservables": mapped.observables,
         "energy": energy,
+        "energy_error": energy_err,
+        "energy_theory": energy_theory,
+        "lambda_min": lmin,
+        "verdict": verd,
         "counts": counts_z,
         "probabilities": mapped.probabilities,
         "backendInfo": {
@@ -60,6 +82,41 @@ def _compose_result(
             "executionTime": execution_time,
         },
     }
+
+
+def run_experiment_sync(alpha: float, shots: int, backend: str = "aer") -> dict:
+    """Synchronous execution for aer / aer_qpu — records the run in the job store."""
+    backend_requested = (backend or "aer").strip().lower()
+
+    job_id = job_store.create_job(
+        float(alpha),
+        int(shots),
+        backend_requested,
+        {"requested_backend": backend_requested},
+    )
+    job_store.update_job(job_id, status="running")
+
+    try:
+        aer_backend = _get_backend_for_aer(backend_requested)
+        counts_z, counts_zx, counts_x, backend_used, execution_time, _ = _run_three_basis(
+            alpha, shots, aer_backend
+        )
+        result = _compose_result(alpha, shots, counts_z, counts_zx, counts_x, backend_used, execution_time)
+        job_store.update_job(
+            job_id,
+            status="done",
+            result=result,
+            metadata={
+                "backend_name": backend_used,
+                "execution_backend": backend_requested,
+                "requested_backend": backend_requested,
+            },
+        )
+        return {"job_id": job_id, **result}
+
+    except Exception as exc:
+        job_store.update_job(job_id, status="failed", error=str(exc))
+        raise
 
 
 def run_job_async(job_id: str) -> None:
@@ -76,19 +133,18 @@ def run_job_async(job_id: str) -> None:
     try:
         if requested_backend == "ibm":
             client = get_shared_client()
-            if not client.connect().available:
-                raise RuntimeError(client.connect().reason or "IBM Runtime unavailable")
+            availability = client.connect()
+            if not availability.available:
+                raise RuntimeError(availability.reason or "IBM Runtime unavailable")
             backend = client.get_backend()
         else:
-            # Use QPU-calibrated Aer when credentials available, ideal otherwise
-            client = get_shared_client()
-            ibm_backend = client.get_backend() if client.connect().available else None
-            backend = make_qpu_backend(ibm_backend) if ibm_backend is not None else None
+            backend = _get_backend_for_aer(requested_backend)
 
         counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_three_basis(
             alpha, shots, backend
         )
         metadata["requested_backend"] = requested_backend
+        metadata["execution_backend"] = requested_backend
 
         result = _compose_result(alpha, shots, counts_z, counts_zx, counts_x, backend_used, execution_time)
 

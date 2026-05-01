@@ -30,12 +30,6 @@ from qiskit_aer.primitives import SamplerV2 as AerSampler
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Shared Aer simulator (noiseless)
-# ---------------------------------------------------------------------------
-_IDEAL_SIMULATOR = AerSimulator()
-
-
-# ---------------------------------------------------------------------------
 # Data types
 # ---------------------------------------------------------------------------
 
@@ -113,7 +107,7 @@ def run_circuits(
         - IBM QPU object            → real hardware via IBM Runtime Sampler
     """
     if backend is None:
-        backend = _IDEAL_SIMULATOR
+        backend = AerSimulator()
 
     shot_count = max(1, int(shots))
     raw_name: str = getattr(backend, "name", type(backend).__name__)

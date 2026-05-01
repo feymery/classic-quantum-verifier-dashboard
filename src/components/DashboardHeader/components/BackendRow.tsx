@@ -1,14 +1,9 @@
-import {
-  BACKENDS,
-  type BackendId,
-  type Backend,
-} from "../../../utils/constants";
+import { BACKENDS, type BackendId } from "../../../utils/constants";
 import type { BackendStatus } from "../../../types/dashboard";
 import { Badge } from "../../../ui/Badge";
 
 export interface BackendRowProps {
   selectedBackend: BackendId;
-  backend: Backend;
   backendStatus: BackendStatus;
   onBackendChange: (id: BackendId) => void;
   onOpenHistory: () => void;
@@ -16,7 +11,6 @@ export interface BackendRowProps {
 
 export function BackendRow({
   selectedBackend,
-  backend,
   backendStatus,
   onBackendChange,
 }: BackendRowProps) {
@@ -40,10 +34,7 @@ export function BackendRow({
           variant="neutral"
           className="flex items-center gap-2 p-1 text-sm font-normal rounded-lg"
         >
-          <span
-            className="h-2.5 w-2.5 rounded-lg"
-            style={{ backgroundColor: backend.dotColor }}
-          />
+          <span className="h-1.5 w-1.5 rounded-lg bg-success" />
           {backendStatus}
         </Badge>
       </div>

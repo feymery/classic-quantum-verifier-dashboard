@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 import math
 
+from backend.jobs.job_runner import _get_backend_for_aer
 from backend.qiskit.circuit_builder import build_measurement_circuit
 from backend.energy import compute_energy as _compute_energy
 from backend.qiskit.executor import make_depolarizing_backend, run_circuits
-from backend.experiment_runner import _get_backend_for_aer
 from backend.qiskit.measurement_mapper import map_measurements, extract_x1z2
 from backend.verifier import compute_energy_error, verdict, compute_lambda_min
 
@@ -35,7 +35,7 @@ def sweep_alpha(shots: int, n_points: int = 30, backend: str = "aer") -> list[di
             "X1X2": round(sa, 6),
         }
         try:
-            aer_backend = _get_backend_for_aer()
+            aer_backend = _get_backend_for_aer(backend)
             z_circuit    = build_measurement_circuit(alpha, basis="z")
             zx_circuit   = build_measurement_circuit(alpha, basis="zx")
             x_circuit    = build_measurement_circuit(alpha, basis="x")
@@ -89,7 +89,7 @@ def sweep_shots(
     results = []
     for shots in shots_list:
         try:
-            aer_backend = _get_backend_for_aer()
+            aer_backend = _get_backend_for_aer("aer")
             z_circuit  = build_measurement_circuit(alpha, basis="z")
             zx_circuit = build_measurement_circuit(alpha, basis="zx")
             x_circuit  = build_measurement_circuit(alpha, basis="x")

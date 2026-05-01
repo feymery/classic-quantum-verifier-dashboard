@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.experiment_runner import runExperimentSync, submitExperimentJob
+from backend.jobs.job_runner import run_experiment_sync, submit_job
 from backend.sweeps import sweep_alpha, sweep_shots, sweep_noise
 from backend.qiskit.ibm.ibm_client import configure_runtime, get_shared_client
 from backend.jobs.job_store import job_store
@@ -280,13 +280,14 @@ def get_backends() -> list[dict]:
 def run_endpoint(payload: RunRequest) -> dict:
     backend = payload.backend
     if backend == "ibm":
-        return submitExperimentJob(
+        job_id = submit_job(
             alpha=payload.alpha,
             shots=payload.shots,
             backend="ibm",
         )
+        return {"job_id": job_id, "status": "queued"}
 
-    return runExperimentSync(
+    return run_experiment_sync(
         alpha=payload.alpha,
         shots=payload.shots,
         backend=payload.backend,

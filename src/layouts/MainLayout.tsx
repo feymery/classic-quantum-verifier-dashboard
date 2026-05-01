@@ -36,7 +36,6 @@ export function MainLayout() {
       <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
-          backend={dashboard.backend}
           backendStatus={backendStatus}
           ibmToken={dashboard.ibmToken}
           ibmTokenSet={dashboard.ibmTokenSet}
