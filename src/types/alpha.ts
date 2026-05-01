@@ -9,6 +9,4 @@ export interface KeyAlpha {
 export interface AlphaControlProps {
   alpha: number;
   setAlpha: (v: number) => void;
-  comparisonAlphas: number[];
-  setComparisonAlphas: (alphas: number[]) => void;
 }

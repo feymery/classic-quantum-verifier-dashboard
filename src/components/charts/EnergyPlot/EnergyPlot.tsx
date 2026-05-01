@@ -21,13 +21,7 @@ const CURVE_DATA: EnergyPlotPoint[] = energyCurve(200).map((pt) => ({
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function EnergyPlot({
-  alpha,
-  result,
-  comparisonAlphas,
-  comparisonResults,
-  comparisonLoading,
-}: EnergyPlotSharedProps) {
+export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
   const chartData = useMemo(() => {
     if (!result) return CURVE_DATA;
     return CURVE_DATA.map((pt) => ({
@@ -41,13 +35,6 @@ export function EnergyPlot({
 
   const currentE = calcEnergy(alpha);
   const estimatedE = result?.energy.estimated;
-  const comparisonByAlpha = new Map(
-    comparisonResults.map((entry) => [entry.alpha, entry]),
-  );
-  const comparisonTheoretical = comparisonAlphas.map((ca) => calcEnergy(ca));
-  const comparisonMeasured = comparisonAlphas.map(
-    (ca) => comparisonByAlpha.get(ca)?.energy.estimated,
-  );
 
   return (
     <Card className="rounded-lg" padded="md">
@@ -65,19 +52,6 @@ export function EnergyPlot({
             {result && (
               <Legend color={CHART_COLORS.estimated} label="estimated" dot />
             )}
-            {comparisonAlphas.length > 0 && (
-              <Legend
-                color={CHART_COLORS.comparison[0]}
-                label={`+${comparisonAlphas.length} compare`}
-              />
-            )}
-            {comparisonAlphas.length > 0 && (
-              <Legend
-                color={CHART_COLORS.estimated}
-                label={comparisonLoading ? "comparing..." : "measured points"}
-                dot
-              />
-            )}
           </div>
         </div>
 
@@ -86,19 +60,12 @@ export function EnergyPlot({
           chartData={chartData}
           hasResult={Boolean(result)}
           currentE={currentE}
-          comparisonAlphas={comparisonAlphas}
-          comparisonEnergies={comparisonTheoretical}
-          measuredComparisonEnergies={comparisonMeasured}
         />
 
         <EnergyPlotSummary
           alpha={alpha}
           currentE={currentE}
           estimatedE={estimatedE}
-          comparisonAlphas={comparisonAlphas}
-          comparisonTheoretical={comparisonTheoretical}
-          comparisonMeasured={comparisonMeasured}
-          comparisonLoading={comparisonLoading}
         />
       </div>
     </Card>

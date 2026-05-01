@@ -1,19 +1,23 @@
-import { Panel } from "../ui/Panel";
-
-const VERDICT_VAR: Record<string, string> = {
-  accept: "var(--color-success)",
-  reject: "var(--color-danger)",
-  marginal: "var(--color-warning)",
-  boundary: "var(--color-warning)",
-};
+import type { ExperimentResult } from "../types/experiment";
+import type { Verdict } from "../types/dashboard";
+import type { TextColor } from "../ui/Text";
+import { Panel, Text } from "../ui";
+import { ResultProvenance } from "./ResultProvenance";
 
 interface EnergyPanelProps {
   title: string;
   description: string;
   energy: string;
   energyTheoretical?: string;
-  verdict?: string | null;
+  result: ExperimentResult | null;
+  verdict?: Verdict | null;
 }
+
+const verdictColors: Record<Verdict, TextColor> = {
+  accept: "success",
+  reject: "error",
+  boundary: "warning",
+};
 
 export function EnergyPanel({
   title,
@@ -21,14 +25,15 @@ export function EnergyPanel({
   energy,
   energyTheoretical,
   verdict,
+  result,
 }: EnergyPanelProps) {
-  const verdictColor = verdict
-    ? (VERDICT_VAR[verdict] ?? "var(--color-muted)")
-    : undefined;
-
   return (
-    <Panel step="step E" title={title} description={description}>
-      <div className="space-y-2">
+    <Panel
+      className="flex flex-col gap-3"
+      title={title}
+      description={description}
+    >
+      <div className="flex-1 space-y-2 ">
         <p className="text-4xl font-semibold text-accent">{energy}</p>
         <p className="text-sm text-subtle">energy estimate</p>
         {energyTheoretical != null && (
@@ -37,14 +42,16 @@ export function EnergyPanel({
           </p>
         )}
         {verdict && (
-          <p
-            className=" text-xs font-medium uppercase tracking-wider"
-            style={{ color: verdictColor }}
-          >
-            {verdict}
-          </p>
+          <Text color={verdictColors[verdict]} variant="title">
+            {verdict.toLocaleUpperCase()}
+          </Text>
         )}
       </div>
+      <ResultProvenance
+        backend={result?.backend ?? null}
+        jobId={result?.jobId}
+        shotsExecuted={result?.shotsExecuted}
+      />
     </Panel>
   );
 }

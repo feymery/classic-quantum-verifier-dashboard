@@ -11,24 +11,18 @@ interface EnergySummaryProps {
 
 const DECISION_CONFIG: Record<
   VerifierDecision,
-  { color: string; bg: string; border: string; label: string }
+  { classes: string; label: string }
 > = {
   accept: {
-    color: "#34d399",
-    bg: "rgba(52,211,153,0.08)",
-    border: "rgba(52,211,153,0.3)",
+    classes: "text-success bg-success/8 border-success/30",
     label: "ACCEPT",
   },
   reject: {
-    color: "#f87171",
-    bg: "rgba(248,113,113,0.08)",
-    border: "rgba(248,113,113,0.3)",
+    classes: "text-danger  bg-danger/8  border-danger/30",
     label: "REJECT",
   },
   boundary: {
-    color: "#f59e0b",
-    bg: "rgba(245,158,11,0.08)",
-    border: "rgba(245,158,11,0.3)",
+    classes: "text-warning bg-warning/8 border-warning/30",
     label: "BOUNDARY",
   },
 };
@@ -44,35 +38,28 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
           label="theoretical"
           value={analysis?.theoretical}
           loading={loading}
-          color="#a78bfa"
+          color="var(--color-accent)"
         />
         <EnergyCell
           label="estimated"
           value={analysis?.estimated}
           loading={loading}
-          color="#e8a020"
+          color="var(--color-gold)"
         />
       </div>
 
       {/* Deviation */}
       {analysis && !loading && (
-        <div
-          className="flex items-center justify-between px-2 py-1 rounded border"
-          style={{ background: "#181620", borderColor: "#2d2b3a" }}
-        >
-          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-            deviation
-          </span>
+        <div className="flex items-center justify-between px-2 py-1 rounded border bg-surface border-border">
+          <span className="text-[10px] text-subtle">deviation</span>
           <div className="flex items-center gap-2">
             <span
-              className=" text-[11px] tabular-nums"
-              style={{
-                color:
-                  analysis.deviation != null &&
-                  Math.abs(analysis.deviation) < 0.01
-                    ? "#34d399"
-                    : "#f59e0b",
-              }}
+              className={`text-[11px] tabular-nums ${
+                analysis.deviation != null &&
+                Math.abs(analysis.deviation) < 0.01
+                  ? "text-success"
+                  : "text-warning"
+              }`}
             >
               {analysis.deviation != null
                 ? analysis.deviation >= 0
@@ -81,7 +68,7 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
                 : ""}
               {analysis.deviation?.toFixed(4) ?? "—"}
             </span>
-            <span className=" text-[10px]" style={{ color: "#6b6780" }}>
+            <span className="text-[10px] text-subtle">
               ({analysis.relativePct?.toFixed(1) ?? "—"}%)
             </span>
           </div>
@@ -94,25 +81,16 @@ export function EnergySummary({ analysis, loading }: EnergySummaryProps) {
       {/* Verifier decision */}
       {cfg && analysis && !loading ? (
         <div
-          className="flex items-center justify-between rounded px-3 py-2 border"
-          style={{ background: cfg.bg, borderColor: cfg.border }}
+          className={`flex items-center justify-between rounded px-3 py-2 border ${cfg.classes}`}
         >
-          <span className=" text-[11px]" style={{ color: cfg.color }}>
-            verifier decision
-          </span>
-          <span
-            className=" text-sm font-semibold tracking-widest"
-            style={{ color: cfg.color }}
-          >
+          <span className="text-[11px]">verifier decision</span>
+          <span className="text-sm font-semibold tracking-widest">
             {cfg.label}
           </span>
         </div>
       ) : (
-        <div
-          className="rounded px-3 py-2 border"
-          style={{ background: "#181620", borderColor: "#2d2b3a" }}
-        >
-          <span className=" text-[10px]" style={{ color: "#6b6780" }}>
+        <div className="rounded px-3 py-2 border bg-surface border-border">
+          <span className="text-[10px] text-subtle">
             {loading ? "computing…" : "run experiment to get decision"}
           </span>
         </div>
