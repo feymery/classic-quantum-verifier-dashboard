@@ -108,20 +108,6 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
           );
         })}
       </div>
-
-      {/* ── Snap indicator ── */}
-      {guidedMode && snappedIdx >= 0 && (
-        <div
-          className="mt-1 flex items-center gap-1.5  text-[10px]"
-          style={{ color: KEY_ALPHAS[snappedIdx].color + "cc" }}
-        >
-          <span
-            className="inline-block w-1 h-1 rounded-lg"
-            style={{ background: KEY_ALPHAS[snappedIdx].color }}
-          />
-          snapped to {KEY_ALPHAS[snappedIdx].label}
-        </div>
-      )}
     </div>
   );
 }

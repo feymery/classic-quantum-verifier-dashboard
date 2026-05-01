@@ -9,28 +9,31 @@ export function ExperimentPage() {
 
   return (
     <div className="space-y-3">
-      <AlphaControl
-        alpha={dashboard.alpha}
-        setAlpha={dashboard.setAlpha}
-        comparisonAlphas={dashboard.comparisonAlphas}
-        setComparisonAlphas={dashboard.setComparisonAlphas}
-      />
+      <div className="flex flex-col gap-3 md:flex-row">
+        <AlphaControl
+          alpha={dashboard.alpha}
+          setAlpha={dashboard.setAlpha}
+          comparisonAlphas={dashboard.comparisonAlphas}
+          setComparisonAlphas={dashboard.setComparisonAlphas}
+        />
 
-      <EnergyPanel
-        title="Instant Energy"
-        description="Current protocol energy for the selected α value."
-        energy={
-          runner.oneQResult?.energy.estimated != null
-            ? formatEnergy(runner.oneQResult.energy.estimated)
-            : dashboard.formattedTheoreticalEnergy
-        }
-        energyTheoretical={
-          runner.oneQResult != null
-            ? dashboard.formattedTheoreticalEnergy
-            : undefined
-        }
-        verdict={runner.oneQResult?.energy.decision ?? null}
-      />
+        <EnergyPanel
+          title="Instant Energy"
+          description="Current protocol energy for the selected α value."
+          energy={
+            runner.oneQResult?.energy.estimated != null
+              ? formatEnergy(runner.oneQResult.energy.estimated)
+              : dashboard.formattedTheoreticalEnergy
+          }
+          energyTheoretical={
+            runner.oneQResult != null
+              ? dashboard.formattedTheoreticalEnergy
+              : undefined
+          }
+          verdict={runner.oneQResult?.energy.decision ?? null}
+          result={runner.oneQResult}
+        />
+      </div>
 
       <MeasurementPanel
         alpha={dashboard.alpha}

@@ -1,5 +1,7 @@
 export type AccentTone = "cyan" | "amber" | "purple" | "neutral";
 
+export type Verdict = "accept" | "reject" | "boundary";
+
 export interface MeasurementRow {
   label: string;
   value: string;
