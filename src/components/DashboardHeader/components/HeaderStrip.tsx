@@ -6,9 +6,6 @@ export interface HeaderStripProps {
   shots: number;
   onAlphaChange: (value: number) => void;
   onShotsChange: (value: number) => void;
-  // info
-  energy: string;
-  latestJobId: string | null;
 }
 
 export function HeaderStrip({

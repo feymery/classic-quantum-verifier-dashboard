@@ -6,3 +6,5 @@ export { Modal } from "./Modal";
 export { Panel } from "./Panel";
 export { Row } from "./Row";
 export { Text } from "./Text";
+export { ToastProvider, useToast } from "./Toast";
+export type { ToastVariant } from "./Toast";

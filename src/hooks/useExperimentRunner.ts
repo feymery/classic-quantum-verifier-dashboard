@@ -15,6 +15,7 @@ import type {
   JobHistoryItem,
 } from "../types/runner";
 import { useJobHistory } from "./useJobHistory";
+import { useToast } from "../ui/Toast";
 
 export type { RunnerStatus, ExecutionSource };
 
@@ -37,7 +38,6 @@ interface RunnerState {
   error: string | null;
   oneQResult: ExperimentResult | null;
   comparisonResults: ExperimentResult[];
-  latestJobId: string | null;
   latestBackend: string | null;
   latestExecutionSource: ExecutionSource | null;
 }
@@ -65,7 +65,6 @@ function commit1QResult(
     error: null,
     oneQResult,
     comparisonResults,
-    latestJobId: oneQResult.jobId,
     latestBackend: oneQResult.backend,
     latestExecutionSource: meta.executionSource,
   }));
@@ -79,7 +78,6 @@ export function useExperimentRunner() {
     error: null,
     oneQResult: null,
     comparisonResults: [],
-    latestJobId: null,
     latestBackend: null,
     latestExecutionSource: null,
   }));
@@ -90,6 +88,13 @@ export function useExperimentRunner() {
   useEffect(() => {
     refetchHistoryRef.current = jobHistory.refetch;
   }, [jobHistory.refetch]);
+
+  const { toast } = useToast();
+  // Keep toast stable inside async closures that declare [] deps.
+  const toastRef = useRef(toast);
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
 
   // One-time migration: remove the old localStorage-based run history key.
   useEffect(() => {
@@ -114,7 +119,6 @@ export function useExperimentRunner() {
       if (started.kind === "queued") {
         setState((prev) => ({
           ...prev,
-          latestJobId: started.jobId,
           latestBackend: "ibm",
           latestExecutionSource: "api",
         }));
@@ -132,6 +136,7 @@ export function useExperimentRunner() {
               setState,
             );
             refetchHistoryRef.current();
+            toastRef.current("Experiment completed successfully", "success");
           })
           .catch((error) => {
             const message =
@@ -142,6 +147,10 @@ export function useExperimentRunner() {
             if (message.includes("Timed out")) {
               refetchHistoryRef.current();
               setState((prev) => ({ ...prev, status: "idle", error: null }));
+              toastRef.current(
+                "IBM job is still queued – check the History panel for updates",
+                "warning",
+              );
               return;
             }
             setState((prev) => ({
@@ -149,6 +158,7 @@ export function useExperimentRunner() {
               status: "error",
               error: message,
             }));
+            toastRef.current(message, "error");
           });
         return;
       }
@@ -164,6 +174,7 @@ export function useExperimentRunner() {
         setState,
       );
       refetchHistoryRef.current();
+      toastRef.current("Experiment completed successfully", "success");
     },
     [],
   );
@@ -202,6 +213,7 @@ export function useExperimentRunner() {
           setState,
         );
         refetchHistoryRef.current();
+        toastRef.current("Experiment completed successfully", "success");
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Experiment run failed";
@@ -210,6 +222,7 @@ export function useExperimentRunner() {
           status: "error",
           error: message,
         }));
+        toastRef.current(message, "error");
       }
     },
     [runIbm1Q],
@@ -236,14 +249,15 @@ export function useExperimentRunner() {
         error: null,
         oneQResult,
         comparisonResults: [],
-        latestJobId: item.jobId,
         latestBackend: item.resolvedBackend,
         latestExecutionSource: item.executionSource as ExecutionSource | null,
       }));
+      toastRef.current("Result loaded from history", "success");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to load result";
       setState((prev) => ({ ...prev, status: "error", error: message }));
+      toastRef.current(message, "error");
     }
   }, []);
 

@@ -1,18 +1,11 @@
-import { Button, Text } from "../../../ui";
+import { Button } from "../../../ui";
 
 export interface RunExperimentProps {
-  energy: string;
-  latestJobId: string | null;
   runFor1Q: () => void;
   isRunning: boolean;
 }
 
-export function RunExperiment({
-  energy,
-  latestJobId,
-  runFor1Q,
-  isRunning,
-}: RunExperimentProps) {
+export function RunExperiment({ runFor1Q, isRunning }: RunExperimentProps) {
   return (
     <div className="gap-4">
       <Button
@@ -25,14 +18,6 @@ export function RunExperiment({
       >
         Run experiment
       </Button>
-      <div className="flex flex-col gap-3 mt-2">
-        <Text variant="caption" color="accent">
-          energy: {energy}
-        </Text>
-        <Text variant="caption" color="muted">
-          last job: {latestJobId ?? "--"}
-        </Text>
-      </div>
     </div>
   );
 }

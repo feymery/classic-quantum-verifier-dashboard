@@ -13,9 +13,6 @@ export interface DashboardHeaderProps {
   // parameters
   alpha: number;
   shots: number;
-  // derived / read-only
-  energy: string;
-  latestJobId: string | null;
   // IBM credentials
   ibmToken: string;
   ibmTokenSet: boolean;
@@ -40,8 +37,6 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     backendStatus,
     alpha,
     shots,
-    energy,
-    latestJobId,
     ibmToken,
     ibmTokenSet,
     ibmInstance,
@@ -80,8 +75,6 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             shots={shots}
             onAlphaChange={onAlphaChange}
             onShotsChange={onShotsChange}
-            energy={energy}
-            latestJobId={latestJobId}
           />
 
           {selectedBackend === "ibm_runtime" && (
@@ -98,12 +91,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
               onConfirmToken={onConfirmToken}
             />
           )}
-          <RunExperiment
-            energy={energy}
-            latestJobId={latestJobId}
-            runFor1Q={runFor1Q}
-            isRunning={runner.isRunning}
-          />
+          <RunExperiment runFor1Q={runFor1Q} isRunning={runner.isRunning} />
         </div>
       </Card>
     </header>
