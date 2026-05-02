@@ -82,31 +82,31 @@ export function EnergyPlotChart({
 
         <ReferenceLine
           y={THRESHOLD_LOW}
-          stroke={CHART_COLORS.thresholdLow}
+          stroke={CHART_COLORS.secondaryMuted}
           strokeWidth={0.75}
           strokeDasharray="4 3"
           label={{
-            value: `${THRESHOLD_LOW} reject`,
+            value: `${THRESHOLD_LOW}`,
             position: "insideTopRight",
             style: {
               fontFamily: "'Courier New', monospace",
               fontSize: 9,
-              fill: CHART_COLORS.thresholdLow,
+              fill: CHART_COLORS.secondaryMuted,
             },
           }}
         />
         <ReferenceLine
           y={THRESHOLD_HIGH}
-          stroke={CHART_COLORS.thresholdHigh}
+          stroke={CHART_COLORS.secondaryMuted}
           strokeWidth={0.75}
           strokeDasharray="4 3"
           label={{
-            value: `${THRESHOLD_HIGH} accept`,
+            value: `${THRESHOLD_HIGH}`,
             position: "insideTopRight",
             style: {
               fontFamily: "'Courier New', monospace",
               fontSize: 9,
-              fill: CHART_COLORS.thresholdHigh,
+              fill: CHART_COLORS.secondaryMuted,
             },
           }}
         />

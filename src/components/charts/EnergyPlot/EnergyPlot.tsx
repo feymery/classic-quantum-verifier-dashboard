@@ -24,12 +24,14 @@ const CURVE_DATA: EnergyPlotPoint[] = energyCurve(200).map((pt) => ({
 export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
   const chartData = useMemo(() => {
     if (!result) return CURVE_DATA;
+    const closest = CURVE_DATA.reduce((best, pt) =>
+      Math.abs(pt.alpha - result.alpha) < Math.abs(best.alpha - result.alpha)
+        ? pt
+        : best,
+    );
     return CURVE_DATA.map((pt) => ({
       ...pt,
-      estimated:
-        Math.abs(pt.alpha - result.alpha) < 0.008
-          ? result.energy.estimated
-          : undefined,
+      estimated: pt === closest ? result.energy.estimated : undefined,
     }));
   }, [result]);
 

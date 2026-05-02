@@ -8,7 +8,6 @@ import {
 } from "../../physics/measurements";
 import type { ExperimentResult } from "../../../../types/experiment";
 import type { RunnerStatus } from "../../../../types/runner";
-import type { VerifierDecision } from "../../../../physics/energy";
 import { Card } from "../../../../ui/Card";
 import { Text } from "../../../../ui/Text";
 import { BASIS_STATE_COLORS } from "../../../../components/charts/chartTheme";
@@ -19,27 +18,9 @@ const BASIS_STATES = ["00", "01", "10", "11"] as const;
 
 const MEASUREMENT_BASES: Array<{ key: string; label: string }> = [
   { key: "z", label: "ZZ basis" },
-  { key: "zx", label: "Z₁X₂ basis" },
+  { key: "zx", label: "X₁Z₂ basis" },
   { key: "x", label: "XX basis" },
 ];
-
-const VERDICT_CONFIG: Record<
-  VerifierDecision,
-  { classes: string; label: string }
-> = {
-  accept: {
-    classes: "text-success bg-success/8 border-success/30",
-    label: "ACCEPT",
-  },
-  reject: {
-    classes: "text-danger bg-danger/8 border-danger/30",
-    label: "REJECT",
-  },
-  boundary: {
-    classes: "text-warning bg-warning/8 border-warning/30",
-    label: "BOUNDARY",
-  },
-};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -68,9 +49,6 @@ export function MeasurementPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [alpha],
   );
-
-  const verdict = result?.energy.decision ?? null;
-  const verdictCfg = verdict ? VERDICT_CONFIG[verdict] : null;
 
   return (
     <Card className="rounded-lg" padded="md">
@@ -125,27 +103,6 @@ export function MeasurementPanel({
 
         {/* Divider */}
         <div className="border-t border-elevated" />
-
-        {/* Verifier decision */}
-        <section>
-          <SectionLabel>verifier decision</SectionLabel>
-          {verdictCfg && result && !isLoading ? (
-            <div
-              className={`mt-2 flex items-center justify-between rounded px-3 py-2.5 border ${verdictCfg.classes}`}
-            >
-              <span className="text-[11px]">protocol outcome</span>
-              <span className="text-sm font-semibold tracking-widest">
-                {verdictCfg.label}
-              </span>
-            </div>
-          ) : (
-            <div className="px-3 py-2 mt-2 border rounded bg-surface border-border">
-              <span className="text-[10px] text-subtle">
-                {isLoading ? "computing…" : "run experiment to get decision"}
-              </span>
-            </div>
-          )}
-        </section>
       </div>
     </Card>
   );

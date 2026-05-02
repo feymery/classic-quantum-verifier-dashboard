@@ -8,7 +8,6 @@ import {
   CartesianGrid,
   Tooltip,
   Cell,
-  ReferenceLine,
 } from "recharts";
 import type { Counts } from "../../../physics/measurements";
 import {
@@ -22,7 +21,6 @@ import {
   gridProps,
 } from "../../../../../components/charts/chartTheme";
 import { ChartTooltip } from "../../../../../components/charts/ChartTooltip";
-import { ChartLegendItem } from "../../../../../components/charts/ChartLegend";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -103,18 +101,6 @@ export function BasisMeasurementSection({
         <span className="text-[10px] uppercase tracking-widest text-subtle">
           {label}
         </span>
-        <div className="flex items-center gap-3">
-          <ChartLegendItem
-            type="bar"
-            color={BASIS_STATE_COLORS["00"]}
-            label="observed"
-          />
-          <ChartLegendItem
-            type="diamond"
-            color={CHART_COLORS.theoretical}
-            label="Born-rule"
-          />
-        </div>
       </div>
 
       {/* Chart */}
@@ -136,18 +122,6 @@ export function BasisMeasurementSection({
               domain={[0, Math.min(1, maxObserved * 1.25)]}
               tickFormatter={(v: number) => v.toFixed(1)}
             />
-
-            {/* Born-rule reference lines per state as thin dashed marks */}
-            {data.map((d) => (
-              <ReferenceLine
-                key={`ref-${d.state}`}
-                x={d.state}
-                y={d.expected}
-                stroke={CHART_COLORS.theoretical}
-                strokeWidth={1.5}
-                strokeDasharray="3 3"
-              />
-            ))}
 
             <Bar
               dataKey="observed"

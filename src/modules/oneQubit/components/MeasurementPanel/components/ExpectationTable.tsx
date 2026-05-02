@@ -16,6 +16,7 @@ const OBSERVABLES: {
 }[] = [
   { key: "Z1Z2", label: "⟨Z₁Z₂⟩", desc: "ZZ correlator — clock·work" },
   { key: "X1X2", label: "⟨X₁X₂⟩", desc: "XX correlator — clock·work" },
+  { key: "X1Z2", label: "⟨X₁Z₂⟩", desc: "XZ correlator — clock·work" },
   { key: "Z1", label: "⟨Z₁⟩", desc: "clock qubit magnetisation" },
   { key: "Z2", label: "⟨Z₂⟩", desc: "work qubit magnetisation" },
 ];
