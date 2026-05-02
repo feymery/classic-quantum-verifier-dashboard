@@ -10,7 +10,7 @@ export function AlphaControl({ alpha, setAlpha }: AlphaControlProps) {
   const snappedIdx = nearestKeyIndex(alpha, keyValues);
   const preset = snappedIdx >= 0 ? KEY_ALPHAS[snappedIdx] : null;
   return (
-    <Card className="flex-1 rounded-lg" padded="md">
+    <Card className="rounded-lg" padded="md" title="Alpha Control">
       <div className="space-y-4">
         <AlphaSlider alpha={alpha} onChange={setAlpha} guidedMode={true} />
         <AlphaPresets alpha={alpha} onSelect={setAlpha} />

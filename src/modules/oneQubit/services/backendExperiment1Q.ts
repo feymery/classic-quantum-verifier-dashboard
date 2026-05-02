@@ -16,6 +16,8 @@ interface BackendRunResult {
   };
   energy: number;
   counts: Record<string, number>;
+  counts_zx?: Record<string, number>;
+  counts_x?: Record<string, number>;
   backendInfo?: {
     type: string;
     shots: number;
@@ -86,11 +88,24 @@ function toExperimentResult(
 
   const energy = analyseEnergy(input.alpha, expectationValues);
 
+  const countsZ = collapseCountsTo2Bit(finalResult.counts);
+  const countsZX = finalResult.counts_zx
+    ? collapseCountsTo2Bit(finalResult.counts_zx)
+    : undefined;
+  const countsX = finalResult.counts_x
+    ? collapseCountsTo2Bit(finalResult.counts_x)
+    : undefined;
+
+  const countsByBasis: Record<string, Counts> = { z: countsZ };
+  if (countsZX) countsByBasis["zx"] = countsZX;
+  if (countsX) countsByBasis["x"] = countsX;
+
   return {
     jobId,
     status: "complete",
     backend: finalResult.backendInfo?.type || mapBackendId(input.backend),
-    counts: collapseCountsTo2Bit(finalResult.counts),
+    counts: countsZ,
+    countsByBasis,
     expectationValues,
     energy,
     shotsExecuted: input.shots,

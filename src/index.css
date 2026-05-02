@@ -38,6 +38,15 @@
   --color-danger:   #f87171;
   --color-gold:     #e8a020; /* estimated-value chart marker            */
 
+  /* ── Basis state colours (2-qubit ZZ computational basis) ─────────
+     Mirror the semantic tokens; defined separately so they can be
+     used as Tailwind utilities (text-basis-00, bg-basis-11, …) and
+     as CSS custom properties in JS chart code.                       */
+  --color-basis-00: #a78bfa; /* = accent  */
+  --color-basis-01: #9490a8; /* = muted   */
+  --color-basis-10: #a78bfa; /* = accent  */
+  --color-basis-11: #34d399; /* = success */
+
   /* ── Shadows ─────────────────────────────────────────────────────── */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 4px 16px rgba(167, 139, 250, 0.25);

@@ -137,3 +137,65 @@ export const sampleCounts = (
 
   return counts;
 };
+
+// ── Expected Born-rule probabilities per measurement basis ────────────────────
+//
+// State vector indexing (|clock, work⟩):
+//   index 0 = |c=0, w=0⟩ = key "00"
+//   index 1 = |c=0, w=1⟩ = key "01"
+//   index 2 = |c=1, w=0⟩ = key "10"
+//   index 3 = |c=1, w=1⟩ = key "11"
+//
+// The three measurement circuits each apply a basis rotation before
+// measuring in the computational basis:
+//   "z"  — no rotation        (ZZ)
+//   "zx" — H on clock qubit   (Z_clock ⊗ X_work → measures X on clock)
+//   "x"  — H on both qubits   (XX)
+
+export function expectedBasisProbabilities(
+  psi: StateVec4,
+): Record<string, Record<string, number>> {
+  const [p0, p1, p2, p3] = psi;
+  const n2 = (re: number, im: number) => re * re + im * im;
+
+  // z basis: direct Born rule
+  const z: Record<string, number> = {
+    "00": n2(p0[0], p0[1]),
+    "01": n2(p1[0], p1[1]),
+    "10": n2(p2[0], p2[1]),
+    "11": n2(p3[0], p3[1]),
+  };
+
+  // zx basis: H_clock ⊗ I_work
+  // amp'("0b") = (ψ[b] + ψ[2+b]) / √2,  amp'("1b") = (ψ[b] − ψ[2+b]) / √2
+  const zx: Record<string, number> = {
+    "00": n2(p0[0] + p2[0], p0[1] + p2[1]) / 2,
+    "01": n2(p1[0] + p3[0], p1[1] + p3[1]) / 2,
+    "10": n2(p0[0] - p2[0], p0[1] - p2[1]) / 2,
+    "11": n2(p1[0] - p3[0], p1[1] - p3[1]) / 2,
+  };
+
+  // x basis: H_clock ⊗ H_work
+  // amp'("00") = (p0+p1+p2+p3)/2,  amp'("01") = (p0−p1+p2−p3)/2
+  // amp'("10") = (p0+p1−p2−p3)/2,  amp'("11") = (p0−p1−p2+p3)/2
+  const x: Record<string, number> = {
+    "00": n2(
+      (p0[0] + p1[0] + p2[0] + p3[0]) / 2,
+      (p0[1] + p1[1] + p2[1] + p3[1]) / 2,
+    ),
+    "01": n2(
+      (p0[0] - p1[0] + p2[0] - p3[0]) / 2,
+      (p0[1] - p1[1] + p2[1] - p3[1]) / 2,
+    ),
+    "10": n2(
+      (p0[0] + p1[0] - p2[0] - p3[0]) / 2,
+      (p0[1] + p1[1] - p2[1] - p3[1]) / 2,
+    ),
+    "11": n2(
+      (p0[0] - p1[0] - p2[0] + p3[0]) / 2,
+      (p0[1] - p1[1] - p2[1] + p3[1]) / 2,
+    ),
+  };
+
+  return { z, zx, x };
+}

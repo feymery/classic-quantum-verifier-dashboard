@@ -1,6 +1,3 @@
-import type { ReactNode } from "react";
-import { Badge } from "../../../ui/Badge";
-
 interface StatCellProps {
   label: string;
   value: string;
@@ -19,10 +16,6 @@ interface LegendDotProps {
   color: string;
   label: string;
   dashed?: boolean;
-}
-
-interface StepTagProps {
-  children: ReactNode;
 }
 
 export function StatCell({ label, value, color }: StatCellProps) {
@@ -84,13 +77,5 @@ export function LegendDot({ color, label, dashed = false }: LegendDotProps) {
         {label}
       </span>
     </div>
-  );
-}
-
-export function StepTag({ children }: StepTagProps) {
-  return (
-    <Badge variant="quantum" className="rounded px-1.5 py-0.5  text-[10px]">
-      {children}
-    </Badge>
   );
 }

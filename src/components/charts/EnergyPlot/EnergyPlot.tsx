@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { energyCurve } from "../../../physics/energy";
 import { energy as calcEnergy } from "../../../utils/alphaUtils";
 import { CHART_COLORS } from "../chartTheme";
-import { Badge } from "../../../ui/Badge";
+import { ChartLegendItem } from "../ChartLegend";
 import { Card } from "../../../ui/Card";
 import type {
   EnergyPlotPoint,
@@ -24,12 +24,14 @@ const CURVE_DATA: EnergyPlotPoint[] = energyCurve(200).map((pt) => ({
 export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
   const chartData = useMemo(() => {
     if (!result) return CURVE_DATA;
+    const closest = CURVE_DATA.reduce((best, pt) =>
+      Math.abs(pt.alpha - result.alpha) < Math.abs(best.alpha - result.alpha)
+        ? pt
+        : best,
+    );
     return CURVE_DATA.map((pt) => ({
       ...pt,
-      estimated:
-        Math.abs(pt.alpha - result.alpha) < 0.008
-          ? result.energy.estimated
-          : undefined,
+      estimated: pt === closest ? result.energy.estimated : undefined,
     }));
   }, [result]);
 
@@ -42,15 +44,22 @@ export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <StepTag>step D</StepTag>
             <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
               Energy vs α
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Legend color={CHART_COLORS.theoretical} label="E = sin²(α)" />
+            <ChartLegendItem
+              type="line"
+              color={CHART_COLORS.theoretical}
+              label="E = sin²(α)"
+            />
             {result && (
-              <Legend color={CHART_COLORS.estimated} label="estimated" dot />
+              <ChartLegendItem
+                type="dot"
+                color={CHART_COLORS.estimated}
+                label="estimated"
+              />
             )}
           </div>
         </div>
@@ -69,48 +78,5 @@ export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
         />
       </div>
     </Card>
-  );
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function Legend({
-  color,
-  label,
-  dot,
-}: {
-  color: string;
-  label: string;
-  dot?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-1.5">
-      {dot ? (
-        <div
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: color,
-            flexShrink: 0,
-          }}
-        />
-      ) : (
-        <div
-          style={{ width: 16, height: 1.5, background: color, flexShrink: 0 }}
-        />
-      )}
-      <span className=" text-[10px]" style={{ color: "#9490a8" }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function StepTag({ children }: { children: React.ReactNode }) {
-  return (
-    <Badge variant="quantum" className="rounded px-1.5 py-0.5  text-[10px]">
-      {children}
-    </Badge>
   );
 }
