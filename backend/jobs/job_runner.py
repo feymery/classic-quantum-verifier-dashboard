@@ -75,6 +75,8 @@ def _compose_result(
         "lambda_min": lmin,
         "verdict": verd,
         "counts": counts_z,
+        "counts_zx": counts_zx,
+        "counts_x": counts_x,
         "probabilities": mapped.probabilities,
         "backendInfo": {
             "type": backend_used,

@@ -3,7 +3,11 @@ import { analyseNoise } from "../../physics/noise";
 import { NoiseSweepPlot } from "../charts/NoiseSweepPlot";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
-import { CritLambdaRow, LegendDot, StatCell, StepTag } from "./components/NoisePanelParts";
+import {
+  CritLambdaRow,
+  LegendDot,
+  StatCell,
+} from "./components/NoisePanelParts";
 
 interface NoisePanelProps {
   alpha: number;
@@ -34,7 +38,6 @@ export function NoisePanel({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <StepTag>step F</StepTag>
             <span className="text-xs font-medium" style={{ color: "#ddd9ee" }}>
               Noise Model
             </span>

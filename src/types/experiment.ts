@@ -28,8 +28,14 @@ export interface ExperimentResult {
   status: "complete" | "running" | "error";
   backend: string;
 
-  /** Raw counts over |00⟩…|11⟩ */
+  /** Raw counts over |00⟩…|11⟩ in the ZZ basis (kept for backwards compat) */
   counts: Counts;
+
+  /**
+   * Counts per measurement basis.
+   * Keys: "z" (ZZ), "zx" (Z₁X₂), "x" (XX)
+   */
+  countsByBasis: Record<string, Counts>;
 
   /** Sampled expectation values (shot noise included) */
   expectationValues: SampledExpectations;

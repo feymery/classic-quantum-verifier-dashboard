@@ -1,13 +1,17 @@
 import { useMemo } from "react";
 
 import { buildClockState } from "../../../modules/oneQubit/physics/hamiltonian";
-import { CHART_COLORS } from "../chartTheme";
+import {
+  CHART_COLORS,
+  BASIS_STATE_COLORS,
+  NON_EXPECTED_COLOR,
+} from "../chartTheme";
 import type { Counts } from "../../../modules/oneQubit/physics/measurements";
 import { Badge } from "../../../ui/Badge";
 import { Card } from "../../../ui/Card";
+import { ChartLegendItem } from "../ChartLegend";
 import { ShotHistogramChart } from "./components/ShotHistogramChart";
 import { ShotHistogramMeta } from "./components/ShotHistogramMeta";
-import type { LegendType } from "./ShotHistogram.types";
 
 interface ShotHistogramProps {
   counts: Counts | null;
@@ -70,19 +74,26 @@ export function ShotHistogram({ counts, shots, alpha }: ShotHistogramProps) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Legend
+            <ChartLegendItem
               type="bar"
-              color="#a78bfa55"
-              border="#a78bfa"
+              color={BASIS_STATE_COLORS["00"]}
               label="observed freq."
             />
-            <Legend
-              type="line"
+            <ChartLegendItem
+              type="diamond"
               color={CHART_COLORS.theoretical}
               label="expected (Born)"
             />
-            <Legend type="chip" color="#34d399" label="expected state" />
-            <Legend type="chip" color="#f87171" label="non-expected" />
+            <ChartLegendItem
+              type="dot"
+              color={CHART_COLORS.accept}
+              label="expected state"
+            />
+            <ChartLegendItem
+              type="dot"
+              color={NON_EXPECTED_COLOR}
+              label="non-expected"
+            />
           </div>
         </div>
 
@@ -108,61 +119,6 @@ export function ShotHistogram({ counts, shots, alpha }: ShotHistogramProps) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function Legend({
-  type,
-  color,
-  border,
-  label,
-}: {
-  type: LegendType;
-  color: string;
-  border?: string;
-  label: string;
-}) {
-  const marker =
-    type === "bar" ? (
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          background: color,
-          border: `1px solid ${border ?? color}`,
-          borderRadius: 2,
-          flexShrink: 0,
-        }}
-      />
-    ) : type === "line" ? (
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          border: `1.5px solid ${color}`,
-          transform: "rotate(45deg)",
-          flexShrink: 0,
-        }}
-      />
-    ) : (
-      <div
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          background: color,
-          flexShrink: 0,
-        }}
-      />
-    );
-
-  return (
-    <div className="flex items-center gap-1.5">
-      {marker}
-      <span className=" text-[10px]" style={{ color: "#9490a8" }}>
-        {label}
-      </span>
-    </div>
-  );
-}
 
 function StepTag({ children }: { children: React.ReactNode }) {
   return (
