@@ -1,19 +1,25 @@
-# Quantum Verification Playground
+# Quantum Verification Dashboard
 
-Interactive platform for quantum protocol simulation, verification, and adversarial analysis.
+Interactive companion to the one-qubit classical verification protocol from:
 
-**Stack:** React 19 + TypeScript + Tailwind v4 — FastAPI + Qiskit Aer + IBM Runtime
+> **"Towards experimental classical verification of quantum computation"**
+> Roman Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024
+
+The dashboard lets you prepare a parameterised clock state, measure its Hamiltonian energy,
+and observe in real time whether the verifier accepts or rejects the prover.
+
+**Stack:** React 19 + TypeScript + Tailwind v4 — FastAPI + Qiskit Aer + IBM Quantum Runtime
 
 ---
 
 ## Documentation
 
 | Document | Contents |
-| --- | --- |
-| This file | Project overview, quick start, frontend scripts, structure |
-| [backend/README.md](backend/README.md) | Backend installation, execution, Qiskit paths, testing |
+|---|---|
+| This file | Project overview, quick start, scripts, structure |
+| [backend/README.md](backend/README.md) | Backend installation, Qiskit details, testing |
 | [docs/api.md](docs/api.md) | Full API reference — all endpoints, shapes, errors |
-| [docs/protocol.md](docs/protocol.md) | Protocol alignment analysis (Stricker et al. 2024) |
+| [docs/protocol.md](docs/protocol.md) | Protocol alignment with Stricker et al. 2024 |
 
 ---
 
@@ -21,12 +27,29 @@ Interactive platform for quantum protocol simulation, verification, and adversar
 
 **Prerequisites:** Node.js 20+, npm 10+, Python 3.11+
 
+### Option A — unified (frontend + backend together)
+
 ```bash
-# Terminal 1 — frontend
+npm install
+python3 -m pip install -r backend/requirements.txt
+npm start
+```
+
+`npm start` uses `concurrently` to run both servers in one terminal.
+
+### Option B — separate terminals
+
+```bash
+# Terminal 1 — backend
+python3 -m pip install -r backend/requirements.txt
+python3 -m uvicorn backend.main:app --reload --port 8000
+
+# Terminal 2 — frontend
 npm install
 npm run dev
 ```
 
+<<<<<<< HEAD
 ```bash
 # Terminal 2 — backend
 python -m pip install -r backend/requirements.txt
@@ -36,189 +59,156 @@ python -m uvicorn backend.main:app --reload --port 8000
 - Frontend: <http://localhost:5173>
 - Backend API: <http://localhost:8000>
 - Interactive API docs (Swagger): <http://localhost:8000/docs>
+=======
+| Service | URL |
+|---|---|
+| Frontend | <http://localhost:5173> |
+| Backend API | <http://localhost:8000> |
+| Swagger UI | <http://localhost:8000/docs> |
+>>>>>>> main
 
 ---
 
-## Stack at a glance
+## Stack
 
 | Layer | Technology | Notes |
-| --- | --- | --- |
-| Frontend UI | React 19 + TypeScript + Tailwind v4 | Modular pages, production build verified |
-| Charts | Recharts | Energy, histogram, sweep, adversarial plots |
-| Backend API | FastAPI + Pydantic v2 | 9 endpoints, full OpenAPI schema at `/docs` |
-| Quantum execution | Qiskit Aer + IBM Runtime | Aer stable; IBM optional via async job queue |
-| Job system | ThreadPool + SQLite | Persistent job metadata with status transitions |
+|---|---|---|
+| Frontend UI | React 19 + TypeScript + Tailwind v4 | Lazy-loaded routes, Suspense fallbacks |
+| Charts | Recharts 3 | Energy, histogram, alpha sweep, noise plots |
+| Backend API | FastAPI + Pydantic v2 | OpenAPI schema at `/docs` |
+| Quantum execution | Qiskit Aer + IBM Runtime | Aer local; IBM via async job queue |
+| Job system | ThreadPoolExecutor + in-memory store | Separate pools for Aer and IBM |
+
+---
+
+## Pages
+
+| Route | Page | Description |
+|---|---|---|
+| `/fundamentals` | Fundamentals | Protocol guide, noise model panel |
+| `/1Qexperiment` | Experiment | α / shots controls, energy readout, measurement panel |
+| `/visualization` | Visualization | Energy plot, alpha sweep chart |
+| `/traps` | Traps | Dishonest-prover trap scenarios |
+
+---
+
+## Scripts
+
+### Frontend
+
+| Script | Command | Description |
+|---|---|---|
+| `npm start` | `concurrently uvicorn vite` | Run backend + frontend together |
+| `npm run dev` | `vite` | Frontend dev server only |
+| `npm run build` | `tsc -b && vite build` | Production build |
+| `npm run preview` | `vite preview` | Preview production build locally |
+| `npm run lint` | `eslint .` | Lint all TypeScript files |
+| `npm test` | `vitest` | Frontend tests (watch mode) |
+| `npm run test:run` | `vitest run` | Frontend tests (single run) |
+| `npm run test:coverage` | `vitest run --coverage` | Coverage report |
+
+### Backend
+
+| Script | Command | Description |
+|---|---|---|
+| `npm run test:backend` | `pytest backend/tests -q` | Backend tests |
+| `npm run test:backend:strict` | `pytest backend/tests -q -W error` | Backend tests, warnings as errors |
 
 ---
 
 ## Project Structure
 
-``` text
+```text
 .
-├── src/                     # React frontend
-│   ├── components/          # Shared and feature components (charts, panels)
-│   ├── modules/             # Domain modules
-│   │   ├── oneQubit/        # 1Q physics, services, components, pages
-│   │   ├── twoQubit/        # 2Q physics, services, components, pages
-│   │   ├── adversarial/     # Adversarial analysis module
-│   │   └── traps/           # Trap-based verification module
-│   ├── pages/               # Routed page components
-│   ├── physics/             # Shared physics: energy, noise
-│   ├── services/            # API client, sweep API
-│   ├── state/               # App-wide context and hooks
-│   ├── types/               # Shared TypeScript types
-│   ├── ui/                  # Design-system primitives (Button, Card, Badge…)
-│   └── utils/               # Constants, alpha utils, RNG
-├── backend/                 # FastAPI backend — see backend/README.md
-├── docs/                    # Supplementary documentation
-├── public/                  # Static assets
+├── src/                        # React frontend
+│   ├── components/             # Shared feature components (charts, panels, header)
+│   ├── modules/
+│   │   ├── oneQubit/           # 1Q physics, services, components, pages
+│   │   └── traps/              # Trap-based verification scenarios
+│   ├── pages/                  # Routed page components
+│   │   ├── FundamentalsPage.tsx
+│   │   ├── ExperimentPage.tsx
+│   │   ├── VisualizationPage.tsx
+│   │   └── TrapsPage.tsx
+│   ├── physics/                # Shared physics: energy.ts, noise.ts
+│   ├── router/                 # React Router config + lazy page imports
+│   ├── services/               # API client, sweep API
+│   ├── state/                  # App-wide context (AppStateContext)
+│   ├── types/                  # Shared TypeScript types
+│   ├── ui/                     # Design-system primitives (Button, Card, Badge…)
+│   └── utils/                  # Constants, alpha utils, physics helpers, RNG
+├── backend/                    # FastAPI backend — see backend/README.md
+│   ├── main.py                 # App entry point, CORS, router registration
+│   ├── math/                   # Energy, measurement mapper, sweeps, verifier
+│   ├── qiskit/                 # Circuit builder, Aer executor
+│   ├── routers/                # /run, /sweep, /ibm endpoints
+│   └── jobs/                   # Async job store and runner
+├── docs/
+│   ├── api.md                  # API reference
+│   └── protocol.md             # Protocol alignment analysis
+├── src/test/                   # Frontend tests (Vitest + MSW)
+│   ├── api.contract.test.ts    # API contract tests
+│   └── e2e.integration.test.ts # End-to-end workflow tests
 ├── index.html
 ├── vite.config.ts
+├── vitest.config.ts
 └── package.json
 ```
 
 ---
 
-## Frontend
+## Backend API — Quick Reference
 
-### Scripts
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/status` | Service health and IBM connection state |
+| `GET` | `/backends` | List available execution backends |
+| `POST` | `/configure/ibm` | Store IBM credentials |
+| `POST` | `/run` | Run experiment (Aer: sync; IBM: async job) |
+| `GET` | `/job/{id}` | Poll job status and result |
+| `GET` | `/jobs` | List jobs with optional filters |
+| `DELETE` | `/jobs` | Clear all job history |
+| `POST` | `/sweep/alpha` | Sweep α ∈ [0, π/2] at fixed shots |
+| `POST` | `/sweep/shots` | Sweep shot counts at fixed α |
+| `POST` | `/sweep/noise` | Sweep depolarizing noise λ at fixed α |
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start Vite dev server (<http://localhost:5173>) |
-| `npm run build` | TypeScript check + production build → `dist/` |
-| `npm run preview` | Serve the production build locally |
-| `npm run test` | Run Vitest in watch mode |
-| `npm run test:run` | Run tests once (CI) |
-| `npm run test:coverage` | Coverage report |
-| `npm run lint` | ESLint check |
-
-### Environment and proxy
-
-In development, the Vite server proxies `/api/*` → `http://localhost:8000` (configured in `vite.config.ts`).
-No `.env` file is required for local development.
-
-For production deployments, configure your reverse proxy or hosting platform to route `/api/*` to the backend.
-
-### Pages
-
-| Route | Description |
-| --- | --- |
-| `/dashboard` | High-level overview and entry points |
-| `/1Qexperiment` | Experiment 1Q — parameters, execution, measurement output |
-| `/visualization` | Chart surface — energy curves, histograms, sweep plots |
-| `/2Qcircuit` | 2Q Circuit — circuit/physics view and 2Q observables |
-| `/adversarial` | Fake prover controls, attack curves, detection analysis |
-| `/traps` | Trap-based verification module |
-
-### Design system
-
-UI primitives live in `src/ui/`.
-All colors, fonts, shadows, and spacing are defined as CSS custom properties in `src/index.css` under `@theme`.
-To retheme the app, edit that block — Tailwind generates utilities from it automatically.
+Full details including request/response shapes and error format: [docs/api.md](docs/api.md).
 
 ---
 
-## IBM Quantum credentials
+## Protocol — Key Facts
 
-IBM API token, instance CRN, and backend name are stored in `localStorage` under the keys `qvd.ibm.*` so they survive page refreshes without requiring the user to re-enter them.
+The prover builds the two-qubit **clock state** $|\eta(\alpha)\rangle$ via `H(q_clock) → CRY(2α)`.
+The verifier estimates the Hamiltonian energy:
 
-**Security notes:**
+$$
+E = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1 Z_2\rangle
+    - 1.5\cos\alpha\;\langle Z_1 X_2\rangle - 1.5\sin\alpha\;\langle X_1 X_2\rangle
+$$
 
-- `localStorage` is scoped to the browser origin and is inaccessible from other origins.
-- Credentials are never sent to any server other than the local FastAPI backend (`http://localhost:8000`).
-- **Do not deploy this dashboard on a public or shared host.** It is designed for local developer use only. On a shared host, any authenticated user of that origin could read the stored token from the browser's dev tools.
-- To clear saved credentials, use the "Clear" button in the IBM credentials section or run `localStorage.clear()` in the browser console.
+Theoretical minimum: $E_\text{theory} = \sin^2\alpha$.
+
+| Verdict | Condition |
+|---|---|
+| **accept** | $E < 0.4$ |
+| **boundary** | $0.4 \leq E < 0.5$ |
+| **reject** | $E \geq 0.5$ |
+
+Full protocol specification: [docs/protocol.md](docs/protocol.md).
 
 ---
 
-## How the experiment runs (end-to-end)
+## IBM Quantum (optional)
 
-``` text
-User clicks Run Experiment
-        │
-        ▼
-useExperimentRunner (hook)
-        │
-  mode = 1Q ──────────────────► local TypeScript simulator
-        │                        (src/modules/oneQubit/services/)
-        │ backend available
-        ▼
-POST /api/run  {alpha, shots, backend, mode}
-        │
-  backend=aer ──► sync execution → full result
-  backend=ibm ──► job queued  → poll GET /api/job/{id}
-        │
-        ▼
-App state updated → all panels and charts re-render
+IBM credentials are configured at runtime via `POST /configure/ibm` — never via environment
+variables, never persisted to disk. Without credentials all execution uses local Aer simulation.
+
+```json
+{
+  "token": "<IBM Cloud API token>",
+  "instance": "crn:v1:bluemix:public:quantum-computing:<region>:a/<account>:<service>::",
+  "backend_name": "ibm_strasbourg"
+}
 ```
 
----
-
-## Testing
-
-```bash
-# Frontend (Vitest)
-npm run test:run
-
-# Backend (pytest)
-npm run test:backend
-
-# Backend — warnings as errors
-npm run test:backend:strict
-```
-
-Backend tests are split into three markers: `unit`, `integration`, `contract`.
-See [backend/README.md](backend/README.md#testing) for details.
-
----
-
-## Roadmap
-
-- improve IBM async handling (timeouts, retries, cancellation policies)
-- add error mitigation and calibration-aware execution options
-- add configurable random seeds in UI for deterministic replay
-- add richer protocol presets and comparative experiment templates
-
-## Known limitations
-
-- IBM Runtime latency is highly variable and provider-dependent.
-- Job cancellation is not yet exposed by the backend (UI supports retry/dismiss only).
-- Physics model is intentionally simplified for interactive exploration.
-- No authentication or multi-user isolation — single-user local/dev model.
-
-## Protocol alignment
-
-This implementation is based on:
-
-> **"Towards experimental classical verification of quantum computation"**
-> Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024
-
-Full alignment analysis, U(α) decomposition, fix history, and paper-vs-implementation table are in [docs/protocol.md](docs/protocol.md).
-
-## Contributing
-
-Contributions are welcome.
-
-Recommended process:
-
-1. Open an issue describing the change.
-2. Fork and create a feature branch.
-3. Keep PRs scoped (UI, backend, or docs).
-4. Run local checks before opening PR:
-
-```bash
-npm run lint
-npm run build
-npm run test:run
-npm run test:backend
-npm run test:backend:strict
-```
-
-For backend changes, also run FastAPI locally and validate endpoint behavior.
-
-## License
-
-No license file is currently present in the repository.
-
-If you plan to publish or accept external contributions, add an explicit license (for example MIT, Apache-2.0, or GPL-3.0).
+IBM jobs are queued asynchronously. Poll `GET /job/{id}` until `status` is `"done"` or `"failed"`.

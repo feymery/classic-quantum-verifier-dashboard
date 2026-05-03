@@ -81,15 +81,13 @@ Run a quantum experiment.
 | --- | --- | --- | --- | --- |
 | `alpha` | float | ✅ | — | Protocol angle α ∈ [0, π/2] |
 | `shots` | int | ✅ | — | 1 – 1,000,000 |
-| `backend` | `"aer"` \| `"ibm"` | — | `"aer"` | Execution backend |
-| `mode` | `"1q"` \| `"2q"` | — | `"1q"` | Circuit mode |
+| `backend` | `"aer"` \| `"aer_qpu"` \| `"ibm"` | — | `"aer"` | Execution backend |
 
 ```json
 {
   "alpha": 0.1571,
   "shots": 1024,
-  "backend": "aer",
-  "mode": "1q"
+  "backend": "aer"
 }
 ```
 
@@ -133,7 +131,7 @@ Run a quantum experiment.
 | `energy` | Estimated energy from the 5-term Hamiltonian |
 | `energy_error` | Statistical error σ_E (quadrature sum over observables) |
 | `energy_theory` | Analytic reference: `sin²(α)` |
-| `verdict` | `"accept"` / `"reject"` / `"marginal"` based on Eq. D.7 |
+| `verdict` | `"accept"` / `"reject"` / `"boundary"` based on energy thresholds |
 
 #### Response — async submission (IBM)
 
@@ -200,7 +198,6 @@ List jobs with optional filters.
 | `offset` | int | `0` | Pagination offset |
 | `status` | string | — | Filter: `pending` \| `running` \| `done` \| `failed` |
 | `backend` | string | — | Filter: `aer` \| `ibm` |
-| `mode` | string | — | Filter: `1q` \| `2q` |
 
 #### Response
 
@@ -211,17 +208,42 @@ List jobs with optional filters.
       "job_id": "...",
       "status": "done",
       "backend": "aer",
-      "mode": "1q",
       "alpha": 0.1571,
       "shots": 1024,
       "created_at": "2026-04-13T10:00:00.000000+00:00",
-      "updated_at": "2026-04-13T10:00:01.000000+00:00"
+      "updated_at": "2026-04-13T10:00:01.000000+00:00",
+      "energy_estimate": 0.024,
+      "decision": "accept",
+      "resolved_backend": null,
+      "execution_source": null,
+      "error": null
     }
   ],
-  "total": 42,
-  "limit": 20,
-  "offset": 0
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "returned": 1,
+    "total": 42,
+    "has_more": true,
+    "next_offset": 20
+  },
+  "filters": {
+    "status": null,
+    "backend": null
+  }
 }
+```
+
+---
+
+### `DELETE /jobs`
+
+Delete all job records (user-triggered history clear).
+
+#### Response
+
+```json
+{ "deleted": 7 }
 ```
 
 ---
@@ -330,61 +352,11 @@ Shows how energy degrades as λ increases.
 
 ---
 
-### `POST /adversarial/circuit`
-
-Run an honest circuit (α) and a fake prover circuit (α_fake) and compare
-their bitstring distributions.
-
-Returns per-bitstring counts and probabilities for both circuits, plus
-summary divergence metrics.
-
-#### Request
-
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `alpha` | float | ✅ | Honest prover angle |
-| `alpha_fake` | float | ✅ | Fake prover angle |
-| `shots` | int | — | Default `1024` |
-
-```json
-{ "alpha": 0.1571, "alpha_fake": 0.7854, "shots": 2048 }
-```
-
-#### Response
-
-```json
-{
-  "honest": {
-    "counts":        { "000": 510, "100": 330, "111": 184 },
-    "probabilities": { "000": 0.498, "100": 0.322, "111": 0.180 }
-  },
-  "adversarial": {
-    "counts":        { "010": 600, "110": 300, "001": 148 },
-    "probabilities": { "010": 0.586, "110": 0.293, "001": 0.144 }
-  },
-  "metrics": {
-    "tvd": 0.43,
-    "kl_divergence": 0.89,
-    "energy_delta": 0.38
-  }
-}
-```
-
-| Metric | Description |
-| --- | --- |
-| `tvd` | Total Variation Distance between distributions (0 = identical, 1 = disjoint) |
-| `kl_divergence` | KL divergence: how much the fake distribution differs from honest |
-| `energy_delta` | Absolute difference in estimated energy between the two executions |
-
----
-
 ## Notes
 
 - Numeric constraints on `alpha`: `0.0 ≤ alpha ≤ π/2` (≈ 1.5707963).
   Values outside this range return `422`.
-- `mode="2q"` is accepted by `/run` but sweep and adversarial endpoints
-  only support 1Q circuits.
 - The job store (`backend/jobs/job_store.sqlite`) persists across restarts.
-  Delete the file to reset all job history.
-- For a fresh IBM token, set `IBM_QUANTUM_TOKEN` before starting uvicorn —
-  the client reads it at startup.
+  Use `DELETE /jobs` to clear all history, or delete the file to reset.
+- IBM credentials must be configured at runtime via `POST /configure/ibm`.
+  They are never read from environment variables and are never persisted to disk.

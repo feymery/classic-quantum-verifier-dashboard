@@ -5,6 +5,7 @@ import { fetchJson } from "../../../services/apiClient";
 import { mapBackendId, type BackendId } from "../../../utils/constants";
 
 interface BackendRunResult {
+  job_id?: string;
   alpha: number;
   observables: {
     Z1: number;
@@ -15,6 +16,8 @@ interface BackendRunResult {
   };
   energy: number;
   counts: Record<string, number>;
+  counts_zx?: Record<string, number>;
+  counts_x?: Record<string, number>;
   backendInfo?: {
     type: string;
     shots: number;
@@ -73,21 +76,36 @@ function toExperimentResult(
   jobId: string,
 ): ExperimentResult {
   const expectationValues: SampledExpectations = {
-    Z1: finalResult.observables.Z1,
-    Z2: finalResult.observables.Z2,
+    // Backend Z2 (clock) → Frontend Z1 (clock), Backend Z1 (prover) → Frontend Z2 (work)
+    Z1: finalResult.observables.Z2,
+    Z2: finalResult.observables.Z1,
     Z1Z2: finalResult.observables.Z1Z2,
+    // Z1X2 y X1Z2 son el mismo operador físico (Z_{q0}⊗X_{q1} = X_{q1}⊗Z_{q0})
     Z1X2: finalResult.observables.Z1X2 ?? 0,
+    X1Z2: finalResult.observables.Z1X2 ?? 0,
     X1X2: finalResult.observables.X1X2,
   };
 
   const energy = analyseEnergy(input.alpha, expectationValues);
 
+  const countsZ = collapseCountsTo2Bit(finalResult.counts);
+  const countsZX = finalResult.counts_zx
+    ? collapseCountsTo2Bit(finalResult.counts_zx)
+    : undefined;
+  const countsX = finalResult.counts_x
+    ? collapseCountsTo2Bit(finalResult.counts_x)
+    : undefined;
+
+  const countsByBasis: Record<string, Counts> = { z: countsZ };
+  if (countsZX) countsByBasis["zx"] = countsZX;
+  if (countsX) countsByBasis["x"] = countsX;
+
   return {
     jobId,
     status: "complete",
-    backend:
-      finalResult.backendInfo?.type || mapBackendId(input.backend) || "aer",
-    counts: collapseCountsTo2Bit(finalResult.counts),
+    backend: finalResult.backendInfo?.type || mapBackendId(input.backend),
+    counts: countsZ,
+    countsByBasis,
     expectationValues,
     energy,
     shotsExecuted: input.shots,
@@ -128,15 +146,13 @@ export async function startBackendExperiment1Q(input: {
   alpha: number;
   shots: number;
   backend: BackendId;
-}): Promise<BackendExperimentStart1Q | null> {
+}): Promise<BackendExperimentStart1Q> {
   const mappedBackend = mapBackendId(input.backend);
-  if (!mappedBackend) return null;
 
   const payload = {
     alpha: input.alpha,
     shots: input.shots,
     backend: mappedBackend,
-    mode: "1q",
   };
 
   const runResponse = await fetchJson<BackendRunResult | BackendQueued>(
@@ -148,13 +164,21 @@ export async function startBackendExperiment1Q(input: {
     },
   );
 
-  if ("job_id" in runResponse) {
-    return { kind: "queued", jobId: runResponse.job_id };
+  if (
+    "status" in runResponse &&
+    (runResponse as BackendQueued).status === "queued"
+  ) {
+    return { kind: "queued", jobId: (runResponse as BackendQueued).job_id };
   }
 
+  const syncResult = runResponse as BackendRunResult;
   return {
     kind: "complete",
-    result: toExperimentResult(runResponse, input, `api-${Date.now()}`),
+    result: toExperimentResult(
+      syncResult,
+      input,
+      syncResult.job_id ?? `api-${Date.now()}`,
+    ),
   };
 }
 

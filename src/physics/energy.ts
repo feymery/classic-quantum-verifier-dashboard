@@ -23,7 +23,11 @@
  */
 
 import { THRESHOLD_LOW, THRESHOLD_HIGH } from "../utils/constants";
-import type { SampledExpectations, ExactExpectations } from "./measurements";
+import type { Verdict } from "../types/dashboard";
+import type {
+  SampledExpectations,
+  ExactExpectations,
+} from "../modules/oneQubit";
 
 // ── Theoretical energy ────────────────────────────────────────────────────────
 
@@ -63,7 +67,7 @@ export const estimateEnergy = (
 
 // ── Verifier logic ────────────────────────────────────────────────────────────
 
-export type VerifierDecision = "accept" | "reject" | "boundary";
+export type VerifierDecision = Verdict;
 
 export const verifierDecision = (
   energy: number,

@@ -44,75 +44,56 @@ export const KEY_ALPHAS: KeyAlpha[] = [
 
 export const KEY_ALPHA_VALUES = KEY_ALPHAS.map((k) => k.value);
 
+/** Protocol baseline α★ from Stricker et al. — sin²(α★) ≈ 0.024, reliably accepted. */
+export const PROTOCOL_ALPHA = 0.1 * (Math.PI / 2);
+
 // ── Backend options ──────────────────────────────────────────────────────────
 
-export type BackendId = "mock" | "aer" | "ibm_runtime";
+export type BackendId = "aer" | "aer_qpu" | "ibm_runtime";
 
 export interface Backend {
   id: BackendId;
   label: string;
-  dotColor: string;
   requiresToken: boolean;
 }
 
 export const BACKENDS: Backend[] = [
   {
-    id: "mock",
-    label: "Mock (dev)",
-    dotColor: "#445566",
+    id: "aer",
+    label: "Aer Simulator",
     requiresToken: false,
   },
   {
-    id: "aer",
-    label: "Aer Simulator",
-    dotColor: "#34d399",
-    requiresToken: false,
+    id: "aer_qpu",
+    label: "Aer + QPU Noise",
+    requiresToken: true,
   },
   {
     id: "ibm_runtime",
     label: "IBM Quantum",
-    dotColor: "#9a91ad",
     requiresToken: true,
   },
 ];
 
 // ── Backend name mapping (frontend → API) ────────────────────────────────────
-// "mock" is local-only and never reaches the FastAPI backend.
 // "aer" maps to the synchronous Aer executor.
 // "ibm_runtime" maps to the async IBM Runtime executor.
 
-export type ApiBackendId = "aer" | "ibm";
+export type ApiBackendId = "aer" | "aer_qpu" | "ibm";
 
-/**
- * Maps a frontend BackendId to the value expected by POST /run.
- * Returns null for ids that should be handled locally (no HTTP call).
- */
-export function mapBackendId(backend: BackendId): ApiBackendId | null {
+/** Maps a frontend BackendId to the value expected by POST /run. */
+export function mapBackendId(backend: BackendId): ApiBackendId {
   switch (backend) {
     case "aer":
       return "aer";
+    case "aer_qpu":
+      return "aer_qpu";
     case "ibm_runtime":
       return "ibm";
-    case "mock":
-      return null;
   }
-}
-
-/** Returns true if the backend should be executed locally without an API call. */
-export function isLocalBackend(backend: BackendId): boolean {
-  return mapBackendId(backend) === null;
 }
 
 // ── Thresholds ───────────────────────────────────────────────────────────────
 
 export const THRESHOLD_LOW = 0.4;
 export const THRESHOLD_HIGH = 0.5;
-
-// ── Comparison palette (for multi-alpha plots) ───────────────────────────────
-
-export const COMPARISON_COLORS = [
-  "#a78bfa",
-  "#d8b4fe",
-  "#f59e0b",
-  "#34d399",
-] as const;

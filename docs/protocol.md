@@ -1,169 +1,294 @@
-# Protocol Alignment Analysis
+# Protocol Reference — Stricker et al. 2024
 
-Reference paper:
-
-> **"Towards experimental classical verification of quantum computation"**
-> Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024
-
-This document covers:
-
-1. What the paper specifies
-2. How this implementation maps to it
-3. The U(α) decomposition and why it is correct
-4. Fix history (all correctness issues resolved)
-5. Current alignment status
+Implementation of the one-qubit quantum verification protocol described in
+*"Towards experimental classical verification of quantum computation"*
+(Roman Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024).
 
 ---
 
-## What the paper specifies
+## 1. Overview
 
-### Circuit (Fig. 1b, Appendix B)
+The protocol lets a classical **verifier** confirm that a quantum device (the **prover**) is
+genuinely producing quantum states — without the verifier needing to simulate the full quantum
+computation. The prover prepares a parameterised two-qubit *clock state* and the verifier
+measures its Hamiltonian energy. An honest quantum prover achieves an energy below the
+acceptance threshold; a classical prover cannot replicate the required coherence and is detected.
 
-8-qubit circuit: `q_prover` (1), `q_clock` (1), `aux_prover` (3), `aux_clock` (3).
+---
 
-This implementation uses the 2-qubit reduced form (q_prover + q_clock) which is sufficient to compute all relevant observables.
+## 2. Register Layout
 
-### Clock state (Step 2, Eq. 2)
+| Qubit | Label | Role |
+|---|---|---|
+| q0 | `q_prover` | Work / system qubit — holds the evolving state |
+| q1 | `q_clock` | Clock / history register — drives the superposition |
 
-$$|\eta\rangle = \frac{1}{\sqrt{2}}\bigl[|0\rangle_{clk}|0\rangle_{prov} + |1\rangle_{clk} \cdot U(\alpha)|0\rangle_{prov}\bigr] = \frac{1}{\sqrt{2}}\bigl[|00\rangle + \cos(\alpha)|10\rangle + \sin(\alpha)|11\rangle\bigr]$$
+**Qiskit bitstring convention** (big-endian): for a 2-bit register `meas[1]meas[0]`, the string
+`"ab"` has `a = meas[1]` (q_clock, MSB / leftmost) and `b = meas[0]` (q_prover, LSB / rightmost).
 
-where $U(\alpha) = \cos(\alpha)Z + \sin(\alpha)X$.
+---
 
-Prepared via: `H(q_clock)` → `CU(α)` on `q_prover`.
+## 3. Clock State Preparation
 
-### Hamiltonian (Eq. C.1)
+The prover constructs the two-qubit *clock state* $|{\eta(\alpha)}\rangle$ (Eq. 2 of the paper)
+using two gates applied to $|{00}\rangle$:
 
-$$H = 3.5 \cdot I - 2Z_1 + Z_2 - Z_1Z_2 - 1.5\cos(\alpha)\,Z_1X_2 - 1.5\sin(\alpha)\,X_1X_2$$
-
-### Three measurement bases — (k₁, k₂)
-
-| Config | Observable | Basis change |
-| --- | --- | --- |
-| (0,0) | Z₁, Z₂, Z₁Z₂ | None — measure in Z on all qubits |
-| (0,1) | **Z₁X₂** | H gate on q_clock only |
-| (1,1) | X₁X₂ | H on both q_prover and q_clock |
-
-(1,0) is deliberately excluded — X₁Z₂ does not appear in H.
-
-### Energy formula
-
-$$E_{est} = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1Z_2\rangle - 1.5\cos(\alpha)\langle Z_1X_2\rangle - 1.5\sin(\alpha)\langle X_1X_2\rangle$$
-
-### Acceptance criterion (Eq. D.7)
-
-``` text
-E + σ_E < 0.4   →  ACCEPTED   (honest quantum prover)
-E − σ_E ≥ 0.5   →  REJECTED
-otherwise        →  MARGINAL
+```
+Step 1:   H  on q_clock            →  (|0⟩ + |1⟩)/√2  ⊗  |0⟩
+Step 2:   CRY(2α)  ctrl=q_clock, tgt=q_prover
 ```
 
-Low energy = honest prover = ACCEPTED. High energy = REJECTED.
+The resulting state is:
 
-**Theoretical reference:** $\langle\eta|H|\eta\rangle = \sin^2(\alpha)$ — confirmed for all $\alpha \in [0, \pi/2]$.
+$$
+|\eta(\alpha)\rangle = \frac{1}{\sqrt{2}}\bigl(|00\rangle + \cos\alpha\,|01\rangle + \sin\alpha\,|11\rangle\bigr)
+$$
+
+where $|q_{\text{prover}}\,q_{\text{clock}}\rangle$ ordering is used
+(equivalently: `"00"` prob $\tfrac{1}{2}$, `"10"` prob $\tfrac{\cos^2\alpha}{2}$,
+`"11"` prob $\tfrac{\sin^2\alpha}{2}$, `"01"` prob $0$ — Qiskit MSB=q_clock bitstrings).
+
+**Why CRY(2α)?** `RY(2α)|0⟩ = cos(α)|0⟩ + sin(α)|1⟩`. When q_clock = 1 the gate maps
+q_prover from $|0\rangle$ to $\cos\alpha|0\rangle + \sin\alpha|1\rangle$, exactly matching the
+required conditional rotation. This replaces the older three-gate decomposition
+(RY(+α) · CZ · RY(−α)) at lower gate cost.
+
+**Parameter range:** $\alpha \in [0,\, \pi/2]$.
+
+**Protocol baseline α★:** $\alpha_\star = 0.1 \times \frac{\pi}{2} \approx 0.157\,\text{rad}$,
+giving $\sin^2(\alpha_\star) \approx 0.024$, well below the 0.4 acceptance threshold.
 
 ---
 
-## U(α) implementation
+## 4. Hamiltonian
 
-### What U(α) is — and what it is not
+The clock Hamiltonian (Stricker et al. Eq. C.1) whose ground state is $|\eta(\alpha)\rangle$:
 
-$U(\alpha) = \cos(\alpha)Z + \sin(\alpha)X$ is **not** a standard rotation gate. It is a linear combination of two Pauli operators, evaluating to the matrix:
+$$
+H(\alpha) = 3.5\,I\!\otimes\!I
+          - 2\,Z_1\!\otimes\!I
+          + I\!\otimes\!Z_2
+          - Z_1 Z_2
+          - 1.5\cos\alpha\;Z_1 X_2
+          - 1.5\sin\alpha\;X_1 X_2
+$$
 
-$$U(\alpha) = \begin{bmatrix} \cos\alpha & \sin\alpha \\ \sin\alpha & -\cos\alpha \end{bmatrix}$$
+| Symbol | Meaning |
+|---|---|
+| $Z_1$ | $Z$ on q\_prover (coeff $-2$) |
+| $Z_2$ | $Z$ on q\_clock  (coeff $+1$) |
+| $Z_1 Z_2$ | $Z\!\otimes\!Z$ correlated term (coeff $-1$) |
+| $Z_1 X_2$ | $Z_{\text{prover}}\!\otimes\!X_{\text{clock}}$, basis $(k_1,k_2)=(0,1)$ |
+| $X_1 X_2$ | $X\!\otimes\!X$ correlated term, basis $(k_1,k_2)=(1,1)$ |
 
-- α = 0 → pure Z (phase flip only)
-- α = π/2 → pure X (bit flip only)
-- Intermediate → continuously interpolated mix
+The **constant offset** 3.5 equals $\mathrm{Tr}(H)\!/4$, the energy of the maximally-mixed state.
 
-This is physically different from `RY(α)` = e^{-iαY/2}, which only rotates around the Y axis. Using `qc.cu(alpha, 0, 0, 0)` produces RY(α) and gives energy $\sin^2(\alpha/2)$ instead of the required $\sin^2(\alpha)$.
+### 4.1 Energy estimator
 
-### Frontend — `src/modules/oneQubit/physics/hamiltonian.ts`
+$$
+E = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1 Z_2\rangle
+    - 1.5\cos\alpha\;\langle Z_1 X_2\rangle - 1.5\sin\alpha\;\langle X_1 X_2\rangle
+$$
 
-The matrix is computed analytically as a sum of Pauli matrices — no exponentials, no approximations:
+### 4.2 Minimum eigenvalue
 
-```ts
-export const buildU = (alpha: number): Mat2 => {
-  const c = Math.cos(alpha);
-  const s = Math.sin(alpha);
-  // cos(α)·Z + sin(α)·X = [ [c, s], [s, -c] ]
-  return [
-    [[c, 0], [s, 0]],
-    [[s, 0], [-c, 0]],
-  ];
-};
+The minimum eigenvalue equals $\sin^2\alpha$ for all $\alpha$, achieved by the honest clock state:
+
+$$
+\lambda_{\min}(H(\alpha)) = \sin^2\alpha
+$$
+
+This is the theoretical ground truth energy $E_\text{theory}(\alpha) = \sin^2\alpha$.
+
+### 4.3 Theoretical observable values for $|\eta(\alpha)\rangle$
+
+| Observable | Exact value |
+|---|---|
+| $\langle Z_1\rangle$ | $0$ |
+| $\langle Z_2\rangle$ | $\cos^2\alpha$ |
+| $\langle Z_1 Z_2\rangle$ | $\sin^2\alpha$ |
+| $\langle Z_1 X_2\rangle$ | $-\sin\alpha\cos\alpha$ |
+| $\langle X_1 Z_2\rangle$ | $\cos\alpha$ (visualisation only — not in Hamiltonian) |
+| $\langle X_1 X_2\rangle$ | $\sin\alpha$ |
+
+---
+
+## 5. Measurement Strategy
+
+The five observables are estimated from **three independent measurement circuits** (plus one
+optional visualisation circuit). Each circuit appends a basis-change layer to the same clock
+state preparation.
+
+| Circuit | Basis config $(k_1, k_2)$ | Layer added | Observables extracted |
+|---|---|---|---|
+| `"z"` | (0, 0) | none | $Z_1$, $Z_2$, $Z_1 Z_2$ |
+| `"zx"` | (0, 1) | H on q_clock | $Z_1 X_2$ |
+| `"x"` | (1, 1) | H on q_prover and q_clock | $X_1 X_2$ |
+| `"x1z2"` | (1, 0) | H on q_prover only | $X_1 Z_2$ (visualisation) |
+
+The three circuits `z`, `zx`, `x` are run in parallel per shot budget. The `x1z2` circuit is
+executed additionally for the observable sweep plot (Figure 2a of the paper) but does not
+contribute to the energy estimate.
+
+### 5.1 Bitstring decoding
+
+For each bitstring `s` (zero-padded to 2 characters):
+
+```
+q_prover = s[1]   (meas[0] — rightmost / LSB)
+q_clock  = s[0]   (meas[1] — leftmost  / MSB)
+Z eigenvalue: bit "0" → +1,  bit "1" → −1
 ```
 
-`buildClockState` then builds:
+---
 
-$$|\psi\rangle = \frac{1}{\sqrt{2}}\bigl(|00\rangle + \cos(\alpha)|10\rangle + \sin(\alpha)|11\rangle\bigr)$$
+## 6. Shot-Noise Error Propagation
 
-### Backend — `backend/circuit_builder.py`
+For a $\pm 1$ observable $O$ estimated from $N$ shots, the shot-noise variance is:
 
-Qiskit has no native gate for $U(\alpha) = \cos(\alpha)Z + \sin(\alpha)X$.
-The circuit uses the decomposition from Appendix B:
+$$
+\sigma_O^2 = \frac{1 - \langle O\rangle^2}{N}
+$$
 
-$$CU(\alpha) = RY(+\alpha/2) \cdot CZ \cdot RY(-\alpha/2) \quad\text{(on q_prover, controlled by q_clock)}$$
+The propagated energy uncertainty is (Stricker et al. Eq. D.7):
 
-```python
-qc.ry(theta / 2, 0)    # RY(+α/2) on q_prover
-qc.cz(1, 0)             # CZ: control=q_clock, target=q_prover
-qc.ry(-theta / 2, 0)   # RY(-α/2) on q_prover
-```
+$$
+\sigma_E = \sqrt{\sum_i c_i^2\,\sigma_{O_i}^2}
+$$
 
-**Why this is correct:**
-
-- When q_clock = |0⟩: CZ is identity → RY gates cancel → q_prover stays in |0⟩
-- When q_clock = |1⟩: CZ applies Z to q_prover → sequence becomes:
-
-$$RY(+\alpha/2) \cdot Z \cdot RY(-\alpha/2) = \cos(\alpha)Z + \sin(\alpha)X = U(\alpha)$$
-
-This follows from the Lie algebra identity $e^{+i\theta Y} Z e^{-i\theta Y}$ at $\theta = \alpha/2$, which rotates Z toward X by $2\theta = \alpha$ in the ZX plane.
-
-### Frontend ↔ Backend consistency
-
-| Layer | Method | State on q_prover when clock = \|1⟩ |
-| --- | --- | --- |
-| TypeScript `buildU` | Direct matrix sum `c·Z + s·X` | `cos(α)\|0⟩ + sin(α)\|1⟩` |
-| Python `build_circuit` | `RY(α/2) · CZ · RY(-α/2)` | `cos(α)\|0⟩ + sin(α)\|1⟩` |
-
-Both produce the same quantum state. Ideal energy: $\langle H\rangle = \sin^2(\alpha)$, confirmed analytically and verified by Aer.
+with coefficients $c_{Z_1} = -2$, $c_{Z_2} = +1$, $c_{Z_1 Z_2} = -1$,
+$c_{Z_1 X_2} = -1.5\cos\alpha$, $c_{X_1 X_2} = -1.5\sin\alpha$.
 
 ---
 
-## Fix history
+## 7. Verifier Decision Rule
 
-All six correctness bugs identified in the initial gap analysis were resolved in Phase 1 (April 2026).
+The verifier classifies each experiment as:
 
-| # | Fix | File(s) |
-| --- | --- | --- |
-| B1 | CU(α) gate: replaced `qc.cu(alpha,0,0,0)` with `RY(α/2)·CZ·RY(-α/2)` | `backend/circuit_builder.py` |
-| B2 | Added Z₁X₂ observable and `zx` basis circuit end-to-end | `circuit_builder.py`, `measurement_mapper.py`, `executor.py`, `measurements.ts`, `backendExperiment1Q.ts` |
-| B3 | Corrected Hamiltonian to 5-term formula | `backend/executor.py`, `src/physics/energy.ts` |
-| B4 | Corrected acceptance criterion (was inverted) | `src/physics/energy.ts` |
-| B5 | Corrected α★ from 0.9273 to `0.1·π/2` ≈ 0.1571 rad | `src/utils/constants.ts` |
-| B6 | Added statistical error propagation (quadrature sum, Eq. D.7) | `backend/executor.py` |
+| Condition | Verdict |
+|---|---|
+| $E + \sigma_E < 0.4$ | **accept** — consistent with honest quantum prover |
+| $E - \sigma_E \geq 0.5$ | **reject** — inconsistent with quantum device |
+| otherwise | **marginal** — inconclusive |
+
+The thresholds 0.4 and 0.5 create a separation band around the maximum classical energy (≈ 0.5),
+exploiting the fact that the honest clock state achieves $E = \sin^2\alpha \leq 1$.
+
+For the frontend display (no shot-noise bands), the simplified rule is:
+`E < 0.4 → accept`, `E ≥ 0.5 → reject`, otherwise `boundary`.
 
 ---
 
-## Alignment status
+## 8. Depolarizing Noise Model
 
-| Paper concept | Backend | Frontend |
-| --- | --- | --- |
-| U(α) = cos(α)Z + sin(α)X via `RY(α/2)·CZ·RY(-α/2)` | ✅ | — |
-| Clock state \|η⟩ = (1/√2)(\|00⟩ + cos(α)\|10⟩ + sin(α)\|11⟩) | ✅ | ✅ `buildClockState` |
-| 3 measurement circuits (zz, zx, xx) | ✅ | — |
-| Observable Z₁X₂ | ✅ `Z1X2` in response | ✅ `OBS_Z1X2`, `Z1X2` field |
-| Full 5-term Hamiltonian | ✅ | ✅ |
-| σ_E error propagation | ✅ `energy_error` field | ⚠️ Computed but not displayed in EnergyPanel yet |
-| E < 0.4 → ACCEPTED criterion | ✅ `verdict` field | ✅ `verifierDecision` |
-| α★ = 0.1·π/2 reference preset | — | ✅ |
-| λ_min(H) | ❌ Not in `/run` response | ❌ Not displayed |
-| Alpha sweep Figure 2(b) | ✅ `POST /sweep/alpha` | ✅ AlphaSweepChart |
-| Shot convergence sweep | ✅ `POST /sweep/shots` | ✅ |
-| Depolarizing noise sweep | ✅ `POST /sweep/noise` (Phase 3) | ✅ NoiseSweepBackendPanel |
-| Adversarial circuit comparison | ✅ `POST /adversarial/circuit` (Phase 3) | ✅ AdversarialCircuitPanel |
+A single-parameter depolarizing channel with strength $\lambda$ attenuates every Pauli
+observable uniformly:
 
-### Open items
+$$
+\langle O\rangle_\text{noisy} = (1 - \lambda)\,\langle O\rangle_\text{exact}
+$$
 
-- `λ_min(H)` — not yet included in the `/run` response or displayed in the UI.
-- `energy_error` is returned by the backend and stored in state but not yet rendered in `EnergyPanel`.
+Substituting into the energy estimator (the constant 3.5 is unaffected because it comes from the
+identity term):
+
+$$
+E_\text{noisy}(\alpha,\lambda) = \lambda \cdot 3.5 + (1-\lambda)\,\sin^2\alpha
+$$
+
+**Limits:** $\lambda = 0 \Rightarrow E = \sin^2\alpha$ (ideal); $\lambda = 1 \Rightarrow E = 3.5$
+(maximally mixed state).
+
+### 8.1 Critical noise threshold
+
+The noise level at which the energy crosses a threshold $T$:
+
+$$
+\lambda_c = \frac{T - \sin^2\alpha}{3.5 - \sin^2\alpha}
+$$
+
+Dashboard uses $T_\text{high} = 0.5$ (reject boundary) and $T_\text{low} = 0.4$ (accept boundary).
+
+---
+
+## 9. Sweeps
+
+### 9.1 α sweep (`POST /sweep/alpha`)
+
+Runs $n$ experiments at evenly spaced $\alpha \in [0, \pi/2]$. Each point returns
+`alpha`, `energy_est`, `energy_error`, `energy_theory`, `lambda_min`, `verdict`,
+`observables` (measured), and `observables_theory`. Reproduces Figure 2(b) of the paper.
+
+Default: 30 points, 1024 shots, Aer backend.
+
+### 9.2 Shot-count sweep (`POST /sweep/shots`)
+
+Runs the same fixed $\alpha$ at increasing shot counts
+$[64, 128, 256, 512, 1024, 2048, 4096, 8192]$ to show statistical convergence.
+
+### 9.3 Noise sweep (`POST /sweep/noise`)
+
+Runs fixed $\alpha$ and shot count at increasing depolarizing noise levels
+$\lambda \in [0.00, 0.01, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]$ using
+`AerSimulator + NoiseModel`. Shows how noise degrades the verifier signal.
+
+---
+
+## 10. Prover Traps
+
+The Traps page demonstrates strategies a dishonest prover might attempt and how the
+Hamiltonian energy detects them.
+
+### Trap 1 — Classical product state $|00\rangle$
+
+The prover skips all quantum operations and sends the $|00\rangle$ ground state.
+Every measurement shot yields `"00"` — no superposition, no entanglement.
+
+Expectation values:
+
+| Observable | Value |
+|---|---|
+| $\langle Z_1\rangle$ | $+1$ |
+| $\langle Z_2\rangle$ | $+1$ |
+| $\langle Z_1 Z_2\rangle$ | $+1$ |
+| $\langle X_1 X_2\rangle$ | $0$ |
+| $\langle Z_1 X_2\rangle$ | $0$ |
+
+Energy: $E = 3.5 - 2(1) + 1 - 1 = 1.5$. The verifier **rejects** ($E \geq 0.5$).
+
+### Trap 2 — Final state only
+
+The prover prepares only the terminal state of the computation, without the full
+temporal superposition. The energy deviation from the clock state reveals the missing
+history register coherence.
+
+### 3-qubit extension
+
+An optional 3-qubit variant extends the clock by adding a CNOT ancilla qubit:
+
+$$
+|\psi\rangle = \frac{1}{\sqrt{2}}\bigl(|000\rangle + \cos\alpha\,|100\rangle + \sin\alpha\,|111\rangle\bigr)
+$$
+
+The verifier uses total-variation distance $E = \sum_s |P_\text{meas}(s) - P_\text{honest}(s)|$.
+Honest prover: $E = 0$; classical prover ($|000\rangle$): $E = 1.0$.
+
+---
+
+## 11. Key Numeric Constants
+
+| Constant | Value | Meaning |
+|---|---|---|
+| $T_\text{low}$ | 0.4 | Lower energy threshold — accept boundary |
+| $T_\text{high}$ | 0.5 | Upper energy threshold — reject boundary |
+| $H_\infty$ | 3.5 | Energy of maximally-mixed state $\mathrm{Tr}(H)/4$ |
+| $\alpha_\star$ | $0.1 \times \pi/2 \approx 0.157$ | Protocol baseline (Stricker et al.) |
+| $E(\alpha_\star)$ | $\approx 0.024$ | Baseline energy — reliably accepted |
+| $\alpha_\text{max}$ | $\pi/2 \approx 1.571$ | Maximum protocol angle |
+
+---
+
+## 12. Reference
+
+Roman Stricker et al., *"Towards experimental classical verification of quantum computation"*,
+*Quantum Sci. Technol.* 9, 02LT01, 2024.
+Equations referenced: C.1 (Hamiltonian), D.7 (error propagation / verdict thresholds).

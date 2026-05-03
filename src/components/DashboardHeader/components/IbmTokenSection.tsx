@@ -1,4 +1,5 @@
 import { Button } from "../../../ui/Button";
+import { Modal } from "../../../ui/Modal";
 import { Text } from "../../../ui/Text";
 
 export interface IbmTokenSectionProps {
@@ -27,8 +28,8 @@ export function IbmTokenSection({
   onConfirmToken,
 }: IbmTokenSectionProps) {
   return (
-    <div className="px-5 py-4 mt-6 border rounded-lg border-border bg-surface">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="px-5 py-4 border rounded-lg border-border bg-surface">
+      <div className="flex flex-col gap-3">
         <label htmlFor="ibm-token">
           <Text
             variant="caption"
@@ -58,8 +59,12 @@ export function IbmTokenSection({
         </Button>
       </div>
 
-      {showToken && (
-        <div className="flex flex-col gap-3 mt-4">
+      <Modal
+        open={showToken}
+        onClose={onToggleShowToken}
+        title="IBM Quantum credentials"
+      >
+        <div className="flex flex-col gap-3">
           {/* Token row */}
           <div className="flex flex-col gap-1">
             <label htmlFor="ibm-token">
@@ -82,7 +87,7 @@ export function IbmTokenSection({
           <div className="flex flex-col gap-1">
             <label htmlFor="ibm-instance">
               <Text variant="caption" color="muted" className="text-xs">
-                instance <span className="opacity-50">(CRN — optional)</span>
+                Instance CRN
               </Text>
             </label>
             <input
@@ -101,7 +106,7 @@ export function IbmTokenSection({
           <div className="flex flex-col gap-1">
             <label htmlFor="ibm-backend-name">
               <Text variant="caption" color="muted" className="text-xs">
-                backend name <span className="opacity-50">(required)</span>
+                Backend name
               </Text>
             </label>
             <input
@@ -119,8 +124,7 @@ export function IbmTokenSection({
           <Button
             onClick={onConfirmToken}
             variant="secondary"
-            size="lg"
-            className="self-start text-sm font-normal border rounded-lg disabled:opacity-40"
+            className="w-full text-sm font-normal border rounded-lg disabled:opacity-40"
             style={{
               borderColor:
                 "color-mix(in srgb, var(--color-accent) 30%, transparent)",
@@ -130,10 +134,10 @@ export function IbmTokenSection({
             }}
             disabled={!ibmToken}
           >
-            send to backend
+            set credentials
           </Button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

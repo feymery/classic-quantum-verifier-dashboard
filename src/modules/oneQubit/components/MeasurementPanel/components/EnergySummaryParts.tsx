@@ -19,13 +19,8 @@ interface ThresholdSectionProps {
 
 export function EnergyCell({ label, value, loading, color }: EnergyCellProps) {
   return (
-    <div
-      className="rounded border p-2.5 flex flex-col gap-1"
-      style={{ background: "#181620", borderColor: "#2d2b3a" }}
-    >
-      <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-        {label}
-      </span>
+    <div className="rounded border p-2.5 flex flex-col gap-1 bg-surface border-border">
+      <span className="text-[10px] text-subtle">{label}</span>
       <span className="text-base tabular-nums" style={{ color }}>
         {loading ? "···" : value != null ? value.toFixed(4) : "—"}
       </span>
@@ -36,18 +31,10 @@ export function EnergyCell({ label, value, loading, color }: EnergyCellProps) {
 export function MarginCell({ label, value }: MarginCellProps) {
   const isPos = value >= 0;
   return (
-    <div
-      className="rounded border px-2 py-1.5 flex items-center justify-between"
-      style={{ background: "#181620", borderColor: "#2d2b3a" }}
-    >
-      <span className=" text-[9px]" style={{ color: "#6b6780" }}>
-        {label}
-      </span>
+    <div className="rounded border px-2 py-1.5 flex items-center justify-between bg-surface border-border">
+      <span className="text-[9px] text-subtle">{label}</span>
       <span
-        className=" text-[11px] tabular-nums"
-        style={{
-          color: isPos ? "#34d399" : "#f87171",
-        }}
+        className={`text-[11px] tabular-nums ${isPos ? "text-success" : "text-danger"}`}
       >
         {isPos ? "+" : ""}
         {value != null ? value.toFixed(4) : "—"}
@@ -59,26 +46,16 @@ export function MarginCell({ label, value }: MarginCellProps) {
 export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
   if (loading) {
     return (
-      <div
-        className="p-2 border rounded"
-        style={{ background: "#181620", borderColor: "#2d2b3a" }}
-      >
-        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-          ···
-        </span>
+      <div className="p-2 border rounded bg-surface border-border">
+        <span className="text-[10px] text-subtle">···</span>
       </div>
     );
   }
 
   if (value == null) {
     return (
-      <div
-        className="p-2 border rounded"
-        style={{ background: "#181620", borderColor: "#2d2b3a" }}
-      >
-        <span className=" text-[10px]" style={{ color: "#6b6780" }}>
-          —
-        </span>
+      <div className="p-2 border rounded bg-surface border-border">
+        <span className="text-[10px] text-subtle">—</span>
       </div>
     );
   }
@@ -108,9 +85,9 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
             className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-lg border-2 transition-all duration-100"
             style={{
               left: `${Math.min(pct, 100)}%`,
-              borderColor: "#e8a020",
-              background: "#0f0e14",
-              boxShadow: "0 0 6px #e8a020",
+              borderColor: "var(--color-gold)",
+              background: "var(--color-canvas)",
+              boxShadow: "0 0 6px var(--color-gold)",
             }}
           />
         )}
@@ -118,35 +95,19 @@ export function ThresholdSection({ value, loading }: ThresholdSectionProps) {
 
       <div className="relative w-full h-4">
         <span
-          className="absolute  text-[9px] -translate-x-1/2"
-          style={{
-            left: `${THRESHOLD_LOW * 100}%`,
-            color: "rgba(248,113,113,0.7)",
-          }}
+          className="absolute text-[9px] -translate-x-1/2 text-danger/70"
+          style={{ left: `${THRESHOLD_LOW * 100}%` }}
         >
           {THRESHOLD_LOW}
         </span>
         <span
-          className="absolute  text-[9px] -translate-x-1/2"
-          style={{
-            left: `${THRESHOLD_HIGH * 100}%`,
-            color: "rgba(245,158,11,0.7)",
-          }}
+          className="absolute text-[9px] -translate-x-1/2 text-warning/70"
+          style={{ left: `${THRESHOLD_HIGH * 100}%` }}
         >
           {THRESHOLD_HIGH}
         </span>
-        <span
-          className="absolute right-0  text-[9px]"
-          style={{ color: "rgba(52,211,153,0.5)" }}
-        >
-          1
-        </span>
-        <span
-          className="absolute left-0  text-[9px]"
-          style={{ color: "rgba(248,113,113,0.5)" }}
-        >
-          0
-        </span>
+        <span className="absolute right-0 text-[9px] text-success/50">1</span>
+        <span className="absolute left-0 text-[9px] text-danger/50">0</span>
       </div>
     </div>
   );

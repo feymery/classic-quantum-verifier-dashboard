@@ -15,7 +15,12 @@ import {
   THRESHOLD_HIGH,
   THRESHOLD_LOW,
 } from "../../../../utils/constants";
-import { CHART_COLORS, CHART_HEIGHT, axisProps, gridProps } from "../../chartTheme";
+import {
+  CHART_COLORS,
+  CHART_HEIGHT,
+  axisProps,
+  gridProps,
+} from "../../chartTheme";
 import type { EnergyPlotPoint } from "../EnergyPlot.types";
 import { EnergyPlotTooltipContent } from "./EnergyPlotTooltip";
 import { EstimatedDot } from "../../EstimatedDot";
@@ -25,9 +30,6 @@ interface EnergyPlotChartProps {
   chartData: EnergyPlotPoint[];
   hasResult: boolean;
   currentE: number;
-  comparisonAlphas: number[];
-  comparisonEnergies: number[];
-  measuredComparisonEnergies: Array<number | undefined>;
 }
 
 export function EnergyPlotChart({
@@ -35,9 +37,6 @@ export function EnergyPlotChart({
   chartData,
   hasResult,
   currentE,
-  comparisonAlphas,
-  comparisonEnergies,
-  measuredComparisonEnergies,
 }: EnergyPlotChartProps) {
   return (
     <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
@@ -83,31 +82,31 @@ export function EnergyPlotChart({
 
         <ReferenceLine
           y={THRESHOLD_LOW}
-          stroke={CHART_COLORS.thresholdLow}
+          stroke={CHART_COLORS.secondaryMuted}
           strokeWidth={0.75}
           strokeDasharray="4 3"
           label={{
-            value: `${THRESHOLD_LOW} reject`,
+            value: `${THRESHOLD_LOW}`,
             position: "insideTopRight",
             style: {
               fontFamily: "'Courier New', monospace",
               fontSize: 9,
-              fill: CHART_COLORS.thresholdLow,
+              fill: CHART_COLORS.secondaryMuted,
             },
           }}
         />
         <ReferenceLine
           y={THRESHOLD_HIGH}
-          stroke={CHART_COLORS.thresholdHigh}
+          stroke={CHART_COLORS.secondaryMuted}
           strokeWidth={0.75}
           strokeDasharray="4 3"
           label={{
-            value: `${THRESHOLD_HIGH} accept`,
+            value: `${THRESHOLD_HIGH}`,
             position: "insideTopRight",
             style: {
               fontFamily: "'Courier New', monospace",
               fontSize: 9,
-              fill: CHART_COLORS.thresholdHigh,
+              fill: CHART_COLORS.secondaryMuted,
             },
           }}
         />
@@ -153,36 +152,6 @@ export function EnergyPlotChart({
           stroke="#0f0e14"
           strokeWidth={1.5}
         />
-
-        {comparisonAlphas.map((ca, i) => (
-          <ReferenceDot
-            key={`compare-th-${i}`}
-            x={ca}
-            y={comparisonEnergies[i]}
-            r={3.5}
-            fill={CHART_COLORS.comparison[i % CHART_COLORS.comparison.length]}
-            stroke="#0f0e14"
-            strokeWidth={1}
-          />
-        ))}
-
-        {comparisonAlphas.map((ca, i) => {
-          const measured = measuredComparisonEnergies[i];
-          if (measured === undefined) return null;
-          return (
-            <ReferenceDot
-              key={`compare-meas-${i}`}
-              x={ca}
-              y={measured}
-              r={4.5}
-              fill="#0f0e14"
-              stroke={
-                CHART_COLORS.comparison[i % CHART_COLORS.comparison.length]
-              }
-              strokeWidth={1.5}
-            />
-          );
-        })}
 
         <Tooltip
           content={({ active, payload, label }) => (

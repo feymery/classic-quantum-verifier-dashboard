@@ -3,6 +3,7 @@
  */
 
 import { fetchJson } from "./apiClient";
+import type { Verdict } from "../types/dashboard";
 
 const API_BASE =
   (import.meta.env.VITE_BACKEND_URL as string | undefined)?.trim() || "/api";
@@ -24,7 +25,7 @@ export interface AlphaSweepPoint {
   energy_error: number;
   energy_theory: number;
   lambda_min: number;
-  verdict: "accept" | "reject" | "marginal";
+  verdict: Verdict;
   /** Measured expectation values for all 6 operators (Figure 2a) */
   observables?: AlphaSweepObservables;
   /** Theoretical expectation values ⟨O⟩ for the honest clock state (Figure 2a) */
@@ -42,7 +43,7 @@ export interface ShotsSweepPoint {
   energy_est: number;
   energy_error: number;
   energy_theory: number;
-  verdict: "accept" | "reject" | "marginal";
+  verdict: Verdict;
 }
 
 export interface ShotsSweepResult {
@@ -58,7 +59,7 @@ export interface NoiseSweepBackendPoint {
   energy_error: number;
   energy_theory: number;
   lambda_min: number;
-  verdict: "accept" | "reject" | "marginal";
+  verdict: Verdict;
 }
 
 export interface NoiseSweepBackendResult {

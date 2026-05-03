@@ -1,13 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
-import {
-  ExperimentPage,
-  VisualizationPage,
-  CircuitPage,
-  TrapsPage,
-  FundamentalsPage,
-} from "./lazyPages";
+import { ExperimentPage, TrapsPage, FundamentalsPage } from "./lazyPages";
 
 function withPageLoader(node: ReactNode) {
   return (
@@ -38,8 +32,6 @@ export const appRouter = createBrowserRouter([
       { index: true, element: <Navigate to="/fundamentals" replace /> },
       { path: "fundamentals", element: withPageLoader(<FundamentalsPage />) },
       { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
-      { path: "visualization", element: withPageLoader(<VisualizationPage />) },
-      { path: "2Qcircuit", element: withPageLoader(<CircuitPage />) },
       { path: "traps", element: withPageLoader(<TrapsPage />) },
     ],
   },

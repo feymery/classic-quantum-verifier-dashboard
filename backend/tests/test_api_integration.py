@@ -152,7 +152,7 @@ class TestJobsList:
 
     def test_jobs_list_combined_filters(self, client):
         """GET /jobs with multiple filters"""
-        response = client.get("/jobs?limit=10&offset=0&status=done&backend=aer&mode=1q")
+        response = client.get("/jobs?limit=10&offset=0&status=done&backend=aer")
 
         assert response.status_code == 200
         data = response.json()
@@ -160,7 +160,6 @@ class TestJobsList:
         assert data["pagination"]["limit"] == 10
         assert data["filters"]["status"] == "done"
         assert data["filters"]["backend"] == "aer"
-        assert data["filters"]["mode"] == "1q"
 
 
 @pytest.mark.integration

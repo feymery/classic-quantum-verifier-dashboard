@@ -5,7 +5,6 @@
  */
 
 import { Circuit1Q } from "./Circuit1Q";
-import { CircuitDiagram2Q } from "../../CircuitDiagram2Q/CircuitDiagram2Q";
 
 interface QubitComparisonProps {
   alpha: number;
@@ -78,8 +77,8 @@ function SideHeader({ label, color }: { label: string; color: string }) {
 export function QubitComparison({ alpha }: QubitComparisonProps) {
   return (
     <div className="space-y-4">
-      {/* ── Circuits side by side ── */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      {/* ── Circuit (1Q) ── */}
+      <div>
         {/* 1Q panel */}
         <div
           className="rounded-lg border p-3 space-y-2"
@@ -89,18 +88,6 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
           <Circuit1Q alpha={alpha} />
           <p className=" text-[9px]" style={{ color: "#4a4760" }}>
             2 qubits · ctrl-U(α) · no work entanglement
-          </p>
-        </div>
-
-        {/* 2Q panel */}
-        <div
-          className="rounded-lg border p-3 space-y-2"
-          style={{ borderColor: "#34d39944", background: "#181620" }}
-        >
-          <SideHeader label="2-Qubit Extension" color="#34d399" />
-          <CircuitDiagram2Q alpha={alpha} />
-          <p className=" text-[9px]" style={{ color: "#4a4760" }}>
-            3 qubits · ctrl-U(α) + CNOT · entangled work register
           </p>
         </div>
       </div>

@@ -46,3 +46,8 @@ htmlcov/
 # Python build artifacts
 build/
 *.egg-info/
+
+# SQLite databases (runtime data, never committed)
+*.sqlite
+*.sqlite3
+*.db

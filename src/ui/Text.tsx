@@ -2,7 +2,7 @@ import type { HTMLAttributes } from "react";
 import { clsx as classNames } from "clsx";
 
 type TextVariant = "title" | "subtitle" | "body" | "caption" | "label";
-type TextColor =
+export type TextColor =
   | "primary"
   | "muted"
   | "accent"

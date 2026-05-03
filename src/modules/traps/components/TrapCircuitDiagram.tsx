@@ -149,7 +149,7 @@ interface Props {
   annotation?: string;
 }
 
-export function TrapCircuitDiagram2Q({
+export function TrapCircuitDiagram1Q({
   alpha,
   isTrap = false,
   highlightDiff = false,

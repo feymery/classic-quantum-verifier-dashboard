@@ -14,8 +14,6 @@ interface ParameterControlsProps {
   backends: Backend[];
   backendStatus: string;
   setAlpha: (value: number) => void;
-  comparisonAlphas: number[];
-  setComparisonAlphas: (alphas: number[]) => void;
   onShotsChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onNoiseLambdaChange: (value: number) => void;
   onAlphaFakeChange: (value: number) => void;
@@ -31,8 +29,6 @@ export function ParameterControls({
   backends,
   backendStatus,
   setAlpha,
-  comparisonAlphas,
-  setComparisonAlphas,
   onShotsChange,
   onNoiseLambdaChange,
   onAlphaFakeChange,
@@ -40,12 +36,7 @@ export function ParameterControls({
 }: ParameterControlsProps) {
   return (
     <div className="grid gap-3 lg:grid-cols-[1.55fr_0.95fr]">
-      <AlphaControl
-        alpha={alpha}
-        setAlpha={setAlpha}
-        comparisonAlphas={comparisonAlphas}
-        setComparisonAlphas={setComparisonAlphas}
-      />
+      <AlphaControl alpha={alpha} setAlpha={setAlpha} />
 
       <div className="space-y-3">
         <BackendSelector

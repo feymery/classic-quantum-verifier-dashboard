@@ -5,16 +5,6 @@ export const ExperimentPage = lazy(async () => {
   return { default: module.ExperimentPage };
 });
 
-export const VisualizationPage = lazy(async () => {
-  const module = await import("../pages/VisualizationPage");
-  return { default: module.VisualizationPage };
-});
-
-export const CircuitPage = lazy(async () => {
-  const module = await import("../pages/Circuit2QPage");
-  return { default: module.CircuitPage };
-});
-
 export const TrapsPage = lazy(async () => {
   const module = await import("../pages/TrapsPage");
   return { default: module.TrapsPage };
