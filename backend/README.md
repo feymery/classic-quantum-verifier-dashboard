@@ -34,28 +34,30 @@ python3 -m pip install -r backend/requirements.txt
 
 ---
 
-## Installation virtual environment 
+## Installation (Virtual Environment)
 
-From the backend folder:
-
-```bash
-python -m venv venv
-```
+From the project root:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m venv backend/venv
 ```
 
 On Windows:
 
 ```bash
-venv\Scripts\activate
+backend\venv\Scripts\activate
 ```
 
 On Mac/Linux:
 
 ```bash
-source venv/bin/activate
+source backend/venv/bin/activate
+```
+
+After activating, install the dependencies:
+
+```bash
+python -m pip install -r backend/requirements.txt
 ```
 
 ---
@@ -92,8 +94,6 @@ The singleton `IBMClient` holds the connection for the lifetime of the server pr
 
 ---
 
-<<<<<<< HEAD
-=======
 ## Module overview
 
 ```text
@@ -118,7 +118,6 @@ backend/
     └── job_runner.py        # ThreadPool-based async job execution (separate pools for IBM and Aer)
 ```
 
->>>>>>> main
 ### Execution flow
 
 **Synchronous (`backend=aer`):**
