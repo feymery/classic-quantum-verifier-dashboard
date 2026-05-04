@@ -8,6 +8,8 @@ import { ConceptBox } from "./ConceptBox";
 import { StateSelector } from "./StateSelector";
 import { EnergySection } from "./EnergySection";
 import { ZBasisTable } from "./ZBasisTable";
+import { DetectionBreakdownTable } from "./DetectionBreakdownTable";
+import { HamiltonianExplainer } from "./HamiltonianExplainer";
 import type { TrapState2Q } from "./ClassicalStateTrap.types";
 import { honestCounts } from "../../physics/traps";
 
@@ -30,7 +32,7 @@ export function ClassicalStateTrap({ alpha }: Props) {
 
   return (
     <TrapCard
-      id="Trap 1"
+      id="Trap-1"
       title="Classical State Instead of Superposition"
       description="The dishonest prover skips the entire quantum circuit and submits a single classical basis state |ab⟩ instead of the 2-qubit clock history superposition |η(α)⟩. The Hamiltonian H_prop always detects the missing temporal coherence."
       alpha={alpha}
@@ -53,6 +55,8 @@ export function ClassicalStateTrap({ alpha }: Props) {
             trapEnergy={trapEnergy}
             trapState={trapState}
           />
+          {isTrap && <DetectionBreakdownTable trapState={trapState} />}
+          {isTrap && <HamiltonianExplainer />}
           {isTrap && (
             <div>
               <SectionLabel>z-basis outcomes</SectionLabel>

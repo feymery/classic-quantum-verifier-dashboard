@@ -34,7 +34,7 @@ export function FinalStateTrap({ alpha }: Props) {
 
   return (
     <TrapCard
-      id="Trap 2"
+      id="Trap-2"
       title="Final State Only"
       description="The dishonest prover knows U(α) and submits only the final time step |ψ_2⟩⊗|2⟩ instead of the full clock history superposition |η(α)⟩. H_out is satisfied when claimStep = t2, but H_prop always detects the missing transitions."
       alpha={alpha}

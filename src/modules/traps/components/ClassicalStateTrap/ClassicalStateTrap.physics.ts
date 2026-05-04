@@ -7,7 +7,7 @@ export function trapEnergyBreakdown(
 ): EnergyBreakdown {
   const validOutput = trapState === "00" || trapState === "11";
   const H_out = validOutput ? 0 : 0.5;
-  const H_in_penalty = trapState === "10" ? 1.5 : 0.25;
+  const H_in_penalty = trapState === "10" ? 1.5 : 0;
   const H_prop = 1.5 * (1 - Math.cos(2 * alpha) / 2);
   return {
     H_out,
