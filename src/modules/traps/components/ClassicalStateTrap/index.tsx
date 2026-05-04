@@ -30,7 +30,7 @@ export function ClassicalStateTrap({ alpha }: Props) {
 
   return (
     <TrapCard
-      id="Trap 1 — Classical State"
+      id="Trap 1"
       title="Classical State Instead of Superposition"
       description="The dishonest prover skips the entire quantum circuit and submits a single classical basis state |ab⟩ instead of the 2-qubit clock history superposition |η(α)⟩. The Hamiltonian H_prop always detects the missing temporal coherence."
       alpha={alpha}

@@ -59,16 +59,14 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     <header className="flex flex-col gap-6 md:flex-row">
       <IntroPanel onOpenHistory={onOpenHistory} />
 
-      <Card className="flex-1 rounded-lg " padded="sm">
+      <Card>
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-4">
-            <BackendRow
-              selectedBackend={selectedBackend}
-              backendStatus={backendStatus}
-              onBackendChange={onBackendChange}
-              onOpenHistory={onOpenHistory}
-            />
-          </div>
+          <BackendRow
+            selectedBackend={selectedBackend}
+            backendStatus={backendStatus}
+            onBackendChange={onBackendChange}
+            onOpenHistory={onOpenHistory}
+          />
 
           <HeaderStrip
             alpha={alpha}
@@ -77,20 +75,18 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             onShotsChange={onShotsChange}
           />
 
-          {selectedBackend === "ibm_runtime" && (
-            <IbmTokenSection
-              ibmToken={ibmToken}
-              ibmTokenSet={ibmTokenSet}
-              ibmInstance={ibmInstance}
-              ibmBackendName={ibmBackendName}
-              showToken={showToken}
-              onToggleShowToken={onToggleShowToken}
-              onTokenChange={onTokenChange}
-              onInstanceChange={onInstanceChange}
-              onBackendNameChange={onBackendNameChange}
-              onConfirmToken={onConfirmToken}
-            />
-          )}
+          <IbmTokenSection
+            ibmToken={ibmToken}
+            ibmTokenSet={ibmTokenSet}
+            ibmInstance={ibmInstance}
+            ibmBackendName={ibmBackendName}
+            showToken={showToken}
+            onToggleShowToken={onToggleShowToken}
+            onTokenChange={onTokenChange}
+            onInstanceChange={onInstanceChange}
+            onBackendNameChange={onBackendNameChange}
+            onConfirmToken={onConfirmToken}
+          />
           <RunExperiment runFor1Q={runFor1Q} isRunning={runner.isRunning} />
         </div>
       </Card>

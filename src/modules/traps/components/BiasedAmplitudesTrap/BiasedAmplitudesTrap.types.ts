@@ -42,9 +42,11 @@ export const DEFAULT_SHOTS = 512;
 export const DELTA_MAX = 1 / 3;
 export const SHOT_OPTIONS = [64, 128, 256, 512, 1024] as const;
 
-export const HONEST_COLOR = "#34d399";
-export const TRAP_COLOR = "#f87171";
-export const BIAS_COLOR = "#f59e0b";
+export {
+  HONEST_COLOR,
+  TRAP_COLOR,
+  BIAS_COLOR,
+} from "../../shared/trapShared.constants";
 
 export const DETECTION_THRESHOLD = 0.4;
 

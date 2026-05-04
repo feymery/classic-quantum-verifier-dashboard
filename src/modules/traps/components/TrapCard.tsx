@@ -46,84 +46,121 @@ export function TrapCard({
   description,
   alpha,
   circuitAnnotation,
-  circuitShowDiffToggle,
   circuitStepWeights,
   children,
 }: Props) {
   const [mode, setMode] = useState<"honest" | "trap">("honest");
-  const [showDiff, setShowDiff] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const isActive = Boolean(children);
   const isTrap = isActive && mode === "trap";
-  const borderColor = isTrap ? "#3a1e1e" : isActive ? "#1a2a3a" : "#2d2b3a";
+
+  // border shifts from border → success-tinted (honest active) → danger-tinted (trap)
+  const borderClass = isTrap
+    ? "border-danger/30"
+    : isActive
+      ? "border-accent/20"
+      : "border-border";
 
   return (
     <div
-      className="rounded-lg border p-5 space-y-5 transition-colors duration-500"
-      style={{
-        borderColor,
-        background: "#131217",
-        opacity: isActive ? 1 : 0.55,
-      }}
+      className={`transition-colors duration-500 border rounded-lg bg-canvas ${borderClass}`}
+      style={{ opacity: isActive ? 1 : 0.55 }}
     >
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-3">
-            <span
-              className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase"
-              style={{
-                background: isActive ? "#2a2338" : "#1e1c2a",
-                color: isActive ? "#a78bfa" : "#4b4860",
-              }}
-            >
-              {id}
-            </span>
-            <h2
-              className="text-[14px] font-semibold"
-              style={{ color: isActive ? "#ddd9ee" : "#4b4860" }}
-            >
-              {title}
-            </h2>
-          </div>
-          <p
-            className="mt-1 text-[12px]"
-            style={{ color: isActive ? "#9490a8" : "#4b4860" }}
+      {/* ── Header (always visible, clickable to collapse) ── */}
+      <div
+        className="flex items-center justify-between gap-3 px-5 py-4 cursor-pointer select-none"
+        onClick={() => isActive && setCollapsed((v) => !v)}
+      >
+        <div className="flex items-center min-w-0 gap-3">
+          <span
+            className={`shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase ${
+              isActive
+                ? "bg-accent/10 text-accent"
+                : "bg-elevated text-subtle/60"
+            }`}
           >
-            {description}
-          </p>
+            {id}
+          </span>
+          <h2
+            className={`text-[14px] font-semibold truncate ${
+              isActive ? "text-foreground" : "text-subtle/60"
+            }`}
+          >
+            {title}
+          </h2>
         </div>
 
-        {isActive ? (
-          <ToggleButton
-            isTrap={isTrap}
-            onToggle={() => setMode(isTrap ? "honest" : "trap")}
-          />
-        ) : (
-          <span
-            className="shrink-0 rounded-lg px-2 py-0.5 text-[10px]"
-            style={{ background: "#1e1c2a", color: "#6b6780" }}
-          >
-            coming soon
-          </span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {isActive ? (
+            <>
+              <div onClick={(e) => e.stopPropagation()}>
+                <ToggleButton
+                  isTrap={isTrap}
+                  onToggle={() => {
+                    setMode(isTrap ? "honest" : "trap");
+                    if (collapsed) setCollapsed(false);
+                  }}
+                />
+              </div>
+              <button
+                className="p-1 transition-colors rounded text-subtle hover:text-muted"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCollapsed((v) => !v);
+                }}
+                aria-label={collapsed ? "Expand" : "Collapse"}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  style={{
+                    transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
+                    transition: "transform 200ms",
+                  }}
+                >
+                  <path
+                    d="M2 5l5 5 5-5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <span className="rounded-lg px-2 py-0.5 text-[10px] bg-elevated text-subtle">
+              coming soon
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* ── Circuit + body ── */}
-      {children && alpha !== undefined && (
-        <>
-          <TrapCircuitSection
-            alpha={alpha}
-            isTrap={isTrap}
-            annotation={isTrap ? circuitAnnotation : undefined}
-            showDiff={showDiff}
-            onToggleDiff={
-              circuitShowDiffToggle ? () => setShowDiff((v) => !v) : undefined
-            }
-            stepWeights={isTrap ? circuitStepWeights : undefined}
-          />
-          {children({ isTrap })}
-        </>
+      {/* ── Circuit (left) + body (right) ── */}
+      {!collapsed && children && alpha !== undefined && (
+        <div className="flex flex-col items-start gap-3 px-5 pb-5 lg:flex-row">
+          <div className="flex flex-col gap-3 shrink-0 lg:w-1/3">
+            <TrapCircuitSection
+              alpha={alpha}
+              isTrap={isTrap}
+              annotation={isTrap ? circuitAnnotation : undefined}
+              stepWeights={isTrap ? circuitStepWeights : undefined}
+            />
+            {/* ── Description (hidden when collapsed) ── */}
+            {!collapsed && isActive && (
+              <p className="px-5 pb-3 text-[12px] text-muted">{description}</p>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 space-y-4">{children({ isTrap })}</div>
+        </div>
+      )}
+
+      {/* ── Skeleton description (always visible) ── */}
+      {!isActive && (
+        <p className="px-5 pb-4 text-[12px] text-subtle/60">{description}</p>
       )}
     </div>
   );

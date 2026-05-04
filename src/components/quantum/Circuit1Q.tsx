@@ -138,10 +138,10 @@ export function Circuit1Q({
 
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
+      width="100%"
+      viewBox={`-40 0 ${W + 40} ${H}`}
       role="img"
       aria-label="2-qubit circuit for 1-qubit verifier protocol"
-      style={{ overflow: "visible" }}
     >
       {/* ── index labels ── */}
       <text

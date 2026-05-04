@@ -18,10 +18,7 @@ export function EnergySection({ isTrap, trapEnergy, claimStep }: Props) {
       <EnergyGauge energy={isTrap ? trapEnergy.total : 0} energyTheory={0} />
       {isTrap && (
         <>
-          <div
-            className="mt-2 flex gap-4 text-[10px]"
-            style={{ color: "#6b6780" }}
-          >
+          <div className="mt-2 flex gap-4 text-[10px] text-subtle">
             <span>H_out = {trapEnergy.H_out.toFixed(2)}</span>
             <span>H_in = {trapEnergy.H_in.toFixed(2)}</span>
             <span style={{ color: TRAP_COLOR, fontWeight: 600 }}>
@@ -31,7 +28,7 @@ export function EnergySection({ isTrap, trapEnergy, claimStep }: Props) {
           <p
             className="mt-1.5 text-[11px]"
             style={{
-              color: claimStep === "t2" ? "#f59e0b" : TRAP_COLOR,
+              color: claimStep === "t2" ? "var(--color-warning)" : TRAP_COLOR,
               fontStyle: "italic",
             }}
           >

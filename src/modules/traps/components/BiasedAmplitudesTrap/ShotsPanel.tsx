@@ -22,6 +22,7 @@ import {
   BIAS_COLOR,
   TRAP_COLOR,
 } from "./BiasedAmplitudesTrap.types";
+import { HONEST_COLOR } from "../../shared/trapShared.constants";
 import { minShotsToDetect } from "./BiasedAmplitudesTrap.helpers";
 
 interface Props {
@@ -46,9 +47,9 @@ function ShotTooltip({
     <div
       className="rounded border px-2 py-1 text-[10px]"
       style={{
-        background: "#1e1c2a",
-        borderColor: "#3d3b4a",
-        color: "#ddd9ee",
+        background: "var(--color-elevated)",
+        borderColor: "var(--color-border)",
+        color: "var(--color-foreground)",
       }}
     >
       δ_min = {payload[0]?.value?.toFixed(3)}
@@ -63,19 +64,16 @@ export function ShotsPanel({ shots, delta }: Props) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p
-          className="text-[10px] uppercase tracking-widest"
-          style={{ color: "#6b6780" }}
-        >
+        <p className="text-[10px] uppercase tracking-widest text-subtle">
           shots vs minimum detectable δ
         </p>
         <span
           className="rounded px-2 py-0.5 text-[10px] font-medium"
           style={{
             background: inRange
-              ? "rgba(52,211,153,0.1)"
-              : "rgba(248,113,113,0.1)",
-            color: inRange ? "#34d399" : TRAP_COLOR,
+              ? "color-mix(in srgb, var(--color-success) 15%, transparent)"
+              : "color-mix(in srgb, var(--color-danger) 15%, transparent)",
+            color: inRange ? HONEST_COLOR : TRAP_COLOR,
           }}
         >
           {inRange ? "detectable" : `need ≥ ${needed} shots`}
@@ -89,13 +87,13 @@ export function ShotsPanel({ shots, delta }: Props) {
         >
           <XAxis
             dataKey="shots"
-            tick={{ fontSize: 8, fill: "#6b6780" }}
+            tick={{ fontSize: 8, fill: "var(--color-subtle)" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             domain={[0, DELTA_MAX]}
-            tick={{ fontSize: 8, fill: "#6b6780" }}
+            tick={{ fontSize: 8, fill: "var(--color-subtle)" }}
             tickLine={false}
             axisLine={false}
             width={28}
@@ -110,22 +108,27 @@ export function ShotsPanel({ shots, delta }: Props) {
           />
           {/* Reference lines for current active shot option marks */}
           {SHOT_OPTIONS.map((s) => (
-            <ReferenceLine key={s} x={s} stroke="#2d2b3a" strokeWidth={1} />
+            <ReferenceLine
+              key={s}
+              x={s}
+              stroke="var(--color-border)"
+              strokeWidth={1}
+            />
           ))}
           {/* Active point */}
           <ReferenceDot
             x={shots}
             y={Math.min(DELTA_MAX, 1 / Math.sqrt(shots))}
             r={4}
-            fill={inRange ? "#34d399" : TRAP_COLOR}
+            fill={inRange ? HONEST_COLOR : TRAP_COLOR}
             stroke="none"
           />
         </LineChart>
       </ResponsiveContainer>
 
-      <p className="text-[10px]" style={{ color: "#6b6780" }}>
+      <p className="text-[10px] text-subtle">
         Below the curve → bias δ is undetectable at this shot count. Your point:{" "}
-        <span style={{ color: inRange ? "#34d399" : TRAP_COLOR }}>
+        <span style={{ color: inRange ? HONEST_COLOR : TRAP_COLOR }}>
           δ = {delta.toFixed(2)}, shots = {shots}
         </span>
       </p>
