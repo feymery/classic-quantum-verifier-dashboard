@@ -8,7 +8,9 @@
 import { Fragment } from "react";
 import { ClassicalStateTrap } from "../modules/traps/components/ClassicalStateTrap";
 import { FinalStateTrap } from "../modules/traps/components/FinalStateTrap";
+import { BiasedAmplitudesTrap } from "../modules/traps/components/BiasedAmplitudesTrap/BiasedAmplitudesTrap";
 import { TrapCard } from "../modules/traps/components/TrapCard";
+import { useAppState } from "../state/useAppState";
 
 // ── Trap definitions ─────────────────────────────────────────────────────────
 
@@ -21,20 +23,29 @@ type PendingTrap = {
 };
 type TrapEntry = ActiveTrap | PendingTrap;
 
-const TRAPS: TrapEntry[] = [
-  {
-    kind: "active",
-    key: "classicalStateTrap",
-    node: <ClassicalStateTrap />,
-  },
-  {
-    kind: "active",
-    key: "finalStateTrap",
-    node: <FinalStateTrap />,
-  },
-];
-
 export function TrapsPage() {
+  const {
+    dashboard: { alpha },
+  } = useAppState();
+
+  const TRAPS: TrapEntry[] = [
+    {
+      kind: "active",
+      key: "classicalStateTrap",
+      node: <ClassicalStateTrap alpha={alpha} />,
+    },
+    {
+      kind: "active",
+      key: "finalStateTrap",
+      node: <FinalStateTrap alpha={alpha} />,
+    },
+    {
+      kind: "active",
+      key: "biasedAmplitudesTrap",
+      node: <BiasedAmplitudesTrap alpha={alpha} />,
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <p className="text-[13px]" style={{ color: "#9490a8" }}>

@@ -7,12 +7,19 @@
  *  q₁ (work):  |0⟩ ─────────── U(α) ───── M
  */
 
-interface Circuit1QProps {
+import { Cross, C_TRAP } from "./Circuit1Q.parts";
+
+export interface Circuit1QProps {
   alpha: number;
+  mode?: "honest" | "trap";
+  highlightStep?: 0 | 1 | 2;
+  stepWeights?: [number, number, number];
+  showDiff?: boolean;
+  annotation?: string;
 }
 
 const W = 460;
-const H = 140;
+const H = 160; // extra height for optional annotation
 
 const Y0 = 55; // clock qubit
 const Y1 = 105; // work qubit
@@ -23,6 +30,12 @@ const X_H = 105;
 const X_CU = 200;
 const X_MEAS = 350;
 const X_END = 390;
+
+// half-widths for wire gap around gates
+const HW_NARROW = 13; // H gate
+const HW_WIDE = 30; // U(α) gate
+
+const NORM = 1 / 3;
 
 const C_WIRE = "#6b6780";
 const C_CTRL = "#b7a8cf";
@@ -100,12 +113,31 @@ function MeasBox({ x, y }: { x: number; y: number }) {
   );
 }
 
-export function Circuit1Q({ alpha }: Circuit1QProps) {
+export function Circuit1Q({
+  alpha,
+  mode = "honest",
+  showDiff = false,
+  stepWeights,
+  highlightStep,
+  annotation,
+}: Circuit1QProps) {
+  const isTrap = mode === "trap";
+  const fade = isTrap && showDiff;
+  const gc = isTrap ? "#6b6780" : C_GATE;
+  const cc = isTrap ? "#6b6780" : C_CTRL;
+
+  // q₀ wire is segmented (3 clock steps): before-H | H-to-ctrl | after-ctrl
+  const sw = (i: 0 | 1 | 2) =>
+    stepWeights
+      ? Math.max(0.3, Math.min(4, (stepWeights[i] / NORM) * 1.5))
+      : 0.75;
+  const so = (i: 0 | 1 | 2) =>
+    highlightStep === undefined || highlightStep === i ? 1 : 0.25;
+
   const aStr = alpha.toFixed(3);
 
   return (
     <svg
-      width="100%"
       viewBox={`0 0 ${W} ${H}`}
       role="img"
       aria-label="2-qubit circuit for 1-qubit verifier protocol"
@@ -141,7 +173,7 @@ export function Circuit1Q({ alpha }: Circuit1QProps) {
         fontFamily="monospace"
         fontSize={11}
         fontWeight={500}
-        fill={C_CTRL}
+        fill={cc}
       >
         |0⟩
       </text>
@@ -157,17 +189,46 @@ export function Circuit1Q({ alpha }: Circuit1QProps) {
         |0⟩
       </text>
 
-      {/* ── wires ── */}
+      {/* ── q₀ wire — 3 segments for stepWeights / highlightStep ── */}
       <line
         x1={X_START}
+        y1={Y0}
+        x2={X_H - HW_NARROW}
+        y2={Y0}
+        stroke={C_WIRE}
+        strokeWidth={sw(0)}
+        opacity={so(0)}
+      />
+      <line
+        x1={X_H + HW_NARROW}
+        y1={Y0}
+        x2={X_CU - 5}
+        y2={Y0}
+        stroke={C_WIRE}
+        strokeWidth={sw(1)}
+        opacity={so(1)}
+      />
+      <line
+        x1={X_CU + 5}
         y1={Y0}
         x2={X_END}
         y2={Y0}
         stroke={C_WIRE}
+        strokeWidth={sw(2)}
+        opacity={so(2)}
+      />
+
+      {/* ── q₁ wire — continuous ── */}
+      <line
+        x1={X_START}
+        y1={Y1}
+        x2={X_CU - HW_WIDE}
+        y2={Y1}
+        stroke={C_WIRE}
         strokeWidth={0.75}
       />
       <line
-        x1={X_START}
+        x1={X_CU + HW_WIDE}
         y1={Y1}
         x2={X_END}
         y2={Y1}
@@ -176,19 +237,25 @@ export function Circuit1Q({ alpha }: Circuit1QProps) {
       />
 
       {/* ── H on q₀ ── */}
-      <GateBox x={X_H} y={Y0} label="H" color={C_CTRL} />
+      <g opacity={fade ? 0.22 : 1}>
+        <GateBox x={X_H} y={Y0} label="H" color={cc} />
+      </g>
+      {fade && <Cross x={X_H} y={Y0} />}
 
-      {/* ── ctrl-U(α): dot on q₀, box on q₁ ── */}
-      <circle cx={X_CU} cy={Y0} r={4} fill={C_CTRL} />
-      <line
-        x1={X_CU}
-        y1={Y0 + 4}
-        x2={X_CU}
-        y2={Y1 - 13}
-        stroke={C_CTRL}
-        strokeWidth={0.75}
-      />
-      <GateBox x={X_CU} y={Y1} label={`U(${aStr})`} color={C_GATE} wide />
+      {/* ── ctrl-U(α): dot on q₀, vertical line, box on q₁ ── */}
+      <g opacity={fade ? 0.22 : 1}>
+        <circle cx={X_CU} cy={Y0} r={4} fill={cc} />
+        <line
+          x1={X_CU}
+          y1={Y0 + 4}
+          x2={X_CU}
+          y2={Y1 - 13}
+          stroke={cc}
+          strokeWidth={0.75}
+        />
+        <GateBox x={X_CU} y={Y1} label={`U(${aStr})`} color={gc} wide />
+      </g>
+      {fade && <Cross x={X_CU} y={Y1} />}
 
       {/* ── measure ── */}
       <MeasBox x={X_MEAS} y={Y0} />
@@ -201,7 +268,7 @@ export function Circuit1Q({ alpha }: Circuit1QProps) {
         textAnchor="middle"
         fontFamily="monospace"
         fontSize={8}
-        fill={C_CTRL}
+        fill={cc}
       >
         clock
       </text>
@@ -211,10 +278,25 @@ export function Circuit1Q({ alpha }: Circuit1QProps) {
         textAnchor="middle"
         fontFamily="monospace"
         fontSize={8}
-        fill={C_GATE}
+        fill={gc}
       >
         work
       </text>
+
+      {/* ── trap annotation ── */}
+      {isTrap && annotation && (
+        <text
+          x={W / 2}
+          y={H - 6}
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize={8}
+          fill={C_TRAP}
+          opacity={0.65}
+        >
+          {annotation}
+        </text>
+      )}
     </svg>
   );
 }

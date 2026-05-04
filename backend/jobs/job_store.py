@@ -37,6 +37,7 @@ class JobStore:
                     job_id TEXT PRIMARY KEY,
                     status TEXT NOT NULL,
                     backend TEXT NOT NULL,
+                    mode TEXT NOT NULL,
                     alpha REAL NOT NULL,
                     shots INTEGER NOT NULL,
                     result_json TEXT,
@@ -53,6 +54,15 @@ class JobStore:
             self._conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend ON jobs(status, backend)"
             )
+            # Migration: add mode column if it doesn't exist (for pre-existing databases)
+            existing_columns = {
+                row[1]
+                for row in self._conn.execute("PRAGMA table_info(jobs)").fetchall()
+            }
+            if "mode" not in existing_columns:
+                self._conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT '1q'"
+                )
             self._conn.commit()
 
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, Any]:

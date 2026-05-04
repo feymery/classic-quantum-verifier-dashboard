@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { Circuit1Q } from "./Circuit1Q";
+import { Circuit1Q } from "../quantum/Circuit1Q";
 
 interface Step {
   id: string;
