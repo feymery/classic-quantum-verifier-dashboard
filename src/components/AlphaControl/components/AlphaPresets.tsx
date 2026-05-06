@@ -1,6 +1,6 @@
 import { KEY_ALPHAS } from "../../../utils/constants";
-import { energy, nearestKeyIndex } from "../../../utils/alphaUtils";
-import { Button } from "../../../ui/Button";
+import { nearestKeyIndex } from "../../../utils/alphaUtils";
+import { AlphaPresetButton } from "./AlphaPresetButton";
 
 interface AlphaPresetsProps {
   alpha: number;
@@ -13,51 +13,21 @@ export function AlphaPresets({ alpha, onSelect }: AlphaPresetsProps) {
 
   return (
     <div className="grid grid-cols-2 gap-1.5">
-      {KEY_ALPHAS.map((ka, i) => {
-        const isActive = snappedIdx === i;
-        const e = energy(ka.value);
-
-        return (
-          <Button
-            key={ka.label}
-            onClick={() => onSelect(ka.value)}
-            variant="secondary"
-            size="sm"
-            className="group relative flex h-auto flex-col gap-0.5 rounded border px-2.5 py-2 text-left font-normal transition-all duration-150"
-            style={{
-              background: isActive ? `${ka.color}18` : "#181620",
-              borderColor: isActive ? ka.color : "#2d2b3a",
-              boxShadow: isActive ? `0 0 12px ${ka.color}22` : "none",
-            }}
-          >
-            {/* Label row */}
-            <div className="flex items-center justify-between">
-              <span
-                className=" text-[11px] font-medium leading-none"
-                style={{ color: isActive ? ka.color : "#9490a8" }}
-              >
-                {ka.label}
-              </span>
-            </div>
-
-            {/* Desc + energy */}
-            <div className="flex items-center justify-between mt-0.5 gap-1">
-              <span
-                className="text-[10px] leading-none"
-                style={{ color: "#6b6780" }}
-              >
-                {ka.desc}
-              </span>
-              <span
-                className=" text-[10px] leading-none"
-                style={{ color: isActive ? ka.color + "cc" : "#6b6780" }}
-              >
-                {e.toFixed(2)}
-              </span>
-            </div>
-          </Button>
-        );
-      })}
+      {KEY_ALPHAS.map((ka, i) => (
+        <div
+          key={ka.label}
+          className={
+            /* 5th item (index 4) spans both columns, centred */
+            i === 4 ? "col-span-2 mx-auto w-[calc(50%-3px)]" : ""
+          }
+        >
+          <AlphaPresetButton
+            ka={ka}
+            isActive={snappedIdx === i}
+            onSelect={onSelect}
+          />
+        </div>
+      ))}
     </div>
   );
 }
