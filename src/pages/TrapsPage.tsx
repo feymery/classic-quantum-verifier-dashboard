@@ -7,8 +7,7 @@
 
 import { Fragment } from "react";
 import { ClassicalStateTrap } from "../modules/traps/components/ClassicalStateTrap";
-import { FinalStateTrap } from "../modules/traps/components/FinalStateTrap";
-import { BiasedAmplitudesTrap } from "../modules/traps/components/BiasedAmplitudesTrap/BiasedAmplitudesTrap";
+import { DepolarizingTrap } from "../modules/traps/components/DepolarizingTrap";
 import { TrapCard } from "../modules/traps/components/TrapCard";
 import { useAppState } from "../state/useAppState";
 
@@ -36,13 +35,8 @@ export function TrapsPage() {
     },
     {
       kind: "active",
-      key: "finalStateTrap",
-      node: <FinalStateTrap alpha={alpha} />,
-    },
-    {
-      kind: "active",
-      key: "biasedAmplitudesTrap",
-      node: <BiasedAmplitudesTrap alpha={alpha} />,
+      key: "depolarizingTrap",
+      node: <DepolarizingTrap alpha={alpha} />,
     },
   ];
 
