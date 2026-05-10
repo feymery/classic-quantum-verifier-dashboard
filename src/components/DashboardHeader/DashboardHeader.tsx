@@ -5,6 +5,7 @@ import { BackendRow, HeaderStrip, IbmTokenSection } from "./components";
 import { useAppState } from "../../state/useAppState";
 import { RunExperiment } from "./components/RunExperiment";
 import { IntroPanel } from "./components/IntroPanel";
+import { AppNavigation } from "../AppNavigation";
 
 export interface DashboardHeaderProps {
   // identity
@@ -56,11 +57,14 @@ export function DashboardHeader(props: DashboardHeaderProps) {
   const { runner, runFor1Q } = useAppState();
 
   return (
-    <header className="flex flex-col gap-6 md:flex-row">
-      <IntroPanel onOpenHistory={onOpenHistory} />
+    <header className="flex flex-col gap-6 lg:flex-row">
+      <div className="flex flex-col gap-6">
+        <IntroPanel onOpenHistory={onOpenHistory} />
+        <AppNavigation />
+      </div>
 
       <Card>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col justify-between h-full gap-3">
           <BackendRow
             selectedBackend={selectedBackend}
             backendStatus={backendStatus}

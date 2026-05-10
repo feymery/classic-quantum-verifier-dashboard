@@ -1,5 +1,4 @@
 import { ProtocolGuide1Q } from "../modules/oneQubit/components/ProtocolGuide1Q/ProtocolGuide1Q";
-import { NoisePanel } from "../components/NoisePanel/NoisePanel";
 import { AlphaSweepChart } from "../components/charts/AlphaSweepChart";
 import { useAppState } from "../state/useAppState";
 
@@ -15,13 +14,12 @@ export function FundamentalsPage() {
 
       <ProtocolGuide1Q alpha={dashboard.alpha} />
 
-      <NoisePanel
-        alpha={dashboard.alpha}
-        noiseLambda={dashboard.noiseLambda}
-        onNoiseLambdaChange={dashboard.setNoiseLambda}
+      <AlphaSweepChart
+        points={dashboard.sweepPoints}
+        loading={dashboard.sweepLoading}
+        error={dashboard.sweepError}
+        onRun={dashboard.runSweep}
       />
-
-      <AlphaSweepChart shots={dashboard.shots} nPoints={30} />
     </div>
   );
 }

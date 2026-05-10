@@ -7,12 +7,12 @@
  *   • Dashed line  — theoretical value ⟨O⟩_theory for the honest clock state
  *   • Coloured dots — measured ⟨O⟩_est values from the simulation
  *
- * Theoretical values (|η⟩ = (1/√2)(|00⟩ + cos α|10⟩ + sin α|11⟩)):
- *   ⟨Z₁⟩   = 0
- *   ⟨Z₂⟩   = cos²(α)
+ * Theoretical values — code convention: Z1 = Z_prover (q0), Z2 = Z_clock (q1)
+ *   ⟨Z₁⟩   = cos²(α)         [Z_prover]
+ *   ⟨Z₂⟩   = 0               [Z_clock]
  *   ⟨Z₁Z₂⟩ = sin²(α)
- *   ⟨Z₁X₂⟩ = −sin(α)cos(α)
- *   ⟨X₁Z₂⟩ = cos(α)
+ *   ⟨Z₁X₂⟩ = cos(α)          [Z_prover ⊗ X_clock]
+ *   ⟨X₁Z₂⟩ = −sin(α)cos(α)  [X_prover ⊗ Z_clock]
  *   ⟨X₁X₂⟩ = sin(α)
  */
 

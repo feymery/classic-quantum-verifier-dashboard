@@ -40,19 +40,23 @@ export function ProtocolGuide1Q({ alpha }: ProtocolGuide1QProps) {
             defaultOpen
           >
             <p>
-              The <em>clock state</em> is the 2-qubit entangled state built
-              after the Hadamard + controlled-U(α):
+              The <em>clock state</em> encodes the progression of the prover's
+              computation into the joint state of two qubits: q₀ (clock /
+              verifier) and q₁ (work / prover).
             </p>
-            <code
-              className="block rounded px-2 py-1  text-[11px] mt-1"
-              style={{ background: "#181620", color: "#b7a8cf" }}
-            >
-              |η(α)⟩ = (|0⟩|0⟩ + |1⟩U(α)|0⟩) / √2
-            </code>
             <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
-              The verifier (clock, q₀) is in superposition; the prover (work,
-              q₁) is in a state controlled by α. This entanglement is what makes
-              the protocol non-trivially quantum.
+              The verifier holds q₀ and keeps it in superposition throughout.
+              The prover holds q₁ and applies U(α) only when q₀ = |1⟩. This
+              conditional action is the controlled-U(α) gate that creates
+              entanglement — the verifier can later measure the joint state and
+              statistically certify that U(α) was applied correctly, without
+              ever seeing the prover's qubit directly.
+            </p>
+            <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
+              A classical prover cannot mimic this entangled structure:
+              separating the two qubits into independent states always produces
+              a higher energy, which the verifier detects through the E &gt; 0.5
+              rejection test.
             </p>
           </ConceptBox>
 
@@ -75,39 +79,83 @@ export function ProtocolGuide1Q({ alpha }: ProtocolGuide1QProps) {
             title="How do expectation values → energy?"
             accentColor="#34d399"
           >
-            <p>Linear inversion (Eq. C.1 in Stricker et al. 2024):</p>
-            <code
-              className="block rounded px-2 py-1  text-[11px] mt-1 leading-relaxed"
-              style={{ background: "#181620", color: "#34d399" }}
-            >
-              E = 3.5 − 2⟨Z₂⟩ + ⟨Z₁⟩ − ⟨Z₁Z₂⟩
-              <br />
-              &nbsp;&nbsp;&nbsp;&nbsp;− 1.5·cos(α)·⟨X₁Z₂⟩
-              <br />
-              &nbsp;&nbsp;&nbsp;&nbsp;− 1.5·sin(α)·⟨X₁X₂⟩
-            </code>
+            <p>
+              The Hamiltonian H is a sum of Pauli operators with known
+              coefficients. Because each Pauli is linear, its expectation value
+              in the clock state can be estimated independently from measurement
+              shots, and the individual estimates are then combined to recover
+              ⟨H⟩ = E — a process called <em>Hamiltonian inversion</em>.
+            </p>
             <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
-              The constant 3.5 is Tr(H·I/4), the energy of the fully mixed
-              state. Under uniform depolarization the whole formula shifts to
-              λ·3.5 + (1−λ)·sin²(α).
+              The five terms and their shot-noise variances propagate
+              independently into the final energy error σ_E. The dominant
+              contributions come from the α-dependent cross-terms X₁Z₂ and X₁X₂,
+              whose coefficients scale as 1.5·cos(α) and 1.5·sin(α)
+              respectively.
+            </p>
+            <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
+              Under uniform depolarizing noise (strength λ), every observable
+              shrinks: ⟨O⟩_noisy = (1−λ)⟨O⟩. The energy shifts to λ·3.5 +
+              (1−λ)·sin²(α) — the accept zone shrinks proportionally.
             </p>
           </ConceptBox>
 
           <ConceptBox title="Why E = sin²(α) exactly?" accentColor="#a78bfa">
             <p>
               With the clock state and U(α) = cos(α)·Z + sin(α)·X, the ideal
-              expectation values evaluate to:
+              expectation values evaluate analytically to:
             </p>
             <code
-              className="block rounded px-2 py-1  text-[11px] mt-1"
+              className="block rounded px-2 py-1  text-[11px] mt-1 leading-relaxed"
               style={{ background: "#181620", color: "#a78bfa" }}
             >
-              ⟨Z₁Z₂⟩ = cos(α) · ⟨X₁X₂⟩ = sin(α) · ...
+              ⟨Z₁⟩ = 0 &nbsp;&nbsp;&nbsp;&nbsp;⟨Z₂⟩ = cos²(α)
+              <br />
+              ⟨Z₁Z₂⟩ = sin²(α)
+              <br />
+              ⟨X₁Z₂⟩ = cos(α) &nbsp;⟨X₁X₂⟩ = sin(α)
             </code>
             <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
-              Substituting into the 5-term formula and simplifying, all cos/sin
-              cross-terms cancel and E = sin²(α) emerges. For α = 0: E = 0
-              (prover does nothing). For α = π/2: E = 1 (full rotation).
+              Substituting into the 5-term formula: the 3.5 constant is
+              cancelled by 2·cos²(α) + sin²(α) + 1.5·cos²(α) + 1.5·sin²(α) = 2 +
+              1 + 1.5 = 4.5 − 1 = 3.5. The remainder is cos²(α) + sin²(α) −
+              cos²(α) − ... which simplifies to sin²(α). For α = 0: E = 0. For α
+              = π/2: E = 1.
+            </p>
+          </ConceptBox>
+
+          <ConceptBox
+            title="Verifier decision: accept / reject"
+            accentColor="#f87171"
+          >
+            <p>
+              The verifier does not compare E to a single threshold — it uses
+              the estimated energy <em>with</em> its propagated shot-noise error
+              σ_E (Stricker et al. Eq. D.7):
+            </p>
+            <div
+              className="rounded px-2 py-1 mt-1 space-y-0.5 text-[11px]"
+              style={{ background: "#181620" }}
+            >
+              <div>
+                <span style={{ color: "#34d399" }}>accept</span>
+                <span style={{ color: "#9490a8" }}> — E + σ_E &lt; 0.4</span>
+              </div>
+              <div>
+                <span style={{ color: "#f87171" }}>reject</span>
+                <span style={{ color: "#9490a8" }}> — E − σ_E ≥ 0.5</span>
+              </div>
+              <div>
+                <span style={{ color: "#f59e0b" }}>marginal</span>
+                <span style={{ color: "#9490a8" }}> — otherwise</span>
+              </div>
+            </div>
+            <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
+              The gap [0.4, 0.5) is the <em>boundary zone</em>: more shots
+              reduce σ_E and shrink this zone. An honest quantum prover at α ≤
+              α_c (≈ 39.2°) always lands in the accept zone in the noiseless
+              limit; a classical prover cannot reach E &lt; 0.5 for any α in the
+              verifiable range.
             </p>
           </ConceptBox>
         </div>
