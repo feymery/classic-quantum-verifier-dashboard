@@ -1,13 +1,18 @@
-En el artículo se considera un circuito de un solo qubit $C = U(\alpha) = \cos\alpha Z + \sin\alpha X$. Como solo tenemos una puerta lógica ($T=1$), necesitamos **1 qubit de sistema (prover)** y **1 qubit de reloj (clock)** para codificar el tiempo $t=0$ y $t=1$. 
+# Calcular la energía de forma teórica 
+
+Vamos a ver como se calcula la energía de forma teórica para el caso del circuito del paper de un solo qubit $C = U(\alpha) = \cos\alpha Z + \sin\alpha X$.  
 
 Vamos a construir el Hamiltoniano paso a paso en el espacio de Hilbert de 2 qubits.
-
----
 
 ### Paso 1: Definir el espacio de Hilbert y la base
 Trabajaremos en un espacio de $\mathbb{C}^2 \otimes \mathbb{C}^2$. La base computacional estándar de 2 qubits es $\{|00\rangle, |01\rangle, |10\rangle, |11\rangle\}$, donde el primer qubit es el del circuito ($q_1$) y el segundo es el reloj ($q_2$).
 
 ### Paso 2: Representación matricial de los operadores
+
+Tenemos que los operadores de Pauli para un qubit son:
+
+$$ I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad X = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad Y = \begin{pmatrix} 0 & -i \\ i & 0 \end{pmatrix}, \quad Z = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} $$
+
 Necesitamos los operadores de Pauli actuando sobre los qubits correspondientes. Usando el producto tensorial ($\otimes$):
 
 *   $Z_1 = Z \otimes \mathbb{I} = \text{diag}(1, 1, -1, -1)$
@@ -17,8 +22,6 @@ Necesitamos los operadores de Pauli actuando sobre los qubits correspondientes. 
 *   $X_2 = \mathbb{I} \otimes X = \begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{pmatrix}$
 *   $Z_1 X_2 = Z \otimes X = \begin{pmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & -1 \\ 0 & 0 & -1 & 0 \end{pmatrix}$
 *   $X_1 X_2 = X \otimes X = \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}$
-
----
 
 ### Paso 3: Construcción de los términos del Hamiltoniano
 El Hamiltoniano total de Kitaev penaliza estados que no cumplen las reglas del cómputo cuántico. Se define como: 
@@ -44,8 +47,6 @@ $$H_{prop} = \frac{1}{2}(I - \cos\alpha Z_1 X_2 - \sin\alpha X_1 X_2)$$
 Sustituyendo las matrices del Paso 2:
 $$H_{prop} = \frac{1}{2} \begin{pmatrix} 1 & -\cos\alpha & 0 & -\sin\alpha \\ -\cos\alpha & 1 & -\sin\alpha & 0 \\ 0 & -\sin\alpha & 1 & \cos\alpha \\ -\sin\alpha & 0 & \cos\alpha & 1 \end{pmatrix}$$
 
----
-
 ### Paso 4: Ensamblar el Hamiltoniano Total ($H$)
 Sumamos todo con los pesos dados en el paper ($1$ para Out, $6$ para In, $3$ para Prop):
 
@@ -53,8 +54,6 @@ $$H = \begin{pmatrix} 0 \\ & 0 \\ & & 0 \\ & & & 2 \end{pmatrix} + \begin{pmatri
 
 **Matriz final del Hamiltoniano $H$ (Tamaño 4x4):**
 $$H = \begin{pmatrix} 1.5 & -1.5\cos\alpha & 0 & -1.5\sin\alpha \\ -1.5\cos\alpha & 1.5 & -1.5\sin\alpha & 0 \\ 0 & -1.5\sin\alpha & 7.5 & 1.5\cos\alpha \\ -1.5\sin\alpha & 0 & 1.5\cos\alpha & 3.5 \end{pmatrix}$$
-
----
 
 ### Paso 5: Cálculo de la Energía Mínima (Diagonalización)
 
