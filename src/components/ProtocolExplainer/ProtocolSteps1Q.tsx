@@ -161,9 +161,13 @@ const STEPS: Step[] = [
 
 interface ProtocolSteps1QProps {
   alpha: number;
+  showCircuit?: boolean;
 }
 
-export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
+export function ProtocolSteps1Q({
+  alpha,
+  showCircuit = true,
+}: ProtocolSteps1QProps) {
   const [open, setOpen] = useState<string | null>(null);
 
   const toggle = (id: string) => setOpen((prev) => (prev === id ? null : id));
@@ -171,21 +175,23 @@ export function ProtocolSteps1Q({ alpha }: ProtocolSteps1QProps) {
   return (
     <div className="space-y-2">
       {/* ── Circuit ── */}
-      <div
-        className="p-3 border rounded-lg"
-        style={{ borderColor: "#2d2b3a", background: "#181620" }}
-      >
-        <p
-          className="mb-2  text-[10px] uppercase tracking-widest"
-          style={{ color: "#6b6780" }}
+      {showCircuit && (
+        <div
+          className="p-3 border rounded-lg"
+          style={{ borderColor: "#2d2b3a", background: "#181620" }}
         >
-          circuit
-        </p>
-        <Circuit1Q alpha={alpha} />
-        <p className="mt-1  text-[9px]" style={{ color: "#4a4760" }}>
-          q₀ = clock (MSB) · q₁ = work (LSB) · little-endian convention
-        </p>
-      </div>
+          <p
+            className="mb-2  text-[10px] uppercase tracking-widest"
+            style={{ color: "#6b6780" }}
+          >
+            circuit
+          </p>
+          <Circuit1Q alpha={alpha} />
+          <p className="mt-1  text-[9px]" style={{ color: "#4a4760" }}>
+            q₀ = clock (MSB) · q₁ = work (LSB) · little-endian convention
+          </p>
+        </div>
+      )}
 
       {/* ── Steps ── */}
       {STEPS.map((step) => {

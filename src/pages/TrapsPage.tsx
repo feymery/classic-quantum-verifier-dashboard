@@ -8,6 +8,7 @@
 import { Fragment } from "react";
 import { ClassicalStateTrap } from "../modules/traps/components/ClassicalStateTrap";
 import { DepolarizingTrap } from "../modules/traps/components/DepolarizingTrap";
+import { BitFlipTrap } from "../modules/traps/components/BitFlipTrap";
 import { TrapCard } from "../modules/traps/components/TrapCard";
 import { useAppState } from "../state/useAppState";
 
@@ -37,6 +38,11 @@ export function TrapsPage() {
       kind: "active",
       key: "depolarizingTrap",
       node: <DepolarizingTrap alpha={alpha} />,
+    },
+    {
+      kind: "active",
+      key: "bitFlipTrap",
+      node: <BitFlipTrap alpha={alpha} />,
     },
   ];
 

@@ -2,6 +2,8 @@ import {
   ProtocolSteps1Q,
   ConceptBox,
 } from "../../../../components/ProtocolExplainer";
+import { QMAVerifierDiagram } from "../../../../components/CircuitDiagram/QMAVerifierDiagram";
+import { Circuit1Q } from "../../../../components/quantum/Circuit1Q";
 import { Card } from "../../../../ui/Card";
 import { Text } from "../../../../ui/Text";
 
@@ -12,23 +14,80 @@ interface ProtocolGuide1QProps {
 export function ProtocolGuide1Q({ alpha }: ProtocolGuide1QProps) {
   return (
     <Card className="rounded-lg" padded="md">
-      <div className="flex items-center gap-2 mb-4">
+      {/* ── Header ── */}
+      <div className="flex items-center gap-2 mb-1">
+        <span
+          className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+          style={{
+            background: "var(--color-elevated)",
+            color: "var(--color-muted)",
+          }}
+        >
+          Protocol
+        </span>
         <Text as="h3" variant="subtitle">
           How the protocol works
         </Text>
       </div>
+      <p className="mb-5 text-xs" style={{ color: "#9490a8" }}>
+        The classical verifier interacts with a quantum prover through an
+        entangled clock state, measures Pauli observables across three
+        incompatible bases, and accepts only if the reconstructed energy
+        E&nbsp;=&nbsp;⟨H⟩ falls below the classical threshold — certifying
+        genuine quantum behaviour without ever touching the prover's qubit.
+      </p>
 
+      {/* ── Diagrams side by side ── */}
+      <div className="grid gap-4 lg:grid-cols-2 mb-6 items-start">
+        {/* Left: 1Q Stricker circuit */}
+        <div
+          className="p-3 border rounded-xl"
+          style={{ borderColor: "#2d2b3a", background: "#181620" }}
+        >
+          <p
+            className="mb-2 text-[10px] uppercase tracking-widest"
+            style={{ color: "#6b6780" }}
+          >
+            1-qubit Stricker circuit
+          </p>
+          <Circuit1Q alpha={alpha} />
+          <p className="mt-1 text-[9px]" style={{ color: "#4a4760" }}>
+            q₀&nbsp;=&nbsp;clock (MSB) · q₁&nbsp;=&nbsp;work (LSB) ·
+            little-endian convention
+          </p>
+        </div>
+
+        {/* Right: two-prover QMA diagram */}
+        <div
+          className="p-3 border rounded-xl"
+          style={{ borderColor: "#2d2b3a", background: "#181620" }}
+        >
+          <p
+            className="mb-2 text-[10px] uppercase tracking-widest"
+            style={{ color: "#6b6780" }}
+          >
+            two-prover QMA verification
+          </p>
+          <QMAVerifierDiagram />
+          <p className="mt-1 text-[9px]" style={{ color: "#4a4760" }}>
+            Alice &amp; Bob share EPR pairs · classical questions from Verifier
+            · no qubit access
+          </p>
+        </div>
+      </div>
+
+      {/* ── Explanation grid ── */}
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr] items-start">
-        {/* Left: step-by-step + circuit */}
+        {/* Left: step-by-step accordion */}
         <div className="space-y-2">
           <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
             Interactive step-by-step breakdown. Click any step to expand it.
             Values update live as you change α.
           </p>
-          <ProtocolSteps1Q alpha={alpha} />
+          <ProtocolSteps1Q alpha={alpha} showCircuit={false} />
         </div>
 
-        {/* Right: conceptual explanations */}
+        {/* Right: conceptual explanations (merged from both sections) */}
         <div className="space-y-2">
           <p className="mb-3 text-xs" style={{ color: "#9490a8" }}>
             Conceptual background. Expand any section for a concise explanation.
@@ -158,8 +217,59 @@ export function ProtocolGuide1Q({ alpha }: ProtocolGuide1QProps) {
               verifiable range.
             </p>
           </ConceptBox>
+
+          <ConceptBox
+            title="Why 3 circuits? — incompatible bases force quantum commitment"
+            accentColor="#e8a020"
+          >
+            <p>
+              The five terms in E(α) require three incompatible measurement
+              bases. The Verifier sends the basis choice <em>after</em> the
+              Prover prepares the state, so the Prover must hold a genuine
+              quantum state in memory — no classical strategy can satisfy all
+              three bases simultaneously.
+            </p>
+            <ul
+              className="mt-2 space-y-1 text-[10px]"
+              style={{ color: "#6b6780" }}
+            >
+              <li>
+                <strong style={{ color: "#d8b4fe" }}>"z"</strong> — Z on both →
+                extracts ⟨Z₁⟩, ⟨Z₂⟩, ⟨Z₁Z₂⟩ (three terms from one circuit).
+              </li>
+              <li>
+                <strong style={{ color: "#34d399" }}>"zx"</strong> — H on
+                q_clock → needed for the cos(α) cross-term ⟨Z₁X₂⟩.
+              </li>
+              <li>
+                <strong style={{ color: "#e8a020" }}>"x12"</strong> — H on both
+                → needed for the sin(α) cross-term ⟨X₁X₂⟩.
+              </li>
+            </ul>
+          </ConceptBox>
         </div>
       </div>
+
+      {/* ── Footnote ── */}
+      <p
+        className="mt-6 text-[10px] leading-relaxed rounded-lg px-3 py-2 border"
+        style={{
+          color: "#9490a8",
+          borderColor: "#2d2b3a",
+          background: "#181620",
+        }}
+      >
+        <strong style={{ color: "#ddd9ee" }}>
+          Classical Quantum Verifier for QMA:
+        </strong>{" "}
+        A classical polynomial-time Verifier uses two entangled,
+        non-communicating quantum provers to verify quantum proofs (Quantum
+        Merlin–Arthur). The construction relates to <strong>MIP* = RE</strong>{" "}
+        (Ji, Natarajan, Vidick, Wright &amp; Yuen, 2020) and enables
+        verification of QMA-complete Local Hamiltonian problems — where the gap
+        β − α ≥ 1/poly(n) separates YES from NO instances — with only classical
+        interaction.
+      </p>
     </Card>
   );
 }
