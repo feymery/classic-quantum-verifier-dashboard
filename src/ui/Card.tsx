@@ -29,7 +29,7 @@ export function Card({
   return (
     <Component
       className={classNames(
-        "rounded-lg border border-border bg-elevated shadow-card",
+        "flex flex-col rounded-lg border border-border bg-elevated shadow-card",
         className,
       )}
       {...props}
@@ -39,6 +39,7 @@ export function Card({
         className={classNames(
           paddingClasses[padded],
           Boolean(header) && "pt-3",
+          "relative flex-1",
         )}
       >
         {children}

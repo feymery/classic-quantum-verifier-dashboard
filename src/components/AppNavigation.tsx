@@ -8,8 +8,8 @@ const NAV_ITEMS = [
 
 export function AppNavigation() {
   return (
-    <nav className="mb-6 overflow-x-auto border-b-[0.3px] border-border">
-      <div className="flex gap-2">
+    <nav className="border-b-[0.3px] border-border">
+      <div className="flex flex-row gap-2">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}

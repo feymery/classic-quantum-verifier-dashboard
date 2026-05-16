@@ -3,6 +3,9 @@ import { theoreticalEnergy, verifierDecision } from "../physics/energy";
 export const ALPHA_MAX = Math.PI / 2;
 export const SNAP_THRESHOLD = 0.08; // radians — ~5% of full range
 
+/** Verifiable limit α_c = arcsin(√0.4) ≈ 39.2° — re-exported from constants for convenience. */
+export { ALPHA_THRESHOLD } from "./constants";
+
 /** E(α) = sin²(α) — delegates to physics/energy canonical definition */
 export const energy = theoreticalEnergy;
 

@@ -7,17 +7,15 @@ export interface RunExperimentProps {
 
 export function RunExperiment({ runFor1Q, isRunning }: RunExperimentProps) {
   return (
-    <div className="gap-4">
-      <Button
-        onClick={runFor1Q}
-        disabled={isRunning}
-        variant="primary"
-        loading={isRunning}
-        loadingLabel="Running..."
-        className="w-full rounded-lg"
-      >
-        Run experiment
-      </Button>
-    </div>
+    <Button
+      onClick={runFor1Q}
+      disabled={isRunning}
+      variant="primary"
+      loading={isRunning}
+      loadingLabel="Running..."
+      className="w-full rounded-lg"
+    >
+      Run experiment
+    </Button>
   );
 }

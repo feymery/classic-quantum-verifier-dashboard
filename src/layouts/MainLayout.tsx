@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
-import { AppNavigation } from "../components/AppNavigation";
 import { RunHistoryDrawer } from "../components/History/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
 import type { JobHistoryItem } from "../types/runner";
@@ -55,7 +54,6 @@ export function MainLayout() {
           onOpenHistory={() => setHistoryOpen(true)}
         />
         <div className="flex-1 px-2 py-6">
-          <AppNavigation />
           <Outlet />
         </div>
       </div>
