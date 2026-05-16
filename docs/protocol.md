@@ -19,7 +19,7 @@ acceptance threshold; a classical prover cannot replicate the required coherence
 ## 2. Register Layout
 
 | Qubit | Label | Role |
-|---|---|---|
+| --- | --- | --- |
 | q0 | `q_prover` | Work / system qubit — holds the evolving state |
 | q1 | `q_clock` | Clock / history register — drives the superposition |
 
@@ -33,7 +33,7 @@ acceptance threshold; a classical prover cannot replicate the required coherence
 The prover constructs the two-qubit *clock state* $|{\eta(\alpha)}\rangle$ (Eq. 2 of the paper)
 using two gates applied to $|{00}\rangle$:
 
-```
+```text
 Step 1:   H  on q_clock            →  (|0⟩ + |1⟩)/√2  ⊗  |0⟩
 Step 2:   CRY(2α)  ctrl=q_clock, tgt=q_prover
 ```
@@ -74,7 +74,7 @@ H(\alpha) = 3.5\,I\!\otimes\!I
 $$
 
 | Symbol | Meaning |
-|---|---|
+| --- | --- |
 | $Z_1$ | $Z$ on q\_prover (coeff $-2$) |
 | $Z_2$ | $Z$ on q\_clock  (coeff $+1$) |
 | $Z_1 Z_2$ | $Z\!\otimes\!Z$ correlated term (coeff $-1$) |
@@ -103,12 +103,12 @@ This is the theoretical ground truth energy $E_\text{theory}(\alpha) = \sin^2\al
 ### 4.3 Theoretical observable values for $|\eta(\alpha)\rangle$
 
 | Observable | Exact value |
-|---|---|
-| $\langle Z_1\rangle$ | $0$ |
-| $\langle Z_2\rangle$ | $\cos^2\alpha$ |
+| --- | --- |
+| $\langle Z_1\rangle$ | $\cos^2\alpha$ |
+| $\langle Z_2\rangle$ | $0$ |
 | $\langle Z_1 Z_2\rangle$ | $\sin^2\alpha$ |
-| $\langle Z_1 X_2\rangle$ | $-\sin\alpha\cos\alpha$ |
-| $\langle X_1 Z_2\rangle$ | $\cos\alpha$ (visualisation only — not in Hamiltonian) |
+| $\langle Z_1 X_2\rangle$ | $\cos\alpha$ |
+| $\langle X_1 Z_2\rangle$ | $-\sin\alpha\cos\alpha$ (visualisation only — not in Hamiltonian) |
 | $\langle X_1 X_2\rangle$ | $\sin\alpha$ |
 
 ---
@@ -120,7 +120,7 @@ optional visualisation circuit). Each circuit appends a basis-change layer to th
 state preparation.
 
 | Circuit | Basis config $(k_1, k_2)$ | Layer added | Observables extracted |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `"z"` | (0, 0) | none | $Z_1$, $Z_2$, $Z_1 Z_2$ |
 | `"zx"` | (0, 1) | H on q_clock | $Z_1 X_2$ |
 | `"x"` | (1, 1) | H on q_prover and q_clock | $X_1 X_2$ |
@@ -134,7 +134,7 @@ contribute to the energy estimate.
 
 For each bitstring `s` (zero-padded to 2 characters):
 
-```
+```text
 q_prover = s[1]   (meas[0] — rightmost / LSB)
 q_clock  = s[0]   (meas[1] — leftmost  / MSB)
 Z eigenvalue: bit "0" → +1,  bit "1" → −1
@@ -166,7 +166,7 @@ $c_{Z_1 X_2} = -1.5\cos\alpha$, $c_{X_1 X_2} = -1.5\sin\alpha$.
 The verifier classifies each experiment as:
 
 | Condition | Verdict |
-|---|---|
+| --- | --- |
 | $E + \sigma_E < 0.4$ | **accept** — consistent with honest quantum prover |
 | $E - \sigma_E \geq 0.5$ | **reject** — inconsistent with quantum device |
 | otherwise | **marginal** — inconclusive |
@@ -246,7 +246,7 @@ Every measurement shot yields `"00"` — no superposition, no entanglement.
 Expectation values:
 
 | Observable | Value |
-|---|---|
+| --- | --- |
 | $\langle Z_1\rangle$ | $+1$ |
 | $\langle Z_2\rangle$ | $+1$ |
 | $\langle Z_1 Z_2\rangle$ | $+1$ |
@@ -277,7 +277,7 @@ Honest prover: $E = 0$; classical prover ($|000\rangle$): $E = 1.0$.
 ## 11. Key Numeric Constants
 
 | Constant | Value | Meaning |
-|---|---|---|
+| --- | --- | --- |
 | $T_\text{low}$ | 0.4 | Lower energy threshold — accept boundary |
 | $T_\text{high}$ | 0.5 | Upper energy threshold — reject boundary |
 | $H_\infty$ | 3.5 | Energy of maximally-mixed state $\mathrm{Tr}(H)/4$ |
