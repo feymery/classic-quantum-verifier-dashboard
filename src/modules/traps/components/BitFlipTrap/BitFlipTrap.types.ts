@@ -8,6 +8,8 @@ export interface BitFlipObservables {
   X1X2: number;
   E_noisy: number;
   E_ideal: number;
+  /** Critical flip probability for the active target; null when never reached. */
+  p_crit: number | null;
 }
 
 export interface StateDistribution {

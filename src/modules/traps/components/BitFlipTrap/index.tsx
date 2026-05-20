@@ -1,12 +1,7 @@
 /**
  * BitFlipTrap — Trap 3: Bit-Flip Error
  *
- * Demonstrates how an accidental X-gate error (bit-flip) on the clock qubit,
- * the work qubit, or both disrupts the Z-basis measurement distribution and
- * raises the Hamiltonian energy, eventually triggering rejection by the verifier.
- *
- * The user can tune the error probability p and the measurement shot count to
- * observe both the systematic bias and the statistical variance of the estimate.
+ * Simplified view: sliders + 3 representative charts.
  */
 
 import { useState, useMemo } from "react";
@@ -14,18 +9,15 @@ import {
   computeIdealDistribution,
   computeNoisyDistribution,
   computeObservables,
+  computePCrit,
+  derivedTarget,
 } from "./BitFlipTrap.physics";
 import { DEFAULT_P, DEFAULT_SHOTS_OPTION } from "./BitFlipTrap.constants";
-import type { FlipTarget } from "./BitFlipTrap.types";
 import type { ShotsOption } from "./BitFlipTrap.constants";
-import { FlipTargetSelector } from "./components/FlipTargetSelector";
-import { ProbabilitySlider } from "./components/ProbabilitySlider";
+import { DualPSlider } from "./components/DualPSlider";
 import { ShotsSelector } from "./components/ShotsSelector";
 import { ObservableComparison } from "./components/ObservableComparison";
-import { DetectionSignatureBox } from "./components/DetectionSignatureBox";
-import { ShotsVarianceSection } from "./components/ShotsVarianceSection";
-import { BitFlipStateEquations } from "./components/BitFlipStateEquations";
-import { BitFlipMetricsPanel } from "./components/BitFlipMetricsPanel";
+import { BitFlipEnergyVsP } from "./components/BitFlipEnergyVsP";
 import { ProbBars } from "../ProbBars";
 import { DistributionCompare } from "../../shared/DistributionCompare";
 import { HONEST_COLOR, TRAP_COLOR } from "../../shared/trapShared.constants";
@@ -35,18 +27,23 @@ interface Props {
 }
 
 export function BitFlipTrap({ alpha }: Props) {
-  const [target, setTarget] = useState<FlipTarget>("clock");
-  const [p, setP] = useState(DEFAULT_P);
+  const [pClock, setPClock] = useState(DEFAULT_P);
+  const [pWork, setPWork] = useState(0);
   const [shots, setShots] = useState<ShotsOption>(DEFAULT_SHOTS_OPTION);
+
+  const target = useMemo(() => derivedTarget(pClock, pWork), [pClock, pWork]);
+  const pActive = target === "work" ? pWork : pClock;
+  const pCritClock = computePCrit(alpha, "clock") ?? 0.5;
+  const pCritWork = computePCrit(alpha, "work") ?? 0.5;
 
   const idealDist = useMemo(() => computeIdealDistribution(alpha), [alpha]);
   const noisyDist = useMemo(
-    () => computeNoisyDistribution(alpha, p, target),
-    [alpha, p, target],
+    () => computeNoisyDistribution(alpha, pActive, target),
+    [alpha, pActive, target],
   );
   const obs = useMemo(
-    () => computeObservables(alpha, p, target),
-    [alpha, p, target],
+    () => computeObservables(alpha, pClock, pWork),
+    [alpha, pClock, pWork],
   );
 
   const idealCounts = Object.fromEntries(
@@ -56,16 +53,16 @@ export function BitFlipTrap({ alpha }: Props) {
     Object.entries(noisyDist).map(([k, v]) => [k, Math.round(v * shots)]),
   );
 
-  const targetLabel: Record<FlipTarget, string> = {
+  const targetLabel: Record<typeof target, string> = {
     clock: "Bit-flip on clock",
     work: "Bit-flip on work",
     both: "Bit-flip on both",
   };
 
   return (
-    <div className="rounded-lg border border-border bg-canvas p-5">
+    <div className="p-5 border rounded-lg border-border bg-canvas">
       {/* ── Header ── */}
-      <div className="mb-4 flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-4">
         <span className="rounded-lg bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
           Trap 3
         </span>
@@ -74,75 +71,66 @@ export function BitFlipTrap({ alpha }: Props) {
         </h2>
       </div>
 
-      {/* ── Two-column body ── */}
-      <div
-        className="grid gap-6"
-        style={{ gridTemplateColumns: "minmax(0,50fr) minmax(0,50fr)" }}
-      >
-        {/* ══════════════ LEFT COLUMN ══════════════ */}
-        <div className="flex flex-col gap-5">
-          {/* Description */}
-          <p className="text-[12px] leading-relaxed text-muted">
-            A bit-flip error applies an accidental{" "}
-            <span className="font-mono text-foreground">X</span> gate to a qubit
-            with probability{" "}
-            <span className="font-mono text-foreground">p</span>. On the{" "}
-            <span className="font-mono text-foreground">clock</span> qubit it
-            swaps the roles of{" "}
-            <span className="font-mono text-foreground">|0⟩</span> and{" "}
-            <span className="font-mono text-foreground">|1⟩</span>, redirecting
-            part of the population into{" "}
-            <span className="font-mono text-foreground">|10⟩</span> and{" "}
-            <span className="font-mono text-foreground">|01⟩</span>. On the{" "}
-            <span className="font-mono text-foreground">work</span> qubit the
-            same disruption appears but in the opposite columns. When{" "}
-            <span className="font-mono text-foreground">both</span> qubits are
-            affected independently, cross-terms mix all four basis states. In
-            every case the Pauli correlators are attenuated by{" "}
-            <span className="font-mono text-foreground">(1−2p)</span> per
-            affected qubit, raising the Hamiltonian energy above the acceptance
-            threshold.
-          </p>
-
-          <FlipTargetSelector target={target} onChange={setTarget} />
-          <BitFlipStateEquations alpha={alpha} p={p} target={target} />
-          <ProbabilitySlider p={p} setP={setP} />
-          <ShotsSelector shots={shots} onChange={setShots} />
-          <ObservableComparison alpha={alpha} obs={obs} p={p} />
-        </div>
-
-        {/* ══════════════ RIGHT COLUMN ══════════════ */}
-        <div className="flex flex-col gap-5">
-          {/* Theoretical distribution: ideal vs noisy */}
-          <DistributionCompare
-            label="theoretical distribution"
-            honestLabel="Honest |η(α)⟩"
-            trapLabel={targetLabel[target]}
-            isTrap={p > 0}
-            honestBars={
-              <ProbBars
-                counts={idealCounts}
-                shots={shots}
-                accentColor={HONEST_COLOR}
-              />
-            }
-            trapBars={
-              <ProbBars
-                counts={noisyCounts}
-                shots={shots}
-                accentColor={p > 0 ? TRAP_COLOR : HONEST_COLOR}
-              />
-            }
-          />
-
-          <DetectionSignatureBox obs={obs} p={p} />
-
-          <ShotsVarianceSection noisyDist={noisyDist} shots={shots} />
-        </div>
+      {/* ── Controls ── */}
+      <div className="mb-5 flex flex-col gap-4">
+        <p className="text-[12px] leading-relaxed text-muted">
+          A bit-flip channel applies an accidental{" "}
+          <span className="font-mono text-foreground">X</span> gate with
+          probability <span className="font-mono text-foreground">p</span>,
+          disrupting Z-basis coherence. Set independent flip probabilities on
+          the{" "}
+          <span className="font-mono" style={{ color: "#a78bfa" }}>
+            clock
+          </span>{" "}
+          and{" "}
+          <span className="font-mono" style={{ color: "#f59e0b" }}>
+            work
+          </span>{" "}
+          qubits.
+        </p>
+        <DualPSlider
+          pClock={pClock}
+          setPClock={setPClock}
+          pWork={pWork}
+          setPWork={setPWork}
+          pCritClock={pCritClock}
+          pCritWork={pCritWork}
+        />
+        <ShotsSelector shots={shots} onChange={setShots} />
       </div>
 
-      {/* ── Metrics panel ── */}
-      <BitFlipMetricsPanel alpha={alpha} p={p} shots={shots} target={target} />
+      {/* ── Charts (3 representative) ── */}
+      <div className="flex flex-col gap-5">
+        {/* Chart 1: ideal vs noisy distribution */}
+        <DistributionCompare
+          label="theoretical distribution"
+          honestLabel="Honest |η(α)⟩"
+          trapLabel={targetLabel[target]}
+          isTrap={pActive > 0}
+          honestBars={
+            <ProbBars
+              counts={idealCounts}
+              shots={shots}
+              accentColor={HONEST_COLOR}
+            />
+          }
+          trapBars={
+            <ProbBars
+              counts={noisyCounts}
+              shots={shots}
+              accentColor={pActive > 0 ? TRAP_COLOR : HONEST_COLOR}
+            />
+          }
+        />
+
+        {/* Chart 2: observable contraction */}
+        <ObservableComparison alpha={alpha} obs={obs} p={pActive} />
+
+        {/* Chart 3: ⟨E⟩ vs p with p_crit markers */}
+        <div className="rounded-md border border-border bg-canvas p-4">
+          <BitFlipEnergyVsP alpha={alpha} pClock={pClock} pWork={pWork} />
+        </div>
+      </div>
     </div>
   );
 }
