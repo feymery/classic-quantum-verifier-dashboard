@@ -10,6 +10,7 @@ interface RunHistoryDrawerProps {
   error: string | null;
   onRestore: (item: JobHistoryItem) => void;
   onLoadResult: (item: JobHistoryItem) => void;
+  onLoadSweep: (items: JobHistoryItem[]) => void;
   onClear: () => void;
   onSync: (item: JobHistoryItem) => void;
 }
@@ -22,6 +23,7 @@ export function RunHistoryDrawer({
   error,
   onRestore,
   onLoadResult,
+  onLoadSweep,
   onClear,
   onSync,
 }: RunHistoryDrawerProps) {
@@ -56,6 +58,10 @@ export function RunHistoryDrawer({
         }}
         onLoadResult={(item) => {
           onLoadResult(item);
+          onClose();
+        }}
+        onLoadSweep={(sweepItems) => {
+          onLoadSweep(sweepItems);
           onClose();
         }}
         onClear={onClear}

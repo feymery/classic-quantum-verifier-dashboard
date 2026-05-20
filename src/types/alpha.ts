@@ -9,4 +9,6 @@ export interface KeyAlpha {
 export interface AlphaControlProps {
   alpha: number;
   setAlpha: (v: number) => void;
+  selectedAlphas?: number[];
+  toggleAlpha?: (v: number) => void;
 }

@@ -8,6 +8,9 @@ import { runAlphaSweep, type AlphaSweepPoint } from "../services/sweepApi";
 
 export function useDashboardState() {
   const [alpha, setAlpha] = useState<number>(PROTOCOL_ALPHA);
+  const [selectedAlphas, setSelectedAlphas] = useState<number[]>([
+    PROTOCOL_ALPHA,
+  ]);
   const [shots, setShots] = useState<number>(1024);
   const [selectedBackend, setSelectedBackend] = useState<BackendId>("aer");
   const {
@@ -76,8 +79,15 @@ export function useDashboardState() {
 
   const toggleShowToken = useCallback(() => setShowToken((v) => !v), []);
 
+  const toggleAlpha = useCallback((v: number) => {
+    setSelectedAlphas((prev) =>
+      prev.includes(v) ? prev.filter((a) => a !== v) : [...prev, v],
+    );
+  }, []);
+
   return {
     alpha,
+    selectedAlphas,
     shots,
     selectedBackend,
     ibmToken,
@@ -95,6 +105,8 @@ export function useDashboardState() {
     sweepError,
     runSweep,
     setAlpha,
+    setSelectedAlphas,
+    toggleAlpha,
     setShots,
     setSelectedBackend,
     setIbmToken,

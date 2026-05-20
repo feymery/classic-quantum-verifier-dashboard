@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { runExperiment as runExperiment1Q } from "../modules/oneQubit/services/quantumApi";
 import {
-  pollBackendExperiment1Q,
   startBackendExperiment1Q,
+  pollBackendExperiment1Q,
 } from "../modules/oneQubit/services/backendExperiment1Q";
 import type { BackendId } from "../utils/constants";
 import type { ExperimentResult } from "../types/experiment";
@@ -33,6 +33,7 @@ interface RunnerState {
   status: RunnerStatus;
   error: string | null;
   oneQResult: ExperimentResult | null;
+  sweepResults: Record<string, ExperimentResult>;
   latestBackend: string | null;
   latestExecutionSource: ExecutionSource | null;
 }
@@ -70,6 +71,7 @@ export function useExperimentRunner() {
     status: "idle",
     error: null,
     oneQResult: null,
+    sweepResults: {},
     latestBackend: null,
     latestExecutionSource: null,
   }));
@@ -166,6 +168,8 @@ export function useExperimentRunner() {
         ...prev,
         status: "running",
         error: null,
+        oneQResult: null,
+        sweepResults: {},
         latestExecutionSource: null,
       }));
 
@@ -199,12 +203,134 @@ export function useExperimentRunner() {
     [runIbm1Q],
   );
 
+  // ── runMultiAlpha ─────────────────────────────────────────────────────────────
+
+  const runMultiAlpha = useCallback(
+    async (alphas: number[], shots: number, backend: BackendId) => {
+      setState((prev) => ({
+        ...prev,
+        status: "running",
+        error: null,
+        oneQResult: null,
+        sweepResults: {},
+        latestExecutionSource: null,
+      }));
+
+      const sweepId = crypto.randomUUID();
+      let completed = 0;
+
+      for (const alpha of alphas) {
+        try {
+          const started = await startBackendExperiment1Q({
+            alpha,
+            shots,
+            backend,
+            sweepId,
+          });
+          const result =
+            started.kind === "queued"
+              ? await pollBackendExperiment1Q(started.jobId, {
+                  alpha,
+                  shots,
+                  backend,
+                })
+              : started.result;
+
+          setState((prev) => ({
+            ...prev,
+            oneQResult: result,
+            latestBackend: result.backend,
+            latestExecutionSource: "api",
+            sweepResults: {
+              ...prev.sweepResults,
+              [alpha.toFixed(4)]: result,
+            },
+          }));
+
+          completed++;
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : `α=${alpha.toFixed(3)} failed`;
+          toastRef.current(msg, "error");
+          // continue with remaining alphas
+        }
+      }
+
+      setState((prev) => ({
+        ...prev,
+        status: completed > 0 ? "complete" : "error",
+      }));
+
+      if (completed > 0) {
+        refetchHistoryRef.current();
+        toastRef.current(
+          `Sweep complete — ${completed}/${alphas.length} α values succeeded`,
+          "success",
+        );
+      }
+    },
+    [],
+  );
+
+  // ── restoreSweep ──────────────────────────────────────────────────────────────
+
+  const restoreSweep = useCallback(async (items: JobHistoryItem[]) => {
+    const doneItems = items.filter((item) => item.status === "done");
+    if (doneItems.length === 0) return;
+
+    setState((prev) => ({
+      ...prev,
+      status: "running",
+      error: null,
+      oneQResult: null,
+      sweepResults: {},
+    }));
+
+    const restored: Record<string, ExperimentResult> = {};
+
+    for (const item of doneItems) {
+      try {
+        const input = {
+          alpha: item.alpha,
+          shots: item.shots,
+          backend: (item.requestedBackend as BackendId) ?? "aer",
+        };
+        const result = await pollBackendExperiment1Q(item.jobId, input);
+        restored[item.alpha.toFixed(4)] = result;
+      } catch {
+        // skip — failed fetches are silent, final toast shows count
+      }
+    }
+
+    const loadedCount = Object.keys(restored).length;
+    setState((prev) => ({
+      ...prev,
+      status: loadedCount > 0 ? "complete" : "error",
+      sweepResults: restored,
+    }));
+
+    if (loadedCount > 0) {
+      toastRef.current(
+        `Sweep restored — ${loadedCount}/${doneItems.length} results loaded`,
+        "success",
+      );
+    } else {
+      toastRef.current("Failed to restore sweep results", "error");
+    }
+  }, []);
+
   // ── Remaining callbacks ───────────────────────────────────────────────────────
 
   const restoreResult = useCallback(async (item: JobHistoryItem) => {
     if (item.status !== "done") return;
 
-    setState((prev) => ({ ...prev, status: "running", error: null }));
+    setState((prev) => ({
+      ...prev,
+      status: "running",
+      error: null,
+      oneQResult: null,
+      sweepResults: {},
+    }));
 
     try {
       const input = {
@@ -235,7 +361,9 @@ export function useExperimentRunner() {
     ...state,
     isRunning: state.status === "running",
     runExperiment,
+    runMultiAlpha,
     restoreResult,
+    restoreSweep,
     // Job history sourced from backend SQLite via useJobHistory
     historyItems: jobHistory.items,
     historyLoading: jobHistory.loading,

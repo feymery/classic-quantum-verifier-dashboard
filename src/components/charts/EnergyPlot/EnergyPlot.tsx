@@ -4,12 +4,12 @@ import { energy as calcEnergy } from "../../../utils/alphaUtils";
 import { CHART_COLORS } from "../chartTheme";
 import { ChartLegendItem } from "../ChartLegend";
 import { Card } from "../../../ui/Card";
+import type { ExperimentResult } from "../../../types/experiment";
 import type {
   EnergyPlotPoint,
   EnergyPlotSharedProps,
 } from "./EnergyPlot.types";
 import { EnergyPlotChart } from "./components/EnergyPlotChart";
-import { EnergyPlotSummary } from "./components/EnergyPlotSummary";
 
 // ── Static curve data (computed once) ────────────────────────────────────────
 
@@ -21,8 +21,40 @@ const CURVE_DATA: EnergyPlotPoint[] = energyCurve(200).map((pt) => ({
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
+export function EnergyPlot({
+  alpha,
+  result,
+  sweepResults,
+}: EnergyPlotSharedProps) {
   const chartData = useMemo(() => {
+    // Build a map from the closest curve-point to each sweep result
+    if (sweepResults && sweepResults.length > 0) {
+      const closestFor = new Map<EnergyPlotPoint, ExperimentResult>();
+      for (const r of sweepResults) {
+        const closest = CURVE_DATA.reduce((best, pt) =>
+          Math.abs(pt.alpha - r.alpha) < Math.abs(best.alpha - r.alpha)
+            ? pt
+            : best,
+        );
+        // Last sweep result wins if two map to the same point (shouldn't happen with 5 distinct alphas)
+        closestFor.set(closest, r);
+      }
+      return CURVE_DATA.map((pt) => {
+        const r = closestFor.get(pt);
+        if (r) {
+          return {
+            ...pt,
+            sweepEst: r.energy.estimated,
+            sweepDecision: r.energy.decision,
+            sweepBackend: r.backend,
+            sweepAlpha: r.alpha,
+          };
+        }
+        return pt;
+      });
+    }
+
+    // Single result (no sweep) — backwards compat
     if (!result) return CURVE_DATA;
     const closest = CURVE_DATA.reduce((best, pt) =>
       Math.abs(pt.alpha - result.alpha) < Math.abs(best.alpha - result.alpha)
@@ -33,13 +65,14 @@ export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
       ...pt,
       estimated: pt === closest ? result.energy.estimated : undefined,
     }));
-  }, [result]);
+  }, [result, sweepResults]);
 
   const currentE = calcEnergy(alpha);
-  const estimatedE = result?.energy.estimated;
+  // When sweep results are present, don't show the single estimated dot
+  const hasSweep = Boolean(sweepResults && sweepResults.length > 0);
 
   return (
-    <Card className="rounded-lg" padded="md">
+    <Card className="h-full rounded-lg" padded="md">
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -54,12 +87,26 @@ export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
               color={CHART_COLORS.theoretical}
               label="E = sin²(α)"
             />
-            {result && (
+            {result && !hasSweep && (
               <ChartLegendItem
                 type="dot"
                 color={CHART_COLORS.estimated}
                 label="estimated"
               />
+            )}
+            {hasSweep && (
+              <>
+                <ChartLegendItem
+                  type="dot"
+                  color={CHART_COLORS.accept}
+                  label="accept"
+                />
+                <ChartLegendItem
+                  type="dot"
+                  color={CHART_COLORS.reject}
+                  label="reject"
+                />
+              </>
             )}
           </div>
         </div>
@@ -67,14 +114,9 @@ export function EnergyPlot({ alpha, result }: EnergyPlotSharedProps) {
         <EnergyPlotChart
           alpha={alpha}
           chartData={chartData}
-          hasResult={Boolean(result)}
+          hasResult={Boolean(result) && !hasSweep}
+          hasSweep={hasSweep}
           currentE={currentE}
-        />
-
-        <EnergyPlotSummary
-          alpha={alpha}
-          currentE={currentE}
-          estimatedE={estimatedE}
         />
       </div>
     </Card>

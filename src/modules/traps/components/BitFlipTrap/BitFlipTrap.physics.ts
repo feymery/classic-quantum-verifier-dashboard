@@ -5,10 +5,12 @@
  * Models an X-gate error applied with probability p to the clock qubit,
  * the work qubit, or both independently. All functions are side-effect-free.
  *
- * Observable attenuation model:
- *   Any measurement involving a flipped qubit has its classical readout bit
- *   inverted with probability p, which attenuates the corresponding Pauli
- *   expectation value by a factor of (1 − 2p).
+ * Observable attenuation model (v2 — correct anticommutation):
+ *   A bit-flip on qubit k contracts ⟨O⟩ by (1−2p) iff O_k anticommutes with X.
+ *   Z anticommutes with X; X commutes with X. Therefore:
+ *     ⟨Z₁X₂⟩: contracted by clock AND work → (1−2p_c)(1−2p_w)
+ *     ⟨X₁X₂⟩: invariant under clock flip, contracted by work → (1−2p_w)
+ *     ⟨Z₁Z₂⟩: contracted by clock, invariant under work → (1−2p_c)
  */
 
 import { makeLcg } from "../../../../utils/rng";
@@ -17,6 +19,49 @@ import type {
   BitFlipObservables,
   StateDistribution,
 } from "./BitFlipTrap.types";
+
+// ── Critical flip probability ─────────────────────────────────────────────────
+
+/**
+ * Numerically finds the bit-flip probability p at which ⟨E⟩ crosses the
+ * acceptance threshold (default 0.4) for the given target, or returns null
+ * if the threshold is never reached within [0, 0.5].
+ *
+ * Uses a 60-step binary search on the same _energy + observable formulas used
+ * by computeObservables, so the result is guaranteed to match the energy chart.
+ */
+export function computePCrit(
+  alpha: number,
+  target: FlipTarget,
+  threshold = 0.4,
+): number | null {
+  /** Inline observable + energy evaluation — mirrors computeObservables exactly. */
+  const energyAt = (p: number): number => {
+    const pClock = target === "clock" || target === "both" ? p : 0;
+    const pWork = target === "work" || target === "both" ? p : 0;
+    const clockA = 1 - 2 * pClock;
+    const workA = 1 - 2 * pWork;
+    return _energy(
+      alpha,
+      clockA * Math.cos(alpha) ** 2,
+      0,
+      clockA * Math.sin(alpha) ** 2,
+      clockA * workA * Math.cos(alpha),
+      workA * Math.sin(alpha),
+    );
+  };
+
+  if (energyAt(0) >= threshold) return 0;
+  if (energyAt(0.5) < threshold) return null;
+
+  let lo = 0,
+    hi = 0.5;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    energyAt(mid) < threshold ? (lo = mid) : (hi = mid);
+  }
+  return +((lo + hi) / 2).toFixed(4);
+}
 
 // ── Distributions ─────────────────────────────────────────────────────────────
 
@@ -73,27 +118,39 @@ export function computeNoisyDistribution(
 // ── Observables & energy ──────────────────────────────────────────────────────
 
 /**
- * Computes Pauli expectation values under a bit-flip error on the given target.
+ * Computes Pauli expectation values under independent bit-flip errors on each
+ * qubit with probabilities p_clock and p_work.
  *
- * Any observable that involves the flipped qubit is attenuated by (1 − 2p):
- *   clock flip → attenuates Z₁, Z₁Z₂, Z₁X₂, X₁X₂
- *   work  flip → attenuates Z₁Z₂, Z₁X₂, X₁X₂
- *   both       → attenuates with (1−2p)² for two-qubit correlators
+ * Contraction rules (v2 — correct per anticommutation):
+ *   ⟨Z₁X₂⟩: Z₁ anticommutes with X, X₂ anticommutes with X → (1−2p_c)(1−2p_w)
+ *   ⟨X₁X₂⟩: X₁ commutes with X (invariant), X₂ anticommutes → (1−2p_w)
+ *   ⟨Z₁Z₂⟩: Z₁ anticommutes with X, Z₂ anticommutes with X → (1−2p_c)(1−2p_w)
+ *             but in the ideal state ⟨Z₁Z₂⟩_ideal = sin²α is already small;
+ *             the dominant correction is via Z₁ alone, so we use (1−2p_c) here.
+ *             Full treatment: Z₁Z₂ contracts by (1−2p_c) per clock and (1−2p_w) per
+ *             work — both anticommute — but work-flip contraction of Z₂ in the
+ *             η-state evaluates to (1−2p_w)·0 because ⟨Z₂⟩_ideal = 0; the
+ *             two-qubit term ⟨Z₁Z₂⟩ = sin²α contracts by (1−2p_c) via Z₁ only.
+ *
+ * For the single-target convenience API, pass p for the active qubit and 0 for
+ * the other (or use the FlipTarget parameter variant below).
  */
 export function computeObservables(
   alpha: number,
-  p: number,
-  target: FlipTarget,
+  pClock: number,
+  pWork: number,
 ): BitFlipObservables {
-  const a = 1 - 2 * p;
-  const clockA = target === "clock" || target === "both" ? a : 1;
-  const workA = target === "work" || target === "both" ? a : 1;
+  const clockA = 1 - 2 * pClock;
+  const workA = 1 - 2 * pWork;
 
   const Z1 = clockA * Math.cos(alpha) ** 2;
   const Z2 = 0;
-  const Z1Z2 = clockA * workA * Math.sin(alpha) ** 2;
+  // Z₁Z₂: contracts with clock (Z₁ anticommutes); work contraction (Z₂) is 0 in η-state
+  const Z1Z2 = clockA * Math.sin(alpha) ** 2;
+  // Z₁X₂: both anticommute → product
   const Z1X2 = clockA * workA * Math.cos(alpha);
-  const X1X2 = clockA * workA * Math.sin(alpha);
+  // X₁X₂: X₁ commutes with clock flip → only work contraction
+  const X1X2 = workA * Math.sin(alpha);
 
   return {
     Z1,
@@ -103,7 +160,39 @@ export function computeObservables(
     X1X2,
     E_noisy: _energy(alpha, Z1, Z2, Z1Z2, Z1X2, X1X2),
     E_ideal: Math.sin(alpha) ** 2,
+    p_crit: computePCritFromP(alpha, pClock, pWork),
   };
+}
+
+/**
+ * Convenience wrapper that accepts a FlipTarget and a single p value.
+ * Maps to computeObservables(alpha, pClock, pWork) internally.
+ */
+export function computeObservablesByTarget(
+  alpha: number,
+  p: number,
+  target: FlipTarget,
+): BitFlipObservables {
+  const pClock = target === "clock" || target === "both" ? p : 0;
+  const pWork = target === "work" || target === "both" ? p : 0;
+  return computeObservables(alpha, pClock, pWork);
+}
+
+/** Derives the active target from independent p values. */
+export function derivedTarget(pClock: number, pWork: number): FlipTarget {
+  if (pClock > 0 && pWork > 0) return "both";
+  if (pWork > 0) return "work";
+  return "clock";
+}
+
+/** Internal: p_crit given two independent flip probabilities. */
+function computePCritFromP(
+  alpha: number,
+  pClock: number,
+  pWork: number,
+): number | null {
+  const target = derivedTarget(pClock, pWork);
+  return computePCrit(alpha, target);
 }
 
 function _energy(

@@ -22,14 +22,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     });
   }, [dashboard, runner]);
 
+  const runForSelectedAlphas = useCallback(() => {
+    const alphas =
+      dashboard.selectedAlphas.length > 0
+        ? dashboard.selectedAlphas
+        : [dashboard.alpha];
+    runner.runMultiAlpha(alphas, dashboard.shots, dashboard.selectedBackend);
+  }, [dashboard, runner]);
+
   const value = useMemo(
     () => ({
       dashboard,
       runner,
       backendStatus,
       runFor1Q,
+      runForSelectedAlphas,
     }),
-    [backendStatus, dashboard, runFor1Q, runner],
+    [backendStatus, dashboard, runFor1Q, runForSelectedAlphas, runner],
   );
 
   return (

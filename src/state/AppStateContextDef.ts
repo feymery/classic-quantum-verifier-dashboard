@@ -7,6 +7,7 @@ interface AppStateContextValue {
   runner: ReturnType<typeof useExperimentRunner>;
   backendStatus: "idle" | "running" | "error";
   runFor1Q: () => void;
+  runForSelectedAlphas: () => void;
 }
 
 export const AppStateContext = createContext<AppStateContextValue | null>(null);

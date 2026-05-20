@@ -138,14 +138,11 @@ class JobStore:
         if result is not None:
             updates.append("result_json = ?")
             params.append(json.dumps(result))
-        if metadata is not None:
-            updates.append("metadata_json = ?")
-            params.append(json.dumps(metadata))
         if error is not None:
             updates.append("error = ?")
             params.append(error)
 
-        if not updates:
+        if not updates and metadata is None:
             return self.get_job(job_id)
 
         updates.append("updated_at = ?")
@@ -153,6 +150,21 @@ class JobStore:
         params.append(job_id)
 
         with self._lock:
+            if metadata is not None:
+                # Merge with existing metadata so keys set at creation (e.g. sweep_id)
+                # are preserved when the job is updated on completion.
+                existing_row = self._conn.execute(
+                    "SELECT metadata_json FROM jobs WHERE job_id = ?", (job_id,)
+                ).fetchone()
+                existing_meta: dict[str, Any] = (
+                    json.loads(existing_row["metadata_json"])
+                    if existing_row and existing_row["metadata_json"]
+                    else {}
+                )
+                merged = {**existing_meta, **metadata}
+                updates.insert(-1, "metadata_json = ?")  # before updated_at
+                params.insert(-2, json.dumps(merged))    # before updated_at, before job_id
+
             cursor = self._conn.execute(
                 f"UPDATE jobs SET {', '.join(updates)} WHERE job_id = ?",
                 params,

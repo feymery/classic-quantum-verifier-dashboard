@@ -4,6 +4,7 @@ import type { BitFlipObservables } from "../BitFlipTrap.types";
 interface Props {
   alpha: number;
   obs: BitFlipObservables;
+  /** Active flip probability (clock or work, whichever is non-zero). */
   p: number;
 }
 
