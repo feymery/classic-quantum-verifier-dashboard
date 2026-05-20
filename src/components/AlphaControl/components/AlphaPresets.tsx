@@ -5,9 +5,16 @@ import { AlphaPresetButton } from "./AlphaPresetButton";
 interface AlphaPresetsProps {
   alpha: number;
   onSelect: (v: number) => void;
+  selectedAlphas: number[];
+  onToggle: (v: number) => void;
 }
 
-export function AlphaPresets({ alpha, onSelect }: AlphaPresetsProps) {
+export function AlphaPresets({
+  alpha,
+  onSelect,
+  selectedAlphas,
+  onToggle,
+}: AlphaPresetsProps) {
   const keyValues = KEY_ALPHAS.map((k) => k.value);
   const snappedIdx = nearestKeyIndex(alpha, keyValues);
 
@@ -24,7 +31,11 @@ export function AlphaPresets({ alpha, onSelect }: AlphaPresetsProps) {
           <AlphaPresetButton
             ka={ka}
             isActive={snappedIdx === i}
-            onSelect={onSelect}
+            isSelected={selectedAlphas.includes(ka.value)}
+            onSelect={(v) => {
+              onSelect(v);
+              onToggle(v);
+            }}
           />
         </div>
       ))}

@@ -93,6 +93,7 @@ interface RawJobItem {
   execution_source: string | null;
   energy_estimate: number | null;
   decision: "accept" | "boundary" | "reject" | null;
+  sweep_id: string | null;
   error: string | null;
 }
 
@@ -121,6 +122,7 @@ function rawToJobHistoryItem(raw: RawJobItem): JobHistoryItem {
     executionSource: raw.execution_source,
     energyEstimate: raw.energy_estimate,
     decision: raw.decision,
+    sweepId: raw.sweep_id ?? null,
     error: raw.error,
   };
 }

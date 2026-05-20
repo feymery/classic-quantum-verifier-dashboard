@@ -54,7 +54,8 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     onOpenHistory,
   } = props;
 
-  const { runner, runFor1Q } = useAppState();
+  const { runner, runFor1Q, runForSelectedAlphas, dashboard } = useAppState();
+  const selectedCount = dashboard.selectedAlphas.length;
 
   return (
     <header className="flex flex-col gap-6 lg:flex-row">
@@ -91,7 +92,11 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             onBackendNameChange={onBackendNameChange}
             onConfirmToken={onConfirmToken}
           />
-          <RunExperiment runFor1Q={runFor1Q} isRunning={runner.isRunning} />
+          <RunExperiment
+            runFor1Q={selectedCount > 1 ? runForSelectedAlphas : runFor1Q}
+            isRunning={runner.isRunning}
+            selectedCount={selectedCount}
+          />
         </div>
       </Card>
     </header>

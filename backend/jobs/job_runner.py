@@ -86,7 +86,7 @@ def _compose_result(
     }
 
 
-def run_experiment_sync(alpha: float, shots: int, backend: str = "aer") -> dict:
+def run_experiment_sync(alpha: float, shots: int, backend: str = "aer", sweep_id: str | None = None) -> dict:
     """Synchronous execution for aer / aer_qpu — records the run in the job store."""
     backend_requested = (backend or "aer").strip().lower()
 
@@ -94,7 +94,7 @@ def run_experiment_sync(alpha: float, shots: int, backend: str = "aer") -> dict:
         float(alpha),
         int(shots),
         backend_requested,
-        {"requested_backend": backend_requested},
+        {"requested_backend": backend_requested, "sweep_id": sweep_id},
     )
     job_store.update_job(job_id, status="running")
 
@@ -167,13 +167,13 @@ def run_job_async(job_id: str) -> None:
         )
 
 
-def submit_job(alpha: float, shots: int, backend: str = "ibm") -> str:
+def submit_job(alpha: float, shots: int, backend: str = "ibm", sweep_id: str | None = None) -> str:
     backend_name = "ibm" if (backend or "ibm").strip().lower() == "ibm" else "aer"
     job_id = job_store.create_job(
         alpha=alpha,
         shots=shots,
         backend=backend_name,
-        metadata={},
+        metadata={"sweep_id": sweep_id},
     )
     executor = _IBM_EXECUTOR if backend_name == "ibm" else _AER_EXECUTOR
     executor.submit(run_job_async, job_id)
