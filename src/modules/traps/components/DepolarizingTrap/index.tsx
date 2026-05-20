@@ -11,7 +11,7 @@
 import { useState, useMemo } from "react";
 import {
   computeENoisy,
-  lambdaCritApprox,
+  lambdaCritExact,
   buildEnergyData,
   noisyColor,
 } from "./DepolarizingTrap.physics";
@@ -21,10 +21,9 @@ import { ObservableTable } from "./components/ObservableTable";
 import { ThresholdStatusBox } from "./components/ThresholdStatusBox";
 import { EnergyVsAlphaChart } from "./components/EnergyVsAlphaChart";
 import { ContractionChart } from "./components/ContractionChart";
-import { DetectionSignatureBox } from "./components/DetectionSignatureBox";
 
 export function DepolarizingTrap({
-  alpha = 0.2,
+  alpha = 9 * (Math.PI / 180), // 9° — Stricker et al. reference operating point
   lambda: lambdaProp = 0.05,
 }: DepolarizingTrapProps) {
   const [lam, setLam] = useState(lambdaProp);
@@ -44,7 +43,7 @@ export function DepolarizingTrap({
     [alpha, lam, lam2, cosA, sinA],
   );
 
-  const lcrit = lambdaCritApprox(alpha);
+  const lcrit = lambdaCritExact(alpha);
   const aboveCrit = lam > lcrit;
   const lineColor = noisyColor(lam);
   const energyData = useMemo(() => buildEnergyData(lam), [lam]);
@@ -97,6 +96,8 @@ export function DepolarizingTrap({
             lcrit={lcrit}
             alpha={alpha}
             aboveCrit={aboveCrit}
+            obs={obs}
+            lineColor={lineColor}
           />
         </div>
 
@@ -110,13 +111,6 @@ export function DepolarizingTrap({
           />
 
           <ContractionChart lam={lam} lcrit={lcrit} lineColor={lineColor} />
-
-          <DetectionSignatureBox
-            alpha={alpha}
-            lam={lam}
-            lineColor={lineColor}
-            obs={obs}
-          />
         </div>
       </div>
     </div>

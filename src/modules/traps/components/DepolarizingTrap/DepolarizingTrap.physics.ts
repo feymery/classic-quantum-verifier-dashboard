@@ -32,11 +32,21 @@ export function computeENoisy(alpha: number, lam: number): number {
 }
 
 /**
- * Approximate critical λ beyond which verification fails at the given α.
- * Derived from E ≈ sin²α + (3/2)λ = 0.4 → λ_crit = (0.4 − sin²α) · 2/3
+ * Exact critical λ at which E_noisy(α, λ) = THRESHOLD.
+ *
+ * Derivation: expanding E(λ) in terms of u = (1−λ) gives a quadratic
+ *   u²·(sin²α + 3/2) + 2u·cos²α − (3.5 − THRESHOLD) = 0
+ * Solved analytically; only the root in [0,1] is physically meaningful.
  */
-export function lambdaCritApprox(alpha: number): number {
-  return Math.max(0, (THRESHOLD - Math.sin(alpha) ** 2) * (2 / 3));
+export function lambdaCritExact(alpha: number): number {
+  const c2 = Math.cos(alpha) ** 2;
+  const s2 = Math.sin(alpha) ** 2;
+  const a = s2 + 1.5;
+  const b = 2 * c2;
+  const c = THRESHOLD - 3.5; // negative
+  const disc = b * b - 4 * a * c;
+  const u = (-b + Math.sqrt(disc)) / (2 * a);
+  return Math.max(0, Math.min(1, 1 - u));
 }
 
 // ── Chart data builders ───────────────────────────────────────────────────────
