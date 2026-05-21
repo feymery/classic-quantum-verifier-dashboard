@@ -17,6 +17,16 @@ export interface ContractionPoint {
   contraction: number;
 }
 
+export interface EnergyVsLambdaPoint {
+  lambda: number;
+  E_noisy: number;
+}
+
+export interface PhaseDiagramPoint {
+  alphaDeg: number;
+  lambdaCrit: number;
+}
+
 /** Live-computed observables at current (alpha, lambda). */
 export interface Observables {
   Z1X2_noisy: number;

@@ -20,7 +20,8 @@ import { LambdaSlider } from "./components/LambdaSlider";
 import { ObservableTable } from "./components/ObservableTable";
 import { ThresholdStatusBox } from "./components/ThresholdStatusBox";
 import { EnergyVsAlphaChart } from "./components/EnergyVsAlphaChart";
-import { ContractionChart } from "./components/ContractionChart";
+import { EnergyVsLambdaChart } from "./components/EnergyVsLambdaChart";
+import { VerificationPhaseDiagram } from "./components/VerificationPhaseDiagram";
 
 export function DepolarizingTrap({
   alpha = 9 * (Math.PI / 180), // 9° — Stricker et al. reference operating point
@@ -110,8 +111,18 @@ export function DepolarizingTrap({
             energyData={energyData}
           />
 
-          <ContractionChart lam={lam} lcrit={lcrit} lineColor={lineColor} />
+          <EnergyVsLambdaChart
+            alpha={alpha}
+            lam={lam}
+            lcrit={lcrit}
+            lineColor={lineColor}
+          />
         </div>
+      </div>
+
+      {/* ── Phase diagram — full width ── */}
+      <div className="mt-5 border-t border-border pt-5">
+        <VerificationPhaseDiagram alpha={alpha} lam={lam} lcrit={lcrit} />
       </div>
     </div>
   );

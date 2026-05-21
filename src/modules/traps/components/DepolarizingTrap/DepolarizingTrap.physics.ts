@@ -11,7 +11,12 @@ import {
   N_POINTS,
   LAMBDA_MAX,
 } from "./DepolarizingTrap.constants";
-import type { EnergyPoint, ContractionPoint } from "./DepolarizingTrap.types";
+import type {
+  EnergyPoint,
+  ContractionPoint,
+  EnergyVsLambdaPoint,
+  PhaseDiagramPoint,
+} from "./DepolarizingTrap.types";
 
 // ── Energy ────────────────────────────────────────────────────────────────────
 
@@ -71,6 +76,32 @@ export const CONTRACTION_DATA: ContractionPoint[] = Array.from(
     return { lambda: lam, contraction: (1 - lam) ** 2 };
   },
 );
+
+/** 150 points: E_noisy(λ) at fixed α over [0, 0.15]. */
+export function buildEnergyVsLambdaData(alpha: number): EnergyVsLambdaPoint[] {
+  return Array.from({ length: 151 }, (_, i) => {
+    const lam = (i / 150) * 0.15;
+    return { lambda: lam, E_noisy: computeENoisy(alpha, lam) };
+  });
+}
+
+/**
+ * Static verification phase diagram: the λ_crit(α) boundary
+ * over the full verifiable range α ∈ [0°, arcsin(√T)).
+ * Built once at import time.
+ */
+export const PHASE_DIAGRAM_DATA: PhaseDiagramPoint[] = (() => {
+  const alphaCritMax = Math.asin(Math.sqrt(THRESHOLD)); // ≈ 39.2°
+  const N = 200;
+  const pts: PhaseDiagramPoint[] = [];
+  for (let i = 0; i <= N; i++) {
+    const alpha = (i / N) * alphaCritMax;
+    const lc = lambdaCritExact(alpha);
+    if (lc <= 0) break;
+    pts.push({ alphaDeg: (alpha / PI_HALF) * 90, lambdaCrit: lc });
+  }
+  return pts;
+})();
 
 // ── Colour helpers ────────────────────────────────────────────────────────────
 
