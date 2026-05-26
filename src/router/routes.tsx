@@ -1,7 +1,12 @@
 import { Suspense, type ReactNode } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
-import { ExperimentPage, TrapsPage, FundamentalsPage } from "./lazyPages";
+import {
+  ConclusionsPage,
+  ExperimentPage,
+  TrapsPage,
+  FundamentalsPage,
+} from "./lazyPages";
 
 function withPageLoader(node: ReactNode) {
   return (
@@ -33,6 +38,7 @@ export const appRouter = createBrowserRouter([
       { path: "fundamentals", element: withPageLoader(<FundamentalsPage />) },
       { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
       { path: "traps", element: withPageLoader(<TrapsPage />) },
+      { path: "conclusions", element: withPageLoader(<ConclusionsPage />) },
     ],
   },
 ]);
