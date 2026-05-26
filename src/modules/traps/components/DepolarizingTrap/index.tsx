@@ -50,9 +50,9 @@ export function DepolarizingTrap({
   const energyData = useMemo(() => buildEnergyData(lam), [lam]);
 
   return (
-    <div className="rounded-lg border border-border bg-canvas p-5">
+    <div className="p-5 border rounded-lg border-border bg-canvas">
       {/* ── Header ── */}
-      <div className="mb-4 flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-4">
         <span className="rounded-lg bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
           Trap 2
         </span>
@@ -121,7 +121,7 @@ export function DepolarizingTrap({
       </div>
 
       {/* ── Phase diagram — full width ── */}
-      <div className="mt-5 border-t border-border pt-5">
+      <div className="pt-5 mt-5 border-t border-border">
         <VerificationPhaseDiagram alpha={alpha} lam={lam} lcrit={lcrit} />
       </div>
     </div>

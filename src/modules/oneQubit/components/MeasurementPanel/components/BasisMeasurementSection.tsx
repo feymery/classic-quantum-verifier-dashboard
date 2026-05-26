@@ -98,7 +98,7 @@ export function BasisMeasurementSection({
     <div className="space-y-2">
       {/* Section header */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-subtle">
+        <span className="text-[10px] uppercase tracking-widest text-white/80">
           {label}
         </span>
       </div>

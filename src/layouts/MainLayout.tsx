@@ -43,7 +43,7 @@ export function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen px-32 py-6">
       <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
@@ -53,7 +53,6 @@ export function MainLayout() {
           ibmInstance={dashboard.ibmInstance}
           ibmBackendName={dashboard.ibmBackendName}
           showToken={dashboard.showToken}
-          alpha={dashboard.alpha}
           shots={dashboard.shots}
           onBackendChange={dashboard.setSelectedBackend}
           onTokenChange={dashboard.setIbmToken}
@@ -61,7 +60,6 @@ export function MainLayout() {
           onBackendNameChange={dashboard.setIbmBackendName}
           onToggleShowToken={dashboard.toggleShowToken}
           onConfirmToken={dashboard.confirmToken}
-          onAlphaChange={dashboard.setAlpha}
           onShotsChange={dashboard.setShots}
           onOpenHistory={() => setHistoryOpen(true)}
         />

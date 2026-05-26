@@ -48,6 +48,7 @@ class JobStore:
                 )
                 """
             )
+            self._add_column_if_missing("jobs", "mode", "TEXT NOT NULL DEFAULT '1q'")
             self._conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_jobs_updated_at ON jobs(updated_at DESC)"
             )
@@ -64,6 +65,11 @@ class JobStore:
                     "ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT '1q'"
                 )
             self._conn.commit()
+
+    def _add_column_if_missing(self, table: str, column: str, col_def: str) -> None:
+        cols = {row[1] for row in self._conn.execute(f"PRAGMA table_info({table})")}
+        if column not in cols:
+            self._conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_def}")
 
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, Any]:
         metadata_raw = row["metadata_json"]
