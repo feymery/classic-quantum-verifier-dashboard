@@ -245,7 +245,7 @@ export function BitFlipEnergyVsP({ alpha, pClock, pWork }: Props) {
         </span>
         <span className="flex items-center gap-1.5">
           <span
-            className="inline-block h-2 w-3 rounded-sm"
+            className="inline-block w-3 h-2 rounded-sm"
             style={{
               background: "rgba(52,211,153,0.15)",
               border: "1px solid rgba(52,211,153,0.3)",

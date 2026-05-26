@@ -13,23 +13,24 @@
 
 @theme {
   /* ── Surfaces ───────────────────────────────────────────────────────
+     Light mode (default). Dark overrides live in .dark {} below.
      Three-level depth scale: canvas → surface → elevated              */
-  --color-canvas:   #131217; /* body / deepest background               */
-  --color-surface:  #181620; /* raised cards, form inputs               */
-  --color-elevated: #1e1c26; /* panel faces, card bodies                */
+  --color-canvas:   #ffffff; /* body / deepest background               */
+  --color-surface:  #f9f8fd; /* raised cards, form inputs               */
+  --color-elevated: #f1eefc; /* panel faces, card bodies                */
 
   /* ── Borders ──────────────────────────────────────────────────────── */
-  --color-border: #2d2b3a;
+  --color-border: #cec8e4;
 
   /* ── Text / Foreground ────────────────────────────────────────────── */
-  --color-foreground: #ddd9ee; /* primary readable text                 */
-  --color-muted:      #9490a8; /* secondary / helper text               */
-  --color-subtle:     #6b6780; /* placeholder, meta, step labels        */
+  --color-foreground: #1c1929; /* primary readable text                 */
+  --color-muted:      #5c5874; /* secondary / helper text               */
+  --color-subtle:     #8c88a0; /* placeholder, meta, step labels        */
 
   /* ── Accent — brand purple ────────────────────────────────────────── */
   --color-accent:       #a78bfa; /* primary accent                      */
-  --color-accent-light: #c4b5fd; /* hover / lighter tint                */
-  --color-accent-dim:   #d8b4fe; /* dimmer purple on dark backgrounds   */
+  --color-accent-light: #a78bfa; /* hover / darker tint on light bg     */
+  --color-accent-dim:   #8b5cf6; /* softer purple                       */
 
   /* ── Semantic feedback ────────────────────────────────────────────── */
   --color-success:  #34d399;
@@ -46,6 +47,17 @@
   --color-basis-01: #9490a8; /* = muted   */
   --color-basis-10: #a78bfa; /* = accent  */
   --color-basis-11: #34d399; /* = success */
+
+  /* ── Badge semantic colours — adapt between light / dark ─────────── */
+  --color-badge-success-text:   #047857;
+  --color-badge-success-bg:     #d1fae5;
+  --color-badge-success-border: #6ee7b7;
+  --color-badge-error-text:     #b91c1c;
+  --color-badge-error-bg:       #fee2e2;
+  --color-badge-error-border:   #fca5a5;
+  --color-badge-warning-text:   #92400e;
+  --color-badge-warning-bg:     #fef3c7;
+  --color-badge-warning-border: #fcd34d;
 
   /* ── Shadows ─────────────────────────────────────────────────────── */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
@@ -75,4 +87,33 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   Applied when <html class="dark"> is set by useTheme hook.
+   These reassign only the surface/text/border/accent tokens; semantic
+   colours (success, warning, etc.) work on both backgrounds unchanged.
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark {
+  --color-canvas:   #131217;
+  --color-surface:  #181620;
+  --color-elevated: #1e1c26;
+  --color-border:   #2d2b3a;
+  --color-foreground: #ddd9ee;
+  --color-muted:      #9490a8;
+  --color-subtle:     #6b6780;
+  --color-accent:       #a78bfa;
+  --color-accent-light: #c4b5fd;
+  --color-accent-dim:   #d8b4fe;
+
+  --color-badge-success-text:   #6ee7b7;
+  --color-badge-success-bg:     rgba(52, 211, 153, 0.10);
+  --color-badge-success-border: rgba(52, 211, 153, 0.25);
+  --color-badge-error-text:     #fca5a5;
+  --color-badge-error-bg:       rgba(248, 113, 113, 0.10);
+  --color-badge-error-border:   rgba(248, 113, 113, 0.25);
+  --color-badge-warning-text:   #fcd34d;
+  --color-badge-warning-bg:     rgba(245, 158, 11, 0.10);
+  --color-badge-warning-border: rgba(245, 158, 11, 0.25);
 }

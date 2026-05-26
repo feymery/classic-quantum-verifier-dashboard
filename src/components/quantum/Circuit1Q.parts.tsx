@@ -5,8 +5,8 @@
 
 export const GW = 26;
 export const GH = 20;
-export const C_GATE = "#a78bfa";
-export const C_TRAP = "#f87171";
+export const C_GATE = "var(--color-accent)";
+export const C_TRAP = "var(--color-danger)";
 
 export function GBox({
   x,
@@ -32,7 +32,7 @@ export function GBox({
         width={w}
         height={GH}
         rx={3}
-        fill="#1e1c2a"
+        style={{ fill: "var(--color-elevated)" }}
         stroke={color}
         strokeWidth={1.2}
       />
@@ -97,15 +97,15 @@ export function MBox({ x, y }: { x: number; y: number }) {
         width={24}
         height={20}
         rx={3}
-        fill="#1e1c2a"
-        stroke="#3d3b4a"
+        style={{ fill: "var(--color-elevated)" }}
+        stroke="var(--color-border)"
         strokeWidth={1}
       />
       <text
         x={x}
         y={y + 4}
         textAnchor="middle"
-        fill="#6b6780"
+        fill="var(--color-subtle)"
         fontSize={8}
         fontFamily="monospace"
       >

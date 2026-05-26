@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.errors import raise_api_error
-from backend.jobs.job_runner import run_experiment_sync, submit_job
+from backend.jobs.job_runner import run_experiment_sync, submit_job, try_sync_ibm_job
 from backend.jobs.job_store import job_store
 
 router = APIRouter()
@@ -64,6 +64,13 @@ def get_job(job_id: str) -> dict:
             message="Requested job does not exist.",
             details={"job_id": job_id},
         )
+
+    # If an IBM job is stuck pending/running, proactively poll IBM for its real state.
+    if job["status"] in ("pending", "running") and job.get("backend") == "ibm":
+        ibm_job_id: str | None = (job.get("metadata") or {}).get("ibm_job_id")
+        if ibm_job_id:
+            try_sync_ibm_job(job_id, ibm_job_id, job)
+            job = job_store.get_job(job_id)  # re-read updated state
 
     return {
         "job_id": job["job_id"],

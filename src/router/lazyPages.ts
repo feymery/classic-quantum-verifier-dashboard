@@ -1,11 +1,16 @@
 import { lazy } from "react";
 
+export const MotivationPage = lazy(async () => {
+  const module = await import("../pages/MotivationPage");
+  return { default: module.MotivationPage };
+});
+
 export const ExperimentPage = lazy(async () => {
   const module = await import("../pages/ExperimentPage");
   return { default: module.ExperimentPage };
 });
 
-export const TrapsPage = lazy(async () => {
+export const AdversarialPage = lazy(async () => {
   const module = await import("../pages/TrapsPage");
   return { default: module.TrapsPage };
 });

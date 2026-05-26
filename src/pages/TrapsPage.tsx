@@ -1,72 +1,68 @@
 /**
- * TrapsPage.tsx — Demos of the quantum verification protocol "traps".
+ * TrapsPage.tsx — Adversarial scenario explorer.
  *
- * Each trap illustrates a strategy a dishonest prover might attempt
- * and how the verifier detects it by measuring the Hamiltonian energy.
+ * One compact ideal-state reference strip, then a tab selector
+ * that shows a single adversarial scenario at a time.
  */
 
-import { Fragment } from "react";
+import { useState } from "react";
 import { ClassicalStateTrap } from "../modules/traps/components/ClassicalStateTrap";
 import { DepolarizingTrap } from "../modules/traps/components/DepolarizingTrap";
 import { BitFlipTrap } from "../modules/traps/components/BitFlipTrap";
-import { TrapCard } from "../modules/traps/components/TrapCard";
 import { useAppState } from "../state/useAppState";
+import { Card } from "../ui";
 
-// ── Trap definitions ─────────────────────────────────────────────────────────
-
-type ActiveTrap = { kind: "active"; key: string; node: React.ReactNode };
-type PendingTrap = {
-  kind: "pending";
-  id: string;
-  title: string;
-  description: string;
-};
-type TrapEntry = ActiveTrap | PendingTrap;
+const SCENARIOS = [
+  { id: 0, n: "1", label: "Classical State" },
+  { id: 1, n: "2", label: "Depolarizing Noise" },
+  { id: 2, n: "3", label: "Bit-Flip Error" },
+] as const;
 
 export function TrapsPage() {
   const {
     dashboard: { alpha },
   } = useAppState();
 
-  const TRAPS: TrapEntry[] = [
-    {
-      kind: "active",
-      key: "classicalStateTrap",
-      node: <ClassicalStateTrap alpha={alpha} />,
-    },
-    {
-      kind: "active",
-      key: "depolarizingTrap",
-      node: <DepolarizingTrap alpha={alpha} />,
-    },
-    {
-      kind: "active",
-      key: "bitFlipTrap",
-      node: <BitFlipTrap alpha={alpha} />,
-    },
-  ];
+  const [active, setActive] = useState(0);
 
   return (
-    <div className="space-y-6">
-      <p className="text-[13px]" style={{ color: "#9490a8" }}>
-        The quantum verification protocol detects dishonest provers by measuring
-        the clock Hamiltonian energy. An honest prover produces a quantum clock
-        state with temporal coherence — any classical shortcut leaves a distinct
-        energy signature.
-      </p>
+    <div className="space-y-4">
+      {/* ── Scenario selector ── */}
+      <div className="grid grid-cols-3 gap-2">
+        {SCENARIOS.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => setActive(s.id)}
+            className={`rounded-lg border-2 px-3 py-2.5 text-left transition-all ${
+              active === s.id
+                ? "border-accent bg-accent/8 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40 hover:bg-elevated"
+            }`}
+          >
+            <span
+              className={`block text-[9px] font-bold uppercase tracking-wider mb-0.5 ${
+                active === s.id ? "text-accent" : "text-subtle"
+              }`}
+            >
+              Scenario {s.n}
+            </span>
+            <span
+              className={`text-[12px] font-medium ${
+                active === s.id ? "text-foreground" : "text-muted"
+              }`}
+            >
+              {s.label}
+            </span>
+          </button>
+        ))}
+      </div>
 
-      {TRAPS.map((trap) =>
-        trap.kind === "active" ? (
-          <Fragment key={trap.key}>{trap.node}</Fragment>
-        ) : (
-          <TrapCard
-            key={trap.id}
-            id={trap.id}
-            title={trap.title}
-            description={trap.description}
-          />
-        ),
-      )}
+      {/* ── Active scenario ── */}
+      <Card padded="lg">
+        {active === 0 && <ClassicalStateTrap alpha={alpha} />}
+        {active === 1 && <DepolarizingTrap />}
+        {active === 2 && <BitFlipTrap alpha={alpha} />}
+      </Card>
     </div>
   );
 }

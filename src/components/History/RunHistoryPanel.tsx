@@ -1,7 +1,6 @@
 import type { JobHistoryItem } from "../../types/runner";
 import { Badge } from "../../ui/Badge";
 import { Button } from "../../ui/Button";
-import { Card } from "../../ui/Card";
 import { Text } from "../../ui/Text";
 import { formatAlpha } from "../../utils/alphaUtils";
 
@@ -185,10 +184,12 @@ function SweepGroup({
   items,
   onRestore,
   onLoadSweep,
+  onSync,
 }: {
   items: JobHistoryItem[];
   onRestore: (item: JobHistoryItem) => void;
   onLoadSweep: (items: JobHistoryItem[]) => void;
+  onSync: (item: JobHistoryItem) => void;
 }) {
   const doneCount = items.filter((i) => i.status === "done").length;
   const acceptCount = items.filter((i) => i.decision === "accept").length;
@@ -199,11 +200,17 @@ function SweepGroup({
     items[0],
   );
   const first = sortedItems[0];
+  const pendingIbmItems = items.filter(
+    (i) =>
+      (i.status === "pending" || i.status === "running") &&
+      i.requestedBackend.includes("ibm"),
+  );
 
   return (
     <div className="px-4 py-4 border rounded-lg border-border bg-surface">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Row 1: badges + timestamp */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Badge variant="neutral">sweep</Badge>
           <Badge variant="neutral">{items.length} α values</Badge>
           {acceptCount > 0 && (
@@ -216,34 +223,13 @@ function SweepGroup({
             <Badge variant="warning">pending: {items.length - doneCount}</Badge>
           )}
         </div>
-
-        <div className="flex items-center gap-2">
-          <Text variant="caption" color="muted">
-            {formatTimestamp(newest.createdAt)}
-          </Text>
-          {doneCount > 0 && (
-            <Button
-              onClick={() => onLoadSweep(items)}
-              variant="primary"
-              size="sm"
-            >
-              Load sweep
-            </Button>
-          )}
-          {first && (
-            <Button
-              onClick={() => onRestore(first)}
-              variant="secondary"
-              size="sm"
-            >
-              Restore inputs
-            </Button>
-          )}
-        </div>
+        <Text variant="caption" color="muted" className="shrink-0">
+          {formatTimestamp(newest.createdAt)}
+        </Text>
       </div>
 
-      {/* Alpha chips colored by decision */}
-      <div className="flex flex-wrap gap-2 mt-3">
+      {/* Row 2: alpha chips */}
+      <div className="flex flex-wrap gap-1.5 mt-3">
         {sortedItems.map((item) => (
           <span
             key={item.jobId}
@@ -263,11 +249,37 @@ function SweepGroup({
         ))}
       </div>
 
-      <div className="mt-2">
+      {/* Row 3: shots info + action buttons */}
+      <div className="flex items-center justify-between gap-3 mt-3">
         <Text variant="caption" color="muted">
           shots: {first?.shots.toLocaleString()} &middot;{" "}
           {first?.requestedBackend ?? "—"}
         </Text>
+        <div className="flex items-center gap-2">
+          {pendingIbmItems.length > 0 && (
+            <Button
+              onClick={() => pendingIbmItems.forEach((i) => onSync(i))}
+              variant="secondary"
+              size="sm"
+            >
+              Sync results
+            </Button>
+          )}
+          {first && (
+            <Button onClick={() => onRestore(first)} variant="ghost" size="sm">
+              Restore inputs
+            </Button>
+          )}
+          {doneCount > 0 && (
+            <Button
+              onClick={() => onLoadSweep(items)}
+              variant="primary"
+              size="sm"
+            >
+              Load sweep
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -285,7 +297,7 @@ export function RunHistoryPanel({
   const entries = partitionItems(items);
 
   return (
-    <Card className="rounded-lg" padded="md">
+    <>
       {error !== null && (
         <Text variant="caption" color="error" className="block mt-4">
           {error}
@@ -322,11 +334,12 @@ export function RunHistoryPanel({
                 items={entry.items}
                 onRestore={onRestore}
                 onLoadSweep={onLoadSweep}
+                onSync={onSync}
               />
             ),
           )}
         </div>
       )}
-    </Card>
+    </>
   );
 }

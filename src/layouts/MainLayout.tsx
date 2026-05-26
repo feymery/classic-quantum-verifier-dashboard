@@ -43,7 +43,7 @@ export function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen px-32 py-6">
+    <div className="min-h-screen px-4 py-4 sm:px-6 sm:py-6 lg:mx-auto lg:px-15 lg:py-15 lg:max-w-8xl">
       <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}
@@ -63,7 +63,7 @@ export function MainLayout() {
           onShotsChange={dashboard.setShots}
           onOpenHistory={() => setHistoryOpen(true)}
         />
-        <div className="flex-1 px-2 py-6">
+        <div className="flex-1 py-6">
           <Outlet />
         </div>
       </div>

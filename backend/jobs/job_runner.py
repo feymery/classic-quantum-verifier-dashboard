@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import math
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
 from backend.qiskit.circuit_builder import build_measurement_circuit
@@ -33,12 +34,15 @@ def _get_backend_for_aer(backend_requested: str) -> object:
     return make_qpu_backend(ibm_backend) if ibm_backend is not None else None
 
 def _run_three_basis(
-    alpha: float, shots: int, backend: object
+    alpha: float, shots: int, backend: object,
+    on_submitted: Callable[[str], None] | None = None,
 ) -> tuple[dict[str, int], dict[str, int], dict[str, int], str, float, dict]:
     z_circuit  = build_measurement_circuit(alpha, basis="z")
     zx_circuit = build_measurement_circuit(alpha, basis="zx")
     x_circuit  = build_measurement_circuit(alpha, basis="x")
-    z_res, zx_res, x_res = run_circuits([z_circuit, zx_circuit, x_circuit], shots, backend)
+    z_res, zx_res, x_res = run_circuits(
+        [z_circuit, zx_circuit, x_circuit], shots, backend, on_submitted=on_submitted,
+    )
     total_ms = sum(r.metadata["execution_time_ms"] for r in (z_res, zx_res, x_res))
     backend_name: str = z_res.metadata.get("backend_name", "aer")
     meta = {
@@ -142,8 +146,12 @@ def run_job_async(job_id: str) -> None:
         else:
             backend = _get_backend_for_aer(requested_backend)
 
+        def _on_ibm_submitted(ibm_job_id: str) -> None:
+            job_store.update_job(job_id, metadata={"ibm_job_id": ibm_job_id})
+
+        callback = _on_ibm_submitted if requested_backend == "ibm" else None
         counts_z, counts_zx, counts_x, backend_used, execution_time, metadata = _run_three_basis(
-            alpha, shots, backend
+            alpha, shots, backend, on_submitted=callback
         )
         metadata["requested_backend"] = requested_backend
         metadata["execution_backend"] = requested_backend
@@ -178,3 +186,47 @@ def submit_job(alpha: float, shots: int, backend: str = "ibm", sweep_id: str | N
     executor = _IBM_EXECUTOR if backend_name == "ibm" else _AER_EXECUTOR
     executor.submit(run_job_async, job_id)
     return job_id
+
+
+def try_sync_ibm_job(local_job_id: str, ibm_job_id: str, job: dict) -> None:
+    """Query IBM Runtime for the real status of a stuck pending/running IBM job.
+
+    If IBM reports completion, the result is processed and the local store is
+    updated to "done".  If IBM reports failure, the store is updated to "failed".
+    If IBM is still running (or we cannot connect), nothing is changed.
+    """
+    from backend.routers.ibm_client import get_shared_client  # noqa: PLC0415
+
+    client = get_shared_client()
+    poll = client.poll_ibm_job(ibm_job_id)
+    if poll is None:
+        return
+
+    status, counts_z, counts_zx, counts_x, backend_name = poll
+
+    if status == "done":
+        alpha = float(job["alpha"])
+        shots = int(job["shots"])
+        requested_backend = str(job.get("backend", "ibm"))
+        result = _compose_result(
+            alpha, shots, counts_z, counts_zx, counts_x, backend_name, 0.0
+        )
+        job_store.update_job(
+            local_job_id,
+            status="done",
+            result=result,
+            metadata={
+                "backend_name": backend_name,
+                "execution_backend": requested_backend,
+                "requested_backend": requested_backend,
+                "ibm_job_id": ibm_job_id,
+            },
+            error=None,
+        )
+    elif status == "failed":
+        job_store.update_job(
+            local_job_id,
+            status="failed",
+            error="IBM job failed or was cancelled",
+            metadata={"ibm_job_id": ibm_job_id},
+        )

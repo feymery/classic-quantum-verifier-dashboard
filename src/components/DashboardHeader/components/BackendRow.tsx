@@ -21,9 +21,9 @@ export function BackendRow({
   onBackendChange,
 }: BackendRowProps) {
   return (
-    <div className="flex justify-between gap-3">
-      <Badge variant="neutral">backend</Badge>
-      <div className="flex gap-3">
+    <div className="flex flex-col gap-1">
+      <span className="text-xs select-none text-muted">backend</span>
+      <div className="flex gap-2">
         <select
           id="backend-select"
           value={selectedBackend}

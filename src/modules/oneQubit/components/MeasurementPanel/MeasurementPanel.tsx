@@ -8,7 +8,6 @@ import {
 } from "../../physics/measurements";
 import type { ExperimentResult } from "../../../../types/experiment";
 import type { RunnerStatus } from "../../../../types/runner";
-import type { Verdict } from "../../../../types/dashboard";
 import { Card } from "../../../../ui/Card";
 import { Text } from "../../../../ui/Text";
 import { BASIS_STATE_COLORS } from "../../../../components/charts/chartTheme";
@@ -22,23 +21,6 @@ const MEASUREMENT_BASES: Array<{ key: string; label: string }> = [
   { key: "zx", label: "X₁Z₂ basis" },
   { key: "x", label: "XX basis" },
 ];
-
-// ── Verdict styles ────────────────────────────────────────────────────────────
-
-const VERDICT_CONFIG: Record<Verdict, { label: string; classes: string }> = {
-  accept: {
-    label: "ACCEPT",
-    classes: "text-success bg-success/8 border-success/30",
-  },
-  boundary: {
-    label: "BOUNDARY",
-    classes: "text-warning bg-warning/8 border-warning/30",
-  },
-  reject: {
-    label: "REJECT",
-    classes: "text-danger bg-danger/8 border-danger/30",
-  },
-};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -60,7 +42,6 @@ export function MeasurementPanel({
   const psi = buildClockState(alpha);
   const exact = exactExpectations(psi);
   const isLoading = status === "running";
-  const decision: Verdict | null = result?.energy?.decision ?? null;
 
   // Born-rule expected probabilities per basis
   const expectedByBasis = useMemo(
@@ -83,14 +64,16 @@ export function MeasurementPanel({
         )}
 
         {/* Expectation values */}
-        <section>
-          <SectionLabel>expectation values</SectionLabel>
-          <ExpectationTable
-            sampled={result?.expectationValues ?? null}
-            exact={exact}
-            loading={isLoading}
-          />
-        </section>
+        <div className="flex flex-col gap-4">
+          <section>
+            <SectionLabel>expectation values</SectionLabel>
+            <ExpectationTable
+              sampled={result?.expectationValues ?? null}
+              exact={exact}
+              loading={isLoading}
+            />
+          </section>
+        </div>
 
         {/* Divider */}
         <div className="border-t border-elevated" />
@@ -112,27 +95,6 @@ export function MeasurementPanel({
             )}
           </section>
         ))}
-
-        {/* Divider */}
-        <div className="border-t border-elevated" />
-
-        {/* Resultado */}
-        <section>
-          <SectionLabel>result</SectionLabel>
-          {decision ? (
-            <div
-              className={`flex items-center justify-between gap-3 rounded px-3 py-2 border ${VERDICT_CONFIG[decision].classes}`}
-            >
-              <span className="text-[11px]">{VERDICT_CONFIG[decision].label}</span>
-            </div>
-          ) : (
-            <div className="rounded px-3 py-2 border bg-surface border-border">
-              <span className="text-[10px] text-subtle">
-                {isLoading ? "computing…" : "run experiment to see result"}
-              </span>
-            </div>
-          )}
-        </section>
       </div>
     </Card>
   );
