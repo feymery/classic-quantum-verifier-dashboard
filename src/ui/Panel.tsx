@@ -21,7 +21,7 @@ export function Panel({
   return (
     <section
       className={classNames(
-        "rounded-lg border border-border bg-elevated p-5 shadow-card",
+        "rounded-lg border border-border bg-surface p-5",
         wide ? "col-span-full" : "",
         className,
       )}

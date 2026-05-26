@@ -13,23 +13,24 @@
 
 @theme {
   /* ── Surfaces ───────────────────────────────────────────────────────
+     Light mode (default). Dark overrides live in .dark {} below.
      Three-level depth scale: canvas → surface → elevated              */
-  --color-canvas:   #131217; /* body / deepest background               */
-  --color-surface:  #181620; /* raised cards, form inputs               */
-  --color-elevated: #1e1c26; /* panel faces, card bodies                */
+  --color-canvas:   #f5f4fc; /* body / deepest background               */
+  --color-surface:  #ffffff; /* raised cards, form inputs               */
+  --color-elevated: #eeedf8; /* panel faces, card bodies                */
 
   /* ── Borders ──────────────────────────────────────────────────────── */
-  --color-border: #2d2b3a;
+  --color-border: #d8d5ef;
 
   /* ── Text / Foreground ────────────────────────────────────────────── */
-  --color-foreground: #ddd9ee; /* primary readable text                 */
-  --color-muted:      #9490a8; /* secondary / helper text               */
-  --color-subtle:     #6b6780; /* placeholder, meta, step labels        */
+  --color-foreground: #1c1929; /* primary readable text                 */
+  --color-muted:      #5c5874; /* secondary / helper text               */
+  --color-subtle:     #8c88a0; /* placeholder, meta, step labels        */
 
   /* ── Accent — brand purple ────────────────────────────────────────── */
-  --color-accent:       #a78bfa; /* primary accent                      */
-  --color-accent-light: #c4b5fd; /* hover / lighter tint                */
-  --color-accent-dim:   #d8b4fe; /* dimmer purple on dark backgrounds   */
+  --color-accent:       #7c3aed; /* primary accent                      */
+  --color-accent-light: #6d28d9; /* hover / darker tint on light bg     */
+  --color-accent-dim:   #8b5cf6; /* softer purple                       */
 
   /* ── Semantic feedback ────────────────────────────────────────────── */
   --color-success:  #34d399;
@@ -75,4 +76,23 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   Applied when <html class="dark"> is set by useTheme hook.
+   These reassign only the surface/text/border/accent tokens; semantic
+   colours (success, warning, etc.) work on both backgrounds unchanged.
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark {
+  --color-canvas:   #131217;
+  --color-surface:  #181620;
+  --color-elevated: #1e1c26;
+  --color-border:   #2d2b3a;
+  --color-foreground: #ddd9ee;
+  --color-muted:      #9490a8;
+  --color-subtle:     #6b6780;
+  --color-accent:       #a78bfa;
+  --color-accent-light: #c4b5fd;
+  --color-accent-dim:   #d8b4fe;
 }
