@@ -5,6 +5,7 @@ import { BackendRow, HeaderStrip, IbmTokenSection } from "./components";
 import { useAppState } from "../../state/useAppState";
 import { RunExperiment } from "./components/RunExperiment";
 import { IntroPanel } from "./components/IntroPanel";
+import { AppNavigation } from "../AppNavigation";
 
 export interface DashboardHeaderProps {
   // identity
@@ -53,22 +54,24 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     onOpenHistory,
   } = props;
 
-  const { runner, runFor1Q } = useAppState();
+  const { runner, runFor1Q, runForSelectedAlphas, dashboard } = useAppState();
+  const selectedCount = dashboard.selectedAlphas.length;
 
   return (
-    <header className="flex flex-col gap-6 md:flex-row">
-      <IntroPanel onOpenHistory={onOpenHistory} />
+    <header className="flex flex-col gap-6 lg:flex-row">
+      <div className="flex flex-col gap-6">
+        <IntroPanel onOpenHistory={onOpenHistory} />
+        <AppNavigation />
+      </div>
 
-      <Card className="flex-1 rounded-lg " padded="sm">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-4">
-            <BackendRow
-              selectedBackend={selectedBackend}
-              backendStatus={backendStatus}
-              onBackendChange={onBackendChange}
-              onOpenHistory={onOpenHistory}
-            />
-          </div>
+      <Card>
+        <div className="flex flex-col justify-between h-full gap-3">
+          <BackendRow
+            selectedBackend={selectedBackend}
+            backendStatus={backendStatus}
+            onBackendChange={onBackendChange}
+            onOpenHistory={onOpenHistory}
+          />
 
           <HeaderStrip
             alpha={alpha}
@@ -77,21 +80,23 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             onShotsChange={onShotsChange}
           />
 
-          {selectedBackend === "ibm_runtime" && (
-            <IbmTokenSection
-              ibmToken={ibmToken}
-              ibmTokenSet={ibmTokenSet}
-              ibmInstance={ibmInstance}
-              ibmBackendName={ibmBackendName}
-              showToken={showToken}
-              onToggleShowToken={onToggleShowToken}
-              onTokenChange={onTokenChange}
-              onInstanceChange={onInstanceChange}
-              onBackendNameChange={onBackendNameChange}
-              onConfirmToken={onConfirmToken}
-            />
-          )}
-          <RunExperiment runFor1Q={runFor1Q} isRunning={runner.isRunning} />
+          <IbmTokenSection
+            ibmToken={ibmToken}
+            ibmTokenSet={ibmTokenSet}
+            ibmInstance={ibmInstance}
+            ibmBackendName={ibmBackendName}
+            showToken={showToken}
+            onToggleShowToken={onToggleShowToken}
+            onTokenChange={onTokenChange}
+            onInstanceChange={onInstanceChange}
+            onBackendNameChange={onBackendNameChange}
+            onConfirmToken={onConfirmToken}
+          />
+          <RunExperiment
+            runFor1Q={selectedCount > 1 ? runForSelectedAlphas : runFor1Q}
+            isRunning={runner.isRunning}
+            selectedCount={selectedCount}
+          />
         </div>
       </Card>
     </header>

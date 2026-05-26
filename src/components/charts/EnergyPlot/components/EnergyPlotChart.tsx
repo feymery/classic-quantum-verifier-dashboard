@@ -25,10 +25,40 @@ import type { EnergyPlotPoint } from "../EnergyPlot.types";
 import { EnergyPlotTooltipContent } from "./EnergyPlotTooltip";
 import { EstimatedDot } from "../../EstimatedDot";
 
+const VERDICT_DOT_COLOR: Record<string, string> = {
+  accept: CHART_COLORS.accept,
+  reject: CHART_COLORS.reject,
+  boundary: CHART_COLORS.thresholdHigh,
+};
+
+// Custom dot for sweep results — reads sweepDecision from the data point
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function SweepEstDot(props: any) {
+  const { cx, cy, payload } = props as {
+    cx: number;
+    cy: number;
+    payload: EnergyPlotPoint;
+  };
+  if (!cx || !cy || payload.sweepEst === undefined) return null;
+  const color =
+    VERDICT_DOT_COLOR[payload.sweepDecision ?? ""] ?? CHART_COLORS.estimated;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={color}
+      stroke="#0f0e14"
+      strokeWidth={1}
+    />
+  );
+}
+
 interface EnergyPlotChartProps {
   alpha: number;
   chartData: EnergyPlotPoint[];
   hasResult: boolean;
+  hasSweep: boolean;
   currentE: number;
 }
 
@@ -36,6 +66,7 @@ export function EnergyPlotChart({
   alpha,
   chartData,
   hasResult,
+  hasSweep,
   currentE,
 }: EnergyPlotChartProps) {
   return (
@@ -141,6 +172,19 @@ export function EnergyPlotChart({
             connectNulls={false}
             isAnimationActive
             animationDuration={600}
+          />
+        )}
+
+        {hasSweep && (
+          <Line
+            type="monotone"
+            dataKey="sweepEst"
+            strokeWidth={0}
+            dot={<SweepEstDot />}
+            activeDot={{ r: 7, strokeWidth: 1.5, stroke: "#0f0e14" }}
+            name="sweep"
+            connectNulls={false}
+            isAnimationActive={false}
           />
         )}
 

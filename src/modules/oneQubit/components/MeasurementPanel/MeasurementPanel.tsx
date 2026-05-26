@@ -52,12 +52,8 @@ export function MeasurementPanel({
 
   return (
     <Card className="rounded-lg" padded="md">
-      <div className="space-y-4">
-        {/* Header */}
-        <Text variant="title" className="text-xs font-medium text-foreground">
-          Measurement Results
-        </Text>
-
+      {/* Header */}
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Error state */}
         {error && (
           <div className="px-3 py-2 border rounded border-danger/30 bg-danger/5">
@@ -66,9 +62,6 @@ export function MeasurementPanel({
             </Text>
           </div>
         )}
-
-        {/* Divider */}
-        <div className="border-t border-border" />
 
         {/* Expectation values */}
         <section>

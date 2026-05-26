@@ -5,6 +5,7 @@ export { Drawer } from "./Drawer";
 export { Modal } from "./Modal";
 export { Panel } from "./Panel";
 export { Row } from "./Row";
+export { Slider } from "./Slider";
 export { Text } from "./Text";
 export { ToastProvider, useToast } from "./Toast";
 export type { ToastVariant } from "./Toast";

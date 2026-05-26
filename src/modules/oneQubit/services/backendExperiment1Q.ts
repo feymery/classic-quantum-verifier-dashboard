@@ -146,14 +146,18 @@ export async function startBackendExperiment1Q(input: {
   alpha: number;
   shots: number;
   backend: BackendId;
+  sweepId?: string;
 }): Promise<BackendExperimentStart1Q> {
   const mappedBackend = mapBackendId(input.backend);
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     alpha: input.alpha,
     shots: input.shots,
     backend: mappedBackend,
   };
+  if (input.sweepId) {
+    payload.sweep_id = input.sweepId;
+  }
 
   const runResponse = await fetchJson<BackendRunResult | BackendQueued>(
     `${API_BASE}/run`,

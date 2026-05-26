@@ -27,12 +27,13 @@ def sweep_alpha(shots: int, n_points: int = 30, backend: str = "aer") -> list[di
         sa = math.sin(alpha)
         energy_theory = sa ** 2
         obs_theory = {
-            "Z1":   0.0,
-            "Z2":   round(ca ** 2, 6),
-            "Z1Z2": round(sa ** 2, 6),
-            "Z1X2": round(-sa * ca, 6),
-            "X1Z2": round(ca, 6),
-            "X1X2": round(sa, 6),
+            # Code convention: Z1 = Z_prover (q0), Z2 = Z_clock (q1)
+            "Z1":   round(ca ** 2, 6),   # ⟨Z_prover⟩ = cos²(α)
+            "Z2":   0.0,                  # ⟨Z_clock⟩  = 0
+            "Z1Z2": round(sa ** 2, 6),   # ⟨Z_prover Z_clock⟩ = sin²(α)
+            "Z1X2": round(ca, 6),         # ⟨Z_prover X_clock⟩ = cos(α)
+            "X1Z2": round(-sa * ca, 6),   # ⟨X_prover Z_clock⟩ = −sin(α)cos(α)
+            "X1X2": round(sa, 6),         # ⟨X_prover X_clock⟩ = sin(α)
         }
         try:
             aer_backend = _get_backend_for_aer(backend)

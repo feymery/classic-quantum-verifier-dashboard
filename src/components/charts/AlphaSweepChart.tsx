@@ -9,7 +9,7 @@
  * A single "Run Sweep" button triggers both charts from the same backend call.
  */
 
-import { useState, useCallback } from "react";
+import { useMemo } from "react";
 import {
   ComposedChart,
   Area,
@@ -24,8 +24,9 @@ import {
 } from "recharts";
 import { Card } from "../../ui/Card";
 import { Button } from "../../ui/Button";
+import { ConceptBox } from "../ProtocolExplainer";
 import { CHART_COLORS, CHART_HEIGHT, axisProps, gridProps } from "./chartTheme";
-import { runAlphaSweep, type AlphaSweepPoint } from "../../services/sweepApi";
+import type { AlphaSweepPoint } from "../../services/sweepApi";
 import { THRESHOLD_LOW, THRESHOLD_HIGH } from "../../utils/constants";
 import { formatAlpha } from "../../utils/alphaUtils";
 import { ExpectationSweepChart } from "./ExpectationSweepChart";
@@ -57,7 +58,7 @@ function toChartPoints(points: AlphaSweepPoint[]): SweepChartPoint[] {
 const VERDICT_COLOR: Record<AlphaSweepPoint["verdict"], string> = {
   accept: CHART_COLORS.accept,
   reject: CHART_COLORS.reject,
-  marginal: CHART_COLORS.thresholdHigh,
+  boundary: CHART_COLORS.thresholdHigh,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,35 +113,22 @@ function SweepTooltip({ active, payload }: any) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface AlphaSweepChartProps {
-  shots?: number;
-  nPoints?: number;
-}
-
-interface SweepData {
-  raw: AlphaSweepPoint[];
-  chart: SweepChartPoint[];
+  points: AlphaSweepPoint[] | null;
+  loading: boolean;
+  error: string | null;
+  onRun: () => void;
 }
 
 export function AlphaSweepChart({
-  shots = 1024,
-  nPoints = 30,
+  points,
+  loading,
+  error,
+  onRun,
 }: AlphaSweepChartProps) {
-  const [data, setData] = useState<SweepData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const runSweep = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await runAlphaSweep(shots, nPoints);
-      setData({ raw: result.points, chart: toChartPoints(result.points) });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Sweep failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [shots, nPoints]);
+  const data = useMemo(
+    () => (points ? { raw: points, chart: toChartPoints(points) } : null),
+    [points],
+  );
 
   return (
     <Card className="rounded-lg" padded="md">
@@ -162,13 +150,65 @@ export function AlphaSweepChart({
           <Button
             size="sm"
             variant="secondary"
-            onClick={runSweep}
+            onClick={onRun}
             disabled={loading}
             className=" text-[10px] px-3 py-1"
           >
             {loading ? "running…" : "Run Sweep"}
           </Button>
         </div>
+
+        {/* Qiskit execution detail */}
+        <ConceptBox
+          title="How this runs on Qiskit Aer"
+          accentColor="#6ee7b7"
+          defaultOpen
+        >
+          <p>
+            Each α point executes <strong>4 circuits</strong> on{" "}
+            <code
+              style={{
+                color: "#6ee7b7",
+                background: "#181620",
+                borderRadius: 3,
+                padding: "0 4px",
+              }}
+            >
+              AerSimulator()
+            </code>{" "}
+            (noiseless, real shot statistics):
+          </p>
+          <div
+            className="rounded px-2 py-1 mt-1 space-y-0.5 text-[11px]"
+            style={{ background: "#181620" }}
+          >
+            {[
+              ["Z basis", "measures Z₁, Z₂, Z₁Z₂"],
+              ["ZX basis", "H on q_clock → measures Z₁X₂"],
+              ["X basis", "H on both → measures X₁X₂"],
+              ["X1Z2 basis", "H on q_clock, Z on q_prover → measures X₁Z₂"],
+            ].map(([basis, desc]) => (
+              <div key={basis} className="flex gap-2">
+                <span style={{ color: "#6ee7b7", minWidth: 80 }}>{basis}</span>
+                <span style={{ color: "#9490a8" }}>{desc}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
+            Circuit: H on q_clock → CRY(2α) controlled on q_clock → basis-change
+            gates. Transpiled with{" "}
+            <code style={{ color: "#6ee7b7" }}>
+              generate_preset_pass_manager
+            </code>{" "}
+            (opt level 1) and executed via{" "}
+            <code style={{ color: "#6ee7b7" }}>SamplerV2</code>.
+          </p>
+          <p className="mt-1 text-[10px]" style={{ color: "#6b6780" }}>
+            σ²_O = (1 − ⟨O⟩²) / shots per observable. Coefficients (−2, +1, −1,
+            −1.5·cos α, −1.5·sin α) are squared and summed → σ_E. These are the
+            error bars in Figure 2(b).
+          </p>
+        </ConceptBox>
 
         {/* Error */}
         {error && (

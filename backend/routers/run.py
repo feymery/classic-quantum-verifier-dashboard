@@ -31,6 +31,7 @@ class RunRequest(BaseModel):
     alpha: float = Field(..., ge=0.0, le=1.5707963267948966)
     shots: int = Field(..., ge=1, le=1_000_000)
     backend: Literal["aer", "aer_qpu", "ibm"] = "aer"
+    sweep_id: str | None = None
 
 
 @router.post("/run")
@@ -41,6 +42,7 @@ def run_endpoint(payload: RunRequest) -> dict:
             alpha=payload.alpha,
             shots=payload.shots,
             backend="ibm",
+            sweep_id=payload.sweep_id,
         )
         return {"job_id": job_id, "status": "queued"}
 
@@ -48,6 +50,7 @@ def run_endpoint(payload: RunRequest) -> dict:
         alpha=payload.alpha,
         shots=payload.shots,
         backend=payload.backend,
+        sweep_id=payload.sweep_id,
     )
 
 
@@ -106,6 +109,7 @@ def list_jobs(
             "decision": _verifier_decision(raw_energy) if raw_energy is not None else None,
             "resolved_backend": meta.get("backend_name"),
             "execution_source": meta.get("execution_backend"),
+            "sweep_id": meta.get("sweep_id"),
             "error": j.get("error"),
         }
 

@@ -114,7 +114,7 @@ backend/
 │   ├── run.py               # /run, /job/{id}, /jobs, DELETE /jobs
 │   └── sweep.py             # /sweep/alpha, /sweep/shots, /sweep/noise
 └── jobs/
-    ├── job_store.py         # In-memory job store (pending → running → done/failed)
+    ├── job_store.py         # SQLite-backed job store (pending → running → done/failed)
     └── job_runner.py        # ThreadPool-based async job execution (separate pools for IBM and Aer)
 ```
 
@@ -146,6 +146,19 @@ POST /run {backend="ibm"}
 
 IBM and Aer jobs run in separate thread pools so long-running QPU jobs cannot starve fast Aer jobs.
 
+<<<<<<< HEAD
+=======
+### Quantum circuit
+
+The 1Q circuit implements the verification protocol from Stricker et al. 2024:
+
+- **State prep:** `H(q_clock)` → `CRY(2α)` (ctrl = `q_clock`, tgt = `q_prover`)
+- **3 measurement bases:** Z⊗Z (`z`), Z⊗X (`zx`), X⊗X (`x`)
+- **Energy formula (Eq. C.1):** $E = 3.5 - 2\langle Z_1\rangle + \langle Z_2\rangle - \langle Z_1Z_2\rangle - 1.5\cos(\alpha)\langle Z_1X_2\rangle - 1.5\sin(\alpha)\langle X_1X_2\rangle$
+
+See [docs/protocol.md](../docs/protocol.md) for the full protocol analysis.
+
+>>>>>>> main
 ---
 
 ## API reference

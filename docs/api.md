@@ -44,6 +44,7 @@ Service health and backend availability.
   "execution_mode": "sync + async",
   "backends": {
     "aer": "active",
+    "aer_qpu": "connected" | "disconnected",
     "ibm": "connected" | "disconnected"
   },
   "job_system": "active"
@@ -60,9 +61,58 @@ List available execution backends.
 
 ```json
 [
-  { "name": "aer", "available": true },
-  { "name": "ibm", "available": false }
+  { "name": "aer",     "available": true },
+  { "name": "aer_qpu", "available": false },
+  { "name": "ibm",     "available": false }
 ]
+```
+
+---
+
+### `POST /configure/ibm`
+
+Store IBM Quantum credentials for the lifetime of the server process.
+Credentials are held only in memory — never logged or persisted to disk.
+
+Pass `verify: true` to trigger a live connection check immediately.
+Omit it (or set `false`) when restoring saved credentials on startup to avoid unnecessary network calls.
+
+#### Request
+
+| Field | Type | Required | Default | Notes |
+| --- | --- | --- | --- | --- |
+| `token` | string | ✅ | — | IBM Cloud API token |
+| `instance` | string | — | `""` | IBM Cloud CRN: `crn:v1:bluemix:public:quantum-computing:<region>:a/<account>:<service>::` |
+| `backend_name` | string | — | `""` | QPU name, e.g. `ibm_strasbourg` |
+| `verify` | bool | — | `false` | If `true`, attempts a live connection check and returns the result |
+
+```json
+{
+  "token": "<IBM_API_TOKEN>",
+  "instance": "crn:v1:bluemix:public:quantum-computing:us-east:a/abc:def::",
+  "backend_name": "ibm_strasbourg",
+  "verify": true
+}
+```
+
+#### Response
+
+```json
+{
+  "configured": true,
+  "connected": true,
+  "reason": "Connected to ibm_strasbourg"
+}
+```
+
+When `verify` is `false`:
+
+```json
+{
+  "configured": true,
+  "connected": false,
+  "reason": "Credentials stored. Send verify=true to test the connection."
+}
 ```
 
 ---

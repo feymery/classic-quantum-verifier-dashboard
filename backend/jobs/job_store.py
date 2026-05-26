@@ -55,6 +55,15 @@ class JobStore:
             self._conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_jobs_status_backend ON jobs(status, backend)"
             )
+            # Migration: add mode column if it doesn't exist (for pre-existing databases)
+            existing_columns = {
+                row[1]
+                for row in self._conn.execute("PRAGMA table_info(jobs)").fetchall()
+            }
+            if "mode" not in existing_columns:
+                self._conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT '1q'"
+                )
             self._conn.commit()
 
     def _add_column_if_missing(self, table: str, column: str, col_def: str) -> None:
@@ -135,14 +144,11 @@ class JobStore:
         if result is not None:
             updates.append("result_json = ?")
             params.append(json.dumps(result))
-        if metadata is not None:
-            updates.append("metadata_json = ?")
-            params.append(json.dumps(metadata))
         if error is not None:
             updates.append("error = ?")
             params.append(error)
 
-        if not updates:
+        if not updates and metadata is None:
             return self.get_job(job_id)
 
         updates.append("updated_at = ?")
@@ -150,6 +156,21 @@ class JobStore:
         params.append(job_id)
 
         with self._lock:
+            if metadata is not None:
+                # Merge with existing metadata so keys set at creation (e.g. sweep_id)
+                # are preserved when the job is updated on completion.
+                existing_row = self._conn.execute(
+                    "SELECT metadata_json FROM jobs WHERE job_id = ?", (job_id,)
+                ).fetchone()
+                existing_meta: dict[str, Any] = (
+                    json.loads(existing_row["metadata_json"])
+                    if existing_row and existing_row["metadata_json"]
+                    else {}
+                )
+                merged = {**existing_meta, **metadata}
+                updates.insert(-1, "metadata_json = ?")  # before updated_at
+                params.insert(-2, json.dumps(merged))    # before updated_at, before job_id
+
             cursor = self._conn.execute(
                 f"UPDATE jobs SET {', '.join(updates)} WHERE job_id = ?",
                 params,

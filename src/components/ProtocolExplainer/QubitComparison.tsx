@@ -4,7 +4,7 @@
  * Shows circuits, observables, and key complexity differences together.
  */
 
-import { Circuit1Q } from "./Circuit1Q";
+import { Circuit1Q } from "../quantum/Circuit1Q";
 
 interface QubitComparisonProps {
   alpha: number;
@@ -53,7 +53,7 @@ function ObsChip({
       className="rounded px-2 py-1 flex items-baseline gap-1.5"
       style={{ background: "#181620" }}
     >
-      <span className=" text-xs shrink-0" style={{ color }}>
+      <span className="text-xs shrink-0" style={{ color }}>
         {name}
       </span>
       <span className=" text-[9px]" style={{ color: "#6b6780" }}>
@@ -81,7 +81,7 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
       <div>
         {/* 1Q panel */}
         <div
-          className="rounded-lg border p-3 space-y-2"
+          className="p-3 space-y-2 border rounded-lg"
           style={{ borderColor: "#a78bfa44", background: "#181620" }}
         >
           <SideHeader label="1-Qubit Protocol" color="#a78bfa" />
@@ -130,7 +130,7 @@ export function QubitComparison({ alpha }: QubitComparisonProps) {
 
       {/* ── Complexity diff table ── */}
       <div
-        className="rounded-lg border overflow-hidden"
+        className="overflow-hidden border rounded-lg"
         style={{ borderColor: "#2d2b3a" }}
       >
         <div

@@ -40,6 +40,8 @@ export interface JobHistoryItem {
   energyEstimate: number | null;
   /** Verifier classification. Null for pending/running jobs. */
   decision: VerifierDecision | null;
+  /** Sweep group identifier. Null for single-run jobs. */
+  sweepId: string | null;
   /** Error message for failed jobs. */
   error: string | null;
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { DashboardHeader } from "../components/DashboardHeader/DashboardHeader";
-import { AppNavigation } from "../components/AppNavigation";
 import { RunHistoryDrawer } from "../components/History/RunHistoryDrawer";
 import { useAppState } from "../state/useAppState";
 import type { JobHistoryItem } from "../types/runner";
@@ -13,6 +12,7 @@ export function MainLayout() {
   const restoreHistoryEntry = (item: JobHistoryItem) => {
     dashboard.setAlpha(item.alpha);
     dashboard.setShots(item.shots);
+    dashboard.setSelectedAlphas([item.alpha]);
     dashboard.setSelectedBackend(
       item.requestedBackend as Parameters<
         typeof dashboard.setSelectedBackend
@@ -23,12 +23,23 @@ export function MainLayout() {
   const loadHistoryResult = (item: JobHistoryItem) => {
     dashboard.setAlpha(item.alpha);
     dashboard.setShots(item.shots);
+    dashboard.setSelectedAlphas([item.alpha]);
     dashboard.setSelectedBackend(
       item.requestedBackend as Parameters<
         typeof dashboard.setSelectedBackend
       >[0],
     );
     void runner.restoreResult(item);
+  };
+
+  const loadSweepFromHistory = (items: JobHistoryItem[]) => {
+    const first = items[0];
+    if (first) {
+      dashboard.setAlpha(first.alpha);
+      dashboard.setShots(first.shots);
+      dashboard.setSelectedAlphas(items.map((i) => i.alpha));
+    }
+    void runner.restoreSweep(items);
   };
 
   return (
@@ -55,7 +66,6 @@ export function MainLayout() {
           onOpenHistory={() => setHistoryOpen(true)}
         />
         <div className="flex-1 px-2 py-6">
-          <AppNavigation />
           <Outlet />
         </div>
       </div>
@@ -68,6 +78,7 @@ export function MainLayout() {
         error={runner.historyError}
         onRestore={restoreHistoryEntry}
         onLoadResult={loadHistoryResult}
+        onLoadSweep={loadSweepFromHistory}
         onClear={runner.clearHistory}
         onSync={(item) => void runner.syncJob(item.jobId)}
       />
