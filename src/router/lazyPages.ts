@@ -10,6 +10,11 @@ export const TrapsPage = lazy(async () => {
   return { default: module.TrapsPage };
 });
 
+export const ConclusionsPage = lazy(async () => {
+  const module = await import("../pages/ConclusionsPage");
+  return { default: module.ConclusionsPage };
+});
+
 export const FundamentalsPage = lazy(async () => {
   const module = await import("../pages/FundamentalsPage");
   return { default: module.FundamentalsPage };

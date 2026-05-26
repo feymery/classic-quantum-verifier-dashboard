@@ -4,6 +4,7 @@ const NAV_ITEMS = [
   { to: "/fundamentals", label: "Fundamentals" },
   { to: "/1Qexperiment", label: "Experiment 1Q" },
   { to: "/traps", label: "Traps" },
+  { to: "/conclusions", label: "Conclusions" },
 ];
 
 export function AppNavigation() {
