@@ -2,7 +2,74 @@
 
 Interactive dashboard for exploring and running the **one-qubit quantum verification protocol** described in *"Towards experimental classical verification of quantum computation"* (Roman Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024).
 
+<<<<<<< HEAD
+> **"Towards experimental classical verification of quantum computation"**
+> Roman Stricker et al., *Quantum Sci. Technol.* 9, 02LT01, 2024
+
+The dashboard lets you prepare a parameterised clock state, measure its Hamiltonian energy,
+and observe in real time whether the verifier accepts or rejects the prover.
+
+**Stack:** React 19 + TypeScript + Tailwind v4 — FastAPI + Qiskit Aer + IBM Quantum Runtime
+
+---
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| This file | Project overview, quick start, scripts, structure |
+| [backend/README.md](backend/README.md) | Backend installation, Qiskit details, testing |
+| [docs/api.md](docs/api.md) | Full API reference — all endpoints, shapes, errors |
+| [docs/protocol.md](docs/protocol.md) | Protocol alignment with Stricker et al. 2024 |
+
+---
+
+## Quick Start
+
+**Prerequisites:** Node.js 20+, npm 10+, Python 3.11+
+
+### Option A — unified (frontend + backend together)
+
+```bash
+npm install
+python3 -m pip install -r backend/requirements.txt
+npm start
+```
+
+`npm start` uses `concurrently` to run both servers in one terminal.
+
+### Option B — separate terminals
+
+```bash
+# Terminal 1 — backend
+python3 -m pip install -r backend/requirements.txt
+python3 -m uvicorn backend.main:app --reload --port 8000
+
+# Terminal 2 — frontend
+npm install
+npm run dev
+```
+
+<<<<<<< HEAD
+```bash
+# Terminal 2 — backend
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --reload --port 8000
+```
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:8000>
+- Interactive API docs (Swagger): <http://localhost:8000/docs>
+=======
+| Service | URL |
+|---|---|
+| Frontend | <http://localhost:5173> |
+| Backend API | <http://localhost:8000> |
+| Swagger UI | <http://localhost:8000/docs> |
+>>>>>>> main
+=======
 The protocol lets a classical verifier confirm that a quantum device (the prover) is genuinely producing quantum states — without needing to simulate the full quantum computation. An honest quantum prover achieves an energy below the acceptance threshold; a classical prover cannot replicate the required coherence and is detected.
+>>>>>>> main
 
 ---
 

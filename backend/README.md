@@ -34,10 +34,39 @@ python3 -m pip install -r backend/requirements.txt
 
 ---
 
+## Installation (Virtual Environment)
+
+From the project root:
+
+```bash
+python -m venv backend/venv
+```
+
+On Windows:
+
+```bash
+backend\venv\Scripts\activate
+```
+
+On Mac/Linux:
+
+```bash
+source backend/venv/bin/activate
+```
+
+After activating, install the dependencies:
+
+```bash
+python -m pip install -r backend/requirements.txt
+```
+
+---
+
+
 ## Running
 
 ```bash
-python3 -m uvicorn backend.main:app --reload --port 8000
+python -m uvicorn backend.main:app --reload --port 8000
 ```
 
 - API base URL: `http://localhost:8000`
@@ -117,6 +146,8 @@ POST /run {backend="ibm"}
 
 IBM and Aer jobs run in separate thread pools so long-running QPU jobs cannot starve fast Aer jobs.
 
+<<<<<<< HEAD
+=======
 ### Quantum circuit
 
 The 1Q circuit implements the verification protocol from Stricker et al. 2024:
@@ -127,6 +158,7 @@ The 1Q circuit implements the verification protocol from Stricker et al. 2024:
 
 See [docs/protocol.md](../docs/protocol.md) for the full protocol analysis.
 
+>>>>>>> main
 ---
 
 ## API reference

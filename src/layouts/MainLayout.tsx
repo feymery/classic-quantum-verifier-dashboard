@@ -43,7 +43,7 @@ export function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen px-64 py-6">
       <div className="flex flex-col">
         <DashboardHeader
           selectedBackend={dashboard.selectedBackend}

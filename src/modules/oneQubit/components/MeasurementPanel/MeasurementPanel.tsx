@@ -103,7 +103,7 @@ export function MeasurementPanel({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[10px] uppercase tracking-widest text-subtle">
+    <span className="text-[10px] uppercase tracking-widest text-white/80">
       {children}
     </span>
   );

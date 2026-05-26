@@ -1,0 +1,15 @@
+## 1. ¿Por qué el Hamiltoniano del paper está relacionado con un problema "QMA-complete"?
+
+El problema de determinar la energía del estado fundamental (ground-state energy) de un Hamiltoniano local es conocido como el **Problema del Hamiltoniano Local (Local Hamiltonian Problem)**. En el paper, los autores citan el trabajo de Kempe, Kitaev y Regev [26], quienes demostraron que este problema es **QMA-complete** , que es el equivalente cuántico a los problemas NP-completos.
+
+En el paper, se utiliza una técnica originada en esas demostraciones llamada **"construcción del estado historia"** $|\eta\rangle$. La idea es codificar toda la evolución temporal de un circuito cuántico $\mathcal{C}$ en un solo estado estático (el estado reloj) y diseñar un Hamiltoniano $H$.
+
+La clase **QMA** es el análogo cuántico de la clase **NP**. Formalmente, incluye los problemas de decisión en los que, si la respuesta es "sí", existe una prueba cuántica (provista por un "demostrador" omnipotente llamado Merlin) que un verificador cuántico de tiempo polinomial (Arthur) puede comprobar eficientemente.
+
+Que el Problema del Hamiltoniano Local sea **QMA-complete** implica dos cosas fundamentales:
+1. **Dureza extrema:** Encontrar el estado fundamental de un Hamiltoniano local arbitrario es increíblemente difícil, incluso para un ordenador cuántico (se cree que BQP $\neq$ QMA). 
+2. **Verificabilidad:** Si alguien (Merlin) te da el estado fundamental correcto, es computacionalmente fácil (para un Arthur cuántico) medir la energía de ese estado y convencerse de que efectivamente la energía es baja, verificando así el problema original.
+
+* **Transforma el problema de computación en un problema de medición de energía:** En lugar de tener que verificar dinámicamente un circuito paso a paso (lo cual Alice no puede hacer clásicamente), el protocolo convierte el circuito entero en un Hamiltoniano fijo $H$.
+* **Permite delegar la prueba (Test):** Dado que el problema que Alice pide a Bob resolver pertenece a BQP (problemas que un ordenador cuántico *sí* puede resolver eficientemente), Bob no necesita ser un "Merlin" omnipotente. Bob puede generar eficientemente el "estado reloj" $|\eta\rangle$ ejecutando el circuito. Este estado actúa como su "prueba" de que ha hecho el cálculo.
+* **Integración con criptografía clásica (El núcleo del protocolo):** Como Alice quiere medir la energía de este estado pero no tiene hardware cuántico, le pide a Bob que lo mida por ella. Usando **funciones trampa seguras post-cuánticas** (trapdoor claw-free functions), Alice fuerza a Bob a entrelazar su estado reloj con qubits auxiliares y a realizar mediciones a ciegas (sin saber si está midiendo en la base X o Z). 
