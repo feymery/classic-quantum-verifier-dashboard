@@ -80,15 +80,16 @@ export function AlphaSlider({ alpha, onChange, guidedMode }: AlphaSliderProps) {
       />
 
       {/* ── Tick labels below ── */}
-      <div className="relative w-full h-6 mt-2">
+      <div className="relative w-full h-10 mt-1">
         {KEY_ALPHAS.map((ka, i) => {
           const pct = alphaToPercent(ka.value);
           const isSnapped = snappedIdx === i;
+          const staggered = i % 2 === 1;
           return (
             <div
               key={ka.label}
               className="absolute -translate-x-1/2 flex flex-col items-center gap-0.5"
-              style={{ left: `${pct}%` }}
+              style={{ left: `${pct}%`, top: staggered ? "14px" : "0px" }}
             >
               <span
                 className=" text-[10px] leading-none transition-colors duration-150"

@@ -40,7 +40,7 @@ export function CircuitStateExplainer({ alpha }: Props) {
   );
 
   return (
-    <div className="rounded-lg border border-border bg-canvas p-5">
+    <div className="rounded-lg border-2 border-border bg-canvas p-5">
       {/* ── Header ── */}
       <div className="mb-4 flex items-center gap-2">
         <span className="rounded-lg bg-elevated px-2 py-0.5 text-[10px] font-bold uppercase text-muted">

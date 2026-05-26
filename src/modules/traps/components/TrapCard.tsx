@@ -10,6 +10,7 @@
 
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { Card } from "../../../ui/Card";
 import { ToggleButton } from "../shared/ToggleButton";
 import { TrapCircuitSection } from "../shared/TrapCircuitSection";
 
@@ -55,17 +56,18 @@ export function TrapCard({
   const isActive = Boolean(children);
   const isTrap = isActive && mode === "trap";
 
-  // border shifts from border → success-tinted (honest active) → danger-tinted (trap)
-  const borderClass = isTrap
-    ? "border-danger/30"
+  // border shifts: danger-tinted (trap) → accent-tinted (honest active) → default (skeleton)
+  const borderColor = isTrap
+    ? "color-mix(in srgb, var(--color-danger) 30%, transparent)"
     : isActive
-      ? "border-accent/20"
-      : "border-border";
+      ? "color-mix(in srgb, var(--color-accent) 20%, transparent)"
+      : undefined;
 
   return (
-    <div
-      className={`transition-colors duration-500 border rounded-lg bg-canvas ${borderClass}`}
-      style={{ opacity: isActive ? 1 : 0.55 }}
+    <Card
+      padded="none"
+      className="transition-colors duration-500"
+      style={{ opacity: isActive ? 1 : 0.55, borderColor }}
     >
       {/* ── Header (always visible, clickable to collapse) ── */}
       <div
@@ -162,6 +164,6 @@ export function TrapCard({
       {!isActive && (
         <p className="px-5 pb-4 text-[12px] text-subtle/60">{description}</p>
       )}
-    </div>
+    </Card>
   );
 }

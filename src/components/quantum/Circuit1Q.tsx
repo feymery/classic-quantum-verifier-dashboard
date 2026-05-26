@@ -18,18 +18,17 @@ export interface Circuit1QProps {
   annotation?: string;
 }
 
-const W = 460;
-const H = 160; // extra height for optional annotation
+const W = 238;
+const H = 120; // extra height for optional annotation
 
-const Y0 = 55; // clock qubit
-const Y1 = 105; // work qubit
+const Y0 = 44; // clock qubit
+const Y1 = 88; // work qubit
 
-const X_LABEL = 28;
-const X_START = 60;
-const X_H = 105;
-const X_CU = 200;
-const X_MEAS = 350;
-const X_END = 390;
+const X_START = 40;
+const X_H = 74;
+const X_CU = 134;
+const X_MEAS = 200;
+const X_END = 230;
 
 // half-widths for wire gap around gates
 const HW_NARROW = 13; // H gate
@@ -37,12 +36,11 @@ const HW_WIDE = 30; // U(α) gate
 
 const NORM = 1 / 3;
 
-const C_WIRE = "#6b6780";
-const C_CTRL = "#b7a8cf";
-const C_GATE = "#a78bfa";
+const C_WIRE = "var(--color-subtle)";
+const C_CTRL = "var(--color-accent-light)";
+const C_GATE = "var(--color-accent)";
 const C_MEAS = "#e8a020";
-const C_DIM = "#4a4760";
-const BG = "#181620";
+const BG = "var(--color-elevated)";
 
 function GateBox({
   x,
@@ -57,25 +55,26 @@ function GateBox({
   color: string;
   wide?: boolean;
 }) {
-  const w = wide ? 58 : 24;
+  const w = wide ? 54 : 22;
   return (
     <g>
       <rect
         x={x - w / 2}
-        y={y - 12}
+        y={y - 11}
         width={w}
-        height={24}
-        rx={4}
-        fill={BG}
+        height={22}
+        rx={3}
+        style={{ fill: BG }}
         stroke={color}
-        strokeWidth={0.8}
+        strokeWidth={1.5}
       />
       <text
         x={x}
-        y={y + 4}
+        y={y}
         textAnchor="middle"
+        dominantBaseline="central"
         fontFamily="'Courier New', monospace"
-        fontSize={wide ? 9 : 11}
+        fontSize={wide ? 8 : 10}
         fontWeight={500}
         fill={color}
       >
@@ -86,24 +85,24 @@ function GateBox({
 }
 
 function MeasBox({ x, y }: { x: number; y: number }) {
-  const w = 26;
+  const w = 22;
   return (
     <g>
       <rect
         x={x - w / 2}
-        y={y - 12}
+        y={y - 11}
         width={w}
-        height={24}
-        rx={4}
-        fill={BG}
+        height={22}
+        rx={3}
+        style={{ fill: BG }}
         stroke={C_MEAS}
-        strokeWidth={0.8}
+        strokeWidth={1.5}
       />
       <text
         x={x}
-        y={y + 4}
+        y={y}
         textAnchor="middle"
-        fontFamily="'Courier New', monospace"
+        dominantBaseline="central"
         fontSize={10}
         fill={C_MEAS}
       >
@@ -128,67 +127,17 @@ export function Circuit1Q({
 
   // q₀ wire is segmented (3 clock steps): before-H | H-to-ctrl | after-ctrl
   const sw = (i: 0 | 1 | 2) =>
-    stepWeights
-      ? Math.max(0.3, Math.min(4, (stepWeights[i] / NORM) * 1.5))
-      : 0.75;
+    stepWeights ? Math.max(0.6, Math.min(4, (stepWeights[i] / NORM) * 2)) : 1.5;
   const so = (i: 0 | 1 | 2) =>
     highlightStep === undefined || highlightStep === i ? 1 : 0.25;
-
-  const aStr = alpha.toFixed(3);
 
   return (
     <svg
       width="100%"
-      viewBox={`-40 0 ${W + 40} ${H}`}
+      viewBox={`32 13 ${W - 32} ${H - 13}`}
       role="img"
-      aria-label="2-qubit circuit for 1-qubit verifier protocol"
+      aria-label={`2-qubit circuit for 1-qubit verifier protocol, \u03b1=${alpha.toFixed(3)}`}
     >
-      {/* ── index labels ── */}
-      <text
-        x={X_LABEL - 24}
-        y={Y0 + 4}
-        textAnchor="end"
-        fontFamily="monospace"
-        fontSize={9}
-        fill={C_DIM}
-      >
-        q₀
-      </text>
-      <text
-        x={X_LABEL - 24}
-        y={Y1 + 4}
-        textAnchor="end"
-        fontFamily="monospace"
-        fontSize={9}
-        fill={C_DIM}
-      >
-        q₁
-      </text>
-
-      {/* ── initial state ── */}
-      <text
-        x={X_LABEL}
-        y={Y0 + 4}
-        textAnchor="end"
-        fontFamily="monospace"
-        fontSize={11}
-        fontWeight={500}
-        fill={cc}
-      >
-        |0⟩
-      </text>
-      <text
-        x={X_LABEL}
-        y={Y1 + 4}
-        textAnchor="end"
-        fontFamily="monospace"
-        fontSize={11}
-        fontWeight={500}
-        fill="#9490a8"
-      >
-        |0⟩
-      </text>
-
       {/* ── q₀ wire — 3 segments for stepWeights / highlightStep ── */}
       <line
         x1={X_START}
@@ -225,7 +174,7 @@ export function Circuit1Q({
         x2={X_CU - HW_WIDE}
         y2={Y1}
         stroke={C_WIRE}
-        strokeWidth={0.75}
+        strokeWidth={1.5}
       />
       <line
         x1={X_CU + HW_WIDE}
@@ -233,7 +182,7 @@ export function Circuit1Q({
         x2={X_END}
         y2={Y1}
         stroke={C_WIRE}
-        strokeWidth={0.75}
+        strokeWidth={1.5}
       />
 
       {/* ── H on q₀ ── */}
@@ -244,16 +193,16 @@ export function Circuit1Q({
 
       {/* ── ctrl-U(α): dot on q₀, vertical line, box on q₁ ── */}
       <g opacity={fade ? 0.22 : 1}>
-        <circle cx={X_CU} cy={Y0} r={4} fill={cc} />
+        <circle cx={X_CU} cy={Y0} r={5} fill={cc} />
         <line
           x1={X_CU}
-          y1={Y0 + 4}
+          y1={Y0 + 5}
           x2={X_CU}
-          y2={Y1 - 13}
+          y2={Y1 - 12}
           stroke={cc}
-          strokeWidth={0.75}
+          strokeWidth={1.5}
         />
-        <GateBox x={X_CU} y={Y1} label={`U(${aStr})`} color={gc} wide />
+        <GateBox x={X_CU} y={Y1} label="U(α)" color={gc} wide />
       </g>
       {fade && <Cross x={X_CU} y={Y1} />}
 

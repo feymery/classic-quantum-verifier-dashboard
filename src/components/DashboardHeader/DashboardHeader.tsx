@@ -56,23 +56,21 @@ export function DashboardHeader(props: DashboardHeaderProps) {
   return (
     <header className="flex flex-col gap-6 lg:flex-row">
       <div className="flex flex-col gap-6">
-        <IntroPanel onOpenHistory={onOpenHistory} />
-        <AppNavigation />
+        <IntroPanel />
+        <AppNavigation onOpenHistory={onOpenHistory} />
       </div>
 
       <Card>
         <div className="flex flex-col justify-between h-full gap-3">
-          <BackendRow
-            selectedBackend={selectedBackend}
-            backendStatus={backendStatus}
-            onBackendChange={onBackendChange}
-            onOpenHistory={onOpenHistory}
-          />
-
-          <HeaderStrip
-            shots={shots}
-            onShotsChange={onShotsChange}
-          />
+          <div className="flex gap-4">
+            <BackendRow
+              selectedBackend={selectedBackend}
+              backendStatus={backendStatus}
+              onBackendChange={onBackendChange}
+              onOpenHistory={onOpenHistory}
+            />
+            <HeaderStrip shots={shots} onShotsChange={onShotsChange} />
+          </div>
 
           <IbmTokenSection
             ibmToken={ibmToken}

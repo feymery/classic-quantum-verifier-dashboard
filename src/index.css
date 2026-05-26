@@ -15,12 +15,12 @@
   /* ── Surfaces ───────────────────────────────────────────────────────
      Light mode (default). Dark overrides live in .dark {} below.
      Three-level depth scale: canvas → surface → elevated              */
-  --color-canvas:   #f5f4fc; /* body / deepest background               */
-  --color-surface:  #ffffff; /* raised cards, form inputs               */
-  --color-elevated: #eeedf8; /* panel faces, card bodies                */
+  --color-canvas:   #ffffff; /* body / deepest background               */
+  --color-surface:  #f9f8fd; /* raised cards, form inputs               */
+  --color-elevated: #f1eefc; /* panel faces, card bodies                */
 
   /* ── Borders ──────────────────────────────────────────────────────── */
-  --color-border: #d8d5ef;
+  --color-border: #cec8e4;
 
   /* ── Text / Foreground ────────────────────────────────────────────── */
   --color-foreground: #1c1929; /* primary readable text                 */
@@ -28,8 +28,8 @@
   --color-subtle:     #8c88a0; /* placeholder, meta, step labels        */
 
   /* ── Accent — brand purple ────────────────────────────────────────── */
-  --color-accent:       #7c3aed; /* primary accent                      */
-  --color-accent-light: #6d28d9; /* hover / darker tint on light bg     */
+  --color-accent:       #a78bfa; /* primary accent                      */
+  --color-accent-light: #a78bfa; /* hover / darker tint on light bg     */
   --color-accent-dim:   #8b5cf6; /* softer purple                       */
 
   /* ── Semantic feedback ────────────────────────────────────────────── */
@@ -47,6 +47,17 @@
   --color-basis-01: #9490a8; /* = muted   */
   --color-basis-10: #a78bfa; /* = accent  */
   --color-basis-11: #34d399; /* = success */
+
+  /* ── Badge semantic colours — adapt between light / dark ─────────── */
+  --color-badge-success-text:   #047857;
+  --color-badge-success-bg:     #d1fae5;
+  --color-badge-success-border: #6ee7b7;
+  --color-badge-error-text:     #b91c1c;
+  --color-badge-error-bg:       #fee2e2;
+  --color-badge-error-border:   #fca5a5;
+  --color-badge-warning-text:   #92400e;
+  --color-badge-warning-bg:     #fef3c7;
+  --color-badge-warning-border: #fcd34d;
 
   /* ── Shadows ─────────────────────────────────────────────────────── */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
@@ -95,4 +106,14 @@ body {
   --color-accent:       #a78bfa;
   --color-accent-light: #c4b5fd;
   --color-accent-dim:   #d8b4fe;
+
+  --color-badge-success-text:   #6ee7b7;
+  --color-badge-success-bg:     rgba(52, 211, 153, 0.10);
+  --color-badge-success-border: rgba(52, 211, 153, 0.25);
+  --color-badge-error-text:     #fca5a5;
+  --color-badge-error-bg:       rgba(248, 113, 113, 0.10);
+  --color-badge-error-border:   rgba(248, 113, 113, 0.25);
+  --color-badge-warning-text:   #fcd34d;
+  --color-badge-warning-bg:     rgba(245, 158, 11, 0.10);
+  --color-badge-warning-border: rgba(245, 158, 11, 0.25);
 }

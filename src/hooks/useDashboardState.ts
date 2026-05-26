@@ -4,7 +4,6 @@ import { energyFromAlpha } from "../utils/physics";
 import { formatEnergy } from "../utils/physics";
 import { fetchJson } from "../services/apiClient";
 import { useIbmCredentials } from "./useIbmCredentials";
-import { runAlphaSweep, type AlphaSweepPoint } from "../services/sweepApi";
 
 export function useDashboardState() {
   const [alpha, setAlpha] = useState<number>(PROTOCOL_ALPHA);
@@ -27,26 +26,6 @@ export function useDashboardState() {
   const [noiseLambda, setNoiseLambda] = useState<number>(0.05);
   const [alphaFake, setAlphaFake] = useState<number>(1.1);
   const [showToken, setShowToken] = useState<boolean>(false);
-
-  // ── Alpha sweep (Figure 2) — persisted so navigation doesn't reset results ─
-  const [sweepPoints, setSweepPoints] = useState<AlphaSweepPoint[] | null>(
-    null,
-  );
-  const [sweepLoading, setSweepLoading] = useState(false);
-  const [sweepError, setSweepError] = useState<string | null>(null);
-
-  const runSweep = useCallback(async () => {
-    setSweepLoading(true);
-    setSweepError(null);
-    try {
-      const result = await runAlphaSweep(shots, 30);
-      setSweepPoints(result.points);
-    } catch (err) {
-      setSweepError(err instanceof Error ? err.message : "Sweep failed");
-    } finally {
-      setSweepLoading(false);
-    }
-  }, [shots]);
 
   const theoreticalEnergy = useMemo(() => energyFromAlpha(alpha), [alpha]);
   const formattedTheoreticalEnergy = formatEnergy(theoreticalEnergy);
@@ -100,10 +79,6 @@ export function useDashboardState() {
     energy: theoreticalEnergy,
     formattedTheoreticalEnergy,
     backend,
-    sweepPoints,
-    sweepLoading,
-    sweepError,
-    runSweep,
     setAlpha,
     setSelectedAlphas,
     toggleAlpha,

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -90,6 +91,7 @@ def run_circuits(
     circuits: list[QuantumCircuit],
     shots: int,
     backend: Any | None = None,
+    on_submitted: Callable[[str], None] | None = None,
 ) -> list[ExecutionResult]:
     """Transpile and execute a list of circuits on any backend, return one
     ExecutionResult per circuit.
@@ -125,6 +127,11 @@ def run_circuits(
     # IBM SamplerV2 accepts a list of PUBs; Aer SamplerV2 also accepts the same format.
     job = sampler.run([isa for isa in isa_circuits], shots=shot_count)
     submit_ms = (time.perf_counter() - start) * 1000.0
+
+    if on_submitted is not None and _is_ibm_backend(backend):
+        ibm_job_id: str = getattr(job, "job_id", lambda: "")()
+        if ibm_job_id:
+            on_submitted(ibm_job_id)
 
     result = job.result()
     total_ms = (time.perf_counter() - start) * 1000.0

@@ -29,7 +29,7 @@ export function Card({
   return (
     <Component
       className={classNames(
-        "flex flex-col rounded-lg border border-border bg-surface",
+        "flex flex-col rounded-lg border-2 border-border bg-surface",
         className,
       )}
       {...props}

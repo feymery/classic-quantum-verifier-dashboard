@@ -171,16 +171,6 @@ export function EnergyVsLambdaChart({ alpha, lam, lcrit, lineColor }: Props) {
           />
         </ComposedChart>
       </ResponsiveContainer>
-
-      {/* Δλ annotation */}
-      {lcrit > LAMBDA_REF && (
-        <p className="mt-1 text-[10px] text-muted">
-          Noise headroom:{" "}
-          <span className="font-mono text-warning">
-            Δλ = {(lcrit - LAMBDA_REF).toFixed(3)}
-          </span>
-        </p>
-      )}
     </div>
   );
 }

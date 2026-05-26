@@ -4,8 +4,9 @@ import { MainLayout } from "../layouts/MainLayout";
 import {
   ConclusionsPage,
   ExperimentPage,
-  TrapsPage,
+  AdversarialPage,
   FundamentalsPage,
+  MotivationPage,
 } from "./lazyPages";
 
 function withPageLoader(node: ReactNode) {
@@ -34,10 +35,11 @@ export const appRouter = createBrowserRouter([
     path: "/",
     element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/fundamentals" replace /> },
+      { index: true, element: <Navigate to="/motivation" replace /> },
+      { path: "motivation", element: withPageLoader(<MotivationPage />) },
       { path: "fundamentals", element: withPageLoader(<FundamentalsPage />) },
       { path: "1Qexperiment", element: withPageLoader(<ExperimentPage />) },
-      { path: "traps", element: withPageLoader(<TrapsPage />) },
+      { path: "adversarial", element: withPageLoader(<AdversarialPage />) },
       { path: "conclusions", element: withPageLoader(<ConclusionsPage />) },
     ],
   },

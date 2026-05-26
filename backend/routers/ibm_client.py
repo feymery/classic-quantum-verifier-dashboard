@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -137,3 +140,52 @@ class IBMClient:
     @property
     def availability(self) -> IBMAvailability:
         return self._availability
+
+    def poll_ibm_job(
+        self, ibm_job_id: str
+    ) -> tuple[str, dict, dict, dict, str] | tuple[str, None, None, None, None] | None:
+        """Poll IBM Runtime for the status/result of a previously submitted job.
+
+        Returns:
+            ("done",   counts_z, counts_zx, counts_x, backend_name)  — job complete
+            ("running", None, None, None, None)                       — still in progress
+            ("failed",  None, None, None, None)                       — error/cancelled
+            None                                                       — can't connect / unexpected error
+        """
+        availability = self.connect()
+        if not availability.available or self._service is None:
+            return None
+
+        try:
+            job = self._service.job(ibm_job_id)
+            status_str = str(job.status()).upper()
+
+            if "DONE" in status_str:
+                primitive_result = job.result()
+
+                def _extract(pub_data: Any) -> dict[str, int]:
+                    creg = getattr(pub_data, "meas", None)
+                    if creg is None or not hasattr(creg, "get_counts"):
+                        raise RuntimeError("meas register not found in IBM result")
+                    return {str(k): int(v) for k, v in creg.get_counts().items()}
+
+                counts_z   = _extract(primitive_result[0].data)
+                counts_zx  = _extract(primitive_result[1].data)
+                counts_x   = _extract(primitive_result[2].data)
+
+                try:
+                    raw_backend = job.backend()
+                    backend_name: str = str(getattr(raw_backend, "name", raw_backend))
+                except Exception:
+                    backend_name = "ibm"
+
+                return ("done", counts_z, counts_zx, counts_x, backend_name)
+
+            if any(s in status_str for s in ("ERROR", "CANCEL", "FAIL")):
+                return ("failed", None, None, None, None)
+
+            return ("running", None, None, None, None)
+
+        except Exception as exc:
+            logger.warning("poll_ibm_job(%s) error: %s", ibm_job_id, exc)
+            return None
