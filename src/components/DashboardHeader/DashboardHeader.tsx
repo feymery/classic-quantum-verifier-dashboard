@@ -12,7 +12,6 @@ export interface DashboardHeaderProps {
   selectedBackend: BackendId;
   backendStatus: BackendStatus;
   // parameters
-  alpha: number;
   shots: number;
   // IBM credentials
   ibmToken: string;
@@ -22,7 +21,6 @@ export interface DashboardHeaderProps {
   showToken: boolean;
   // callbacks
   onBackendChange: (id: BackendId) => void;
-  onAlphaChange: (value: number) => void;
   onShotsChange: (value: number) => void;
   onTokenChange: (token: string) => void;
   onInstanceChange: (instance: string) => void;
@@ -36,7 +34,6 @@ export function DashboardHeader(props: DashboardHeaderProps) {
   const {
     selectedBackend,
     backendStatus,
-    alpha,
     shots,
     ibmToken,
     ibmTokenSet,
@@ -44,7 +41,6 @@ export function DashboardHeader(props: DashboardHeaderProps) {
     ibmBackendName,
     showToken,
     onBackendChange,
-    onAlphaChange,
     onShotsChange,
     onTokenChange,
     onInstanceChange,
@@ -74,9 +70,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
           />
 
           <HeaderStrip
-            alpha={alpha}
             shots={shots}
-            onAlphaChange={onAlphaChange}
             onShotsChange={onShotsChange}
           />
 

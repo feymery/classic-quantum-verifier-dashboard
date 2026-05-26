@@ -53,7 +53,6 @@ export function MainLayout() {
           ibmInstance={dashboard.ibmInstance}
           ibmBackendName={dashboard.ibmBackendName}
           showToken={dashboard.showToken}
-          alpha={dashboard.alpha}
           shots={dashboard.shots}
           onBackendChange={dashboard.setSelectedBackend}
           onTokenChange={dashboard.setIbmToken}
@@ -61,7 +60,6 @@ export function MainLayout() {
           onBackendNameChange={dashboard.setIbmBackendName}
           onToggleShowToken={dashboard.toggleShowToken}
           onConfirmToken={dashboard.confirmToken}
-          onAlphaChange={dashboard.setAlpha}
           onShotsChange={dashboard.setShots}
           onOpenHistory={() => setHistoryOpen(true)}
         />
