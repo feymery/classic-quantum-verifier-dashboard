@@ -1,5 +1,6 @@
 import { AlphaControl } from "../components/AlphaControl/AlphaControl";
 import { EnergyPlot } from "../components/charts/EnergyPlot/EnergyPlot";
+import { HamiltonianInfoPanel } from "../components/HamiltonianInfoPanel/HamiltonianInfoPanel";
 import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
 import { useAppState } from "../state/useAppState";
 import type { ExperimentResult } from "../types/experiment";
@@ -52,6 +53,9 @@ export function ExperimentPage() {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Hamiltonian info */}
+      <HamiltonianInfoPanel />
+
       {/* α control */}
       <div className="flex flex-col gap-3 md:flex-row">
         <div className="min-w-0 md:w-1/2 lg:w-1/3">
