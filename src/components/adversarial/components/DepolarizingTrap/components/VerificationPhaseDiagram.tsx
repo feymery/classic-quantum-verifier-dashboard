@@ -139,7 +139,7 @@ export function VerificationPhaseDiagram({ alpha, lam, lcrit }: Props) {
       {/* Legend */}
       <div className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[10px]">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-4 bg-success/20 border border-success/50 rounded-sm" />
+          <span className="inline-block w-4 h-3 border rounded-sm bg-success/20 border-success/50" />
           <span className="text-success">Verification possible</span>
         </span>
         <span className="flex items-center gap-1.5">

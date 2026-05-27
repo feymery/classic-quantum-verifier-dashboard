@@ -70,7 +70,7 @@ export function MotivationPage() {
               className="flex gap-4 p-4 border rounded-lg border-border bg-surface"
             >
               <span
-                className="text-lg font-bold leading-none  shrink-0"
+                className="text-lg font-bold leading-none shrink-0"
                 style={{ color: a.accent }}
               >
                 {a.index}
