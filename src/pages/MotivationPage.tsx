@@ -1,16 +1,11 @@
 const assumptions = [
   {
     index: "1",
-    title: "Alice poses a QMA-complete problem",
+    title: "Only a quantum device can answer",
     accent: "var(--color-accent)",
   },
   {
     index: "2",
-    title: "Only a quantum device can answer",
-    accent: "var(--color-warning)",
-  },
-  {
-    index: "3",
     title: "Alice verifies without quantum hardware",
     accent: "var(--color-warning)",
   },
