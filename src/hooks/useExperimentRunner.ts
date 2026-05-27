@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { runExperiment as runExperiment1Q } from "../modules/oneQubit/services/quantumApi";
+import { runExperiment as runExperiment1Q } from "../services/quantumApi";
 import {
   startBackendExperiment1Q,
   pollBackendExperiment1Q,
-} from "../modules/oneQubit/services/backendExperiment1Q";
+} from "../services/backendExperiment1Q";
 import type { BackendId } from "../utils/constants";
 import type { ExperimentResult } from "../types/experiment";
 import type {

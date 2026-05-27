@@ -11,11 +11,6 @@ const assumptions = [
   },
   {
     index: "3",
-    title: "Cheating raises the energy",
-    accent: "var(--color-accent)",
-  },
-  {
-    index: "4",
     title: "Alice verifies without quantum hardware",
     accent: "var(--color-warning)",
   },
@@ -68,7 +63,7 @@ export function MotivationPage() {
         <p className="text-xs font-bold tracking-widest uppercase text-muted">
           Key assumptions
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {assumptions.map((a) => (
             <div
               key={a.index}
