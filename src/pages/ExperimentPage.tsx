@@ -1,6 +1,6 @@
 import { AlphaControl } from "../components/AlphaControl/AlphaControl";
 import { EnergyPlot } from "../components/charts/EnergyPlot/EnergyPlot";
-import { MeasurementPanel } from "../modules/oneQubit/components/MeasurementPanel/MeasurementPanel";
+import { MeasurementPanel } from "../components/MeasurementPanel/MeasurementPanel";
 import { useAppState } from "../state/useAppState";
 import type { ExperimentResult } from "../types/experiment";
 

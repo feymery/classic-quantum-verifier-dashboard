@@ -8,10 +8,7 @@
  */
 
 import type { BackendId } from "../utils/constants";
-import type {
-  Counts,
-  SampledExpectations,
-} from "../modules/oneQubit/physics/measurements";
+import type { Counts, SampledExpectations } from "../physics/measurements";
 import type { EnergyAnalysis } from "../physics/energy";
 
 // ── 1-Qubit ───────────────────────────────────────────────────────────────────

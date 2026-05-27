@@ -24,10 +24,7 @@
 
 import { THRESHOLD_LOW, THRESHOLD_HIGH } from "../utils/constants";
 import type { Verdict } from "../types/dashboard";
-import type {
-  SampledExpectations,
-  ExactExpectations,
-} from "../modules/oneQubit";
+import type { SampledExpectations, ExactExpectations } from "./measurements";
 
 // ── Theoretical energy ────────────────────────────────────────────────────────
 

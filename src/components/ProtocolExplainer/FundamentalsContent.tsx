@@ -325,13 +325,13 @@ function ThePaperSection() {
             style={{ color: "var(--color-subtle)" }}
           >
             <li>
-              <span style={{ color: C.alice }}>H_out</span> — wrong final output
+              <span style={{ color: C.alice }}>H_out</span>: wrong final output
             </li>
             <li>
-              <span style={{ color: C.alice }}>H_in</span> — wrong initial state
+              <span style={{ color: C.alice }}>H_in</span>: wrong initial state
             </li>
             <li>
-              <span style={{ color: C.bob }}>H_prop</span> — incorrect gate
+              <span style={{ color: C.bob }}>H_prop</span>: incorrect gate
               application
             </li>
           </ul>
@@ -366,8 +366,8 @@ function ThePaperSection() {
         >
           <p>
             The full protocol hides the measurement basis from Bob using
-            cryptographic trapdoor functions — requiring 8 qubits and
-            interactive rounds.
+            cryptographic trapdoor functions (requires 8 qubits and interactive
+            rounds).
           </p>
           <p
             className="px-2 py-1 rounded"
@@ -571,17 +571,6 @@ function OurImplementationSection({ alpha }: OurImplementationSectionProps) {
               </p>
             </div>
           </div>
-          <p
-            className="text-[10px] mt-1"
-            style={{ color: "var(--color-subtle)" }}
-          >
-            Classical prover minimum energy:{" "}
-            <span className="font-mono" style={{ color: C.red }}>
-              E = 1.5
-            </span>{" "}
-            — always rejected. Honest quantum prover at α ≤ α_c ≈ 0.685 rad:
-            always accepted (noiseless).
-          </p>
         </ImplStep>
       </div>
     </Card>
