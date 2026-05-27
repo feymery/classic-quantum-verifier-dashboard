@@ -18,7 +18,7 @@ interface Props {
 export function ThresholdStatusBox({ aboveCrit, obs, lineColor }: Props) {
   return (
     <div
-      className={`rounded-md border px-4 py-3 text-[12px] ${
+      className={`rounded-md border px-4 pt-3 text-[12px] ${
         aboveCrit
           ? "border-danger/40 bg-danger/10"
           : "border-success/30 bg-success/10"

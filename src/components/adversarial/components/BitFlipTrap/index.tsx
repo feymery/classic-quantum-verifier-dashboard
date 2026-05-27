@@ -77,10 +77,7 @@ export function BitFlipTrap({ alpha }: Props) {
           <p className="text-[12px] leading-relaxed text-muted">
             Flipping the <span className="font-mono text-accent">clock</span>{" "}
             qubit is more damaging than the{" "}
-            <span className="font-mono text-warning">work</span> qubit — a
-            work-only flip{" "}
-            <span className="font-semibold text-foreground">never</span>{" "}
-            triggers rejection.
+            <span className="font-mono text-warning">work</span> qubit
           </p>
 
           <DualPSlider

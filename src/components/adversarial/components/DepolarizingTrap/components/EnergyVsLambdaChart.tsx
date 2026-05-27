@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from "recharts";
 import { axisProps, gridProps } from "../../../../charts/chartTheme";
-import { THRESHOLD, PI_HALF } from "../DepolarizingTrap.constants";
+import { THRESHOLD } from "../DepolarizingTrap.constants";
 import { buildEnergyVsLambdaData } from "../DepolarizingTrap.physics";
 import type { EnergyVsLambdaPoint } from "../DepolarizingTrap.types";
 
@@ -56,12 +56,11 @@ const CHART_LAM_MAX = 0.15;
 
 export function EnergyVsLambdaChart({ alpha, lam, lcrit, lineColor }: Props) {
   const data = useMemo(() => buildEnergyVsLambdaData(alpha), [alpha]);
-  const alphaDeg = ((alpha / PI_HALF) * 90).toFixed(0);
 
   return (
     <div>
-      <p className="mb-2 text-[10px] uppercase tracking-widest text-subtle">
-        Hamiltonian energy vs λ &nbsp;(α = {alphaDeg}°)
+      <p className="mb-2 text-[10px] tracking-widest text-subtle">
+        HAMILTONIAN ENERGY VS λ
       </p>
 
       <ResponsiveContainer width="100%" height={170}>

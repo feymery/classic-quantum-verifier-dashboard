@@ -1,16 +1,11 @@
 const assumptions = [
   {
     index: "1",
-    title: "Alice poses a QMA-complete problem",
+    title: "Only a quantum device can answer",
     accent: "var(--color-accent)",
   },
   {
     index: "2",
-    title: "Only a quantum device can answer",
-    accent: "var(--color-warning)",
-  },
-  {
-    index: "3",
     title: "Alice verifies without quantum hardware",
     accent: "var(--color-warning)",
   },
@@ -63,7 +58,7 @@ export function MotivationPage() {
         <p className="text-xs font-bold tracking-widest uppercase text-muted">
           Key assumptions
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {assumptions.map((a) => (
             <div
               key={a.index}
