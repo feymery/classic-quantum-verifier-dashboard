@@ -58,7 +58,7 @@ export function MotivationPage() {
         <p className="text-xs font-bold tracking-widest uppercase text-muted">
           Key assumptions
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {assumptions.map((a) => (
             <div
               key={a.index}
